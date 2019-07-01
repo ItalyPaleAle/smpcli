@@ -19,15 +19,23 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
+	"crypto/tls"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
-
-	homedir "github.com/mitchellh/go-homedir"
-	"github.com/spf13/viper"
+	//homedir "github.com/mitchellh/go-homedir"
 )
 
-var cfgFile string
+var (
+	httpClient *http.Client
+	httpClientInsecure *http.Client
+
+	optPort     string
+	optInsecure bool
+	optNoTLS    bool
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -54,41 +62,37 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(func() {
+		// Initialize the HTTP clients
+		httpClient = &http.Client{
+			Timeout: 30 * time.Second,
+		}
+
+		// The "insecure" client doesn't validate TLS certificates
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+		httpClientInsecure = &http.Client{
+			Transport: tr,
+			Timeout:   1 * time.Second,
+		}
+
+		// TODO: Read auth cache
+	})
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.smpcli.yaml)")
+	// Port the server is listening on
+	// Default is 2265
+	// TODO: SET DEFAULT TO 2265 or another better port
+	rootCmd.PersistentFlags().StringVarP(&optPort, "port", "p", "2265", "port the node listens on")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name ".smpcli" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".smpcli")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
+	// Flags to control communication with the node
+	// By default, we use TLS and validate the certificate
+	rootCmd.PersistentFlags().BoolVarP(&optInsecure, "insecure", "k", false, "disable TLS certificate validation")
+	rootCmd.PersistentFlags().BoolVarP(&optNoTLS, "http", "s", false, "use HTTP protocol (no TLS)")
 }

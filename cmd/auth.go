@@ -1,0 +1,114 @@
+/*
+Copyright © 2019 Alessandro Segala (@ItalyPaleAle)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+package cmd
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+
+	"github.com/manifoldco/promptui"
+	"github.com/spf13/cobra"
+)
+
+// authCmd represents the auth command
+var authCmd = &cobra.Command{
+	Use:   "auth [address]",
+	Short: "Authenticates with a node",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
+
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 {
+			return errors.New("Requires a valid hostname or IP address")
+		}
+		if len(args[0]) < 2 {
+			return errors.New("Requires a valid hostname or IP address")
+		}
+		return nil
+	},
+
+	Run: func(cmd *cobra.Command, args []string) {
+		// Get the URL
+		address := args[0]
+		protocol := "https"
+		if optNoTLS {
+			protocol = "http"
+		}
+		url := fmt.Sprintf("%s://%s:%s/info", protocol, address, optPort)
+
+		// What client to use?
+		client := httpClient
+		if optInsecure {
+			client = httpClientInsecure
+		}
+
+		// Invoke the /info endpoint to see what's the authentication method
+		resp, err := client.Get(url)
+		if err != nil {
+			fmt.Println("[Fatal error]\nRequest failed:", err)
+			return
+		}
+		defer resp.Body.Close()
+
+		// Parse the response
+		var target struct {
+			AuthMethod string
+			Hostname   string
+			Version    string
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&target); err != nil {
+			fmt.Println("[Fatal error]\nInvalid JSON response:", err)
+			return
+		}
+
+		// Ensure we have the correct data
+		if target.AuthMethod != "sharedkey" {
+			fmt.Println("[Fatal error]\nThe response from the server is invalid")
+			return
+		}
+
+		// Prompt the user for the shared key
+		prompt := promptui.Prompt{
+			Validate: func(input string) error {
+				if len(input) < 1 {
+					return errors.New("Shared key must not be empty")
+				}
+				return nil
+			},
+			Label: "Shared key",
+			Mask:  '*',
+		}
+
+		result, err := prompt.Run()
+
+		if err != nil {
+			fmt.Println("[Fatal error]\nPrompt failed:", err)
+			return
+		}
+
+		fmt.Printf("You choose %q\n", result)
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(authCmd)
+}
