@@ -98,14 +98,17 @@ to quickly create a Cobra application.`,
 			Mask:  '*',
 		}
 
-		result, err := prompt.Run()
-
+		sharedKey, err := prompt.Run()
 		if err != nil {
 			fmt.Println("[Fatal error]\nPrompt failed:", err)
 			return
 		}
 
-		fmt.Printf("You choose %q\n", result)
+		// Store the key in the node store
+		if err := nodeStore.StoreSharedKey(address, sharedKey); err != nil {
+			fmt.Println("[Fatal error]\nError while storing the shared key:", err)
+			return
+		}
 	},
 }
 

@@ -18,18 +18,21 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
-	"crypto/tls"
 	"os"
 	"time"
 
 	"github.com/spf13/cobra"
-	//homedir "github.com/mitchellh/go-homedir"
+
+	"smpcli/utils"
 )
 
 var (
-	httpClient *http.Client
+	nodeStore *utils.NodeStore
+
+	httpClient         *http.Client
 	httpClientInsecure *http.Client
 
 	optPort     string
@@ -63,6 +66,12 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(func() {
+		// Init the node store
+		nodeStore = &utils.NodeStore{}
+		if err := nodeStore.Init(); err != nil {
+			panic(err)
+		}
+
 		// Initialize the HTTP clients
 		httpClient = &http.Client{
 			Timeout: 30 * time.Second,
@@ -78,8 +87,6 @@ func init() {
 			Transport: tr,
 			Timeout:   1 * time.Second,
 		}
-
-		// TODO: Read auth cache
 	})
 
 	// Here you will define your flags and configuration settings.
