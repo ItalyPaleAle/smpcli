@@ -27,7 +27,7 @@ import (
 
 // authCmd represents the auth command
 var authCmd = &cobra.Command{
-	Use:   "auth [address]",
+	Use:   "auth",
 	Short: "Authenticates with a node",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -36,33 +36,11 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			return errors.New("Requires a valid hostname or IP address")
-		}
-		if len(args[0]) < 2 {
-			return errors.New("Requires a valid hostname or IP address")
-		}
-		return nil
-	},
-
 	Run: func(cmd *cobra.Command, args []string) {
-		// Get the URL
-		address := args[0]
-		protocol := "https"
-		if optNoTLS {
-			protocol = "http"
-		}
-		url := fmt.Sprintf("%s://%s:%s/info", protocol, address, optPort)
-
-		// What client to use?
-		client := httpClient
-		if optInsecure {
-			client = httpClientInsecure
-		}
+		baseURL, client := getURLClient()
 
 		// Invoke the /info endpoint to see what's the authentication method
-		resp, err := client.Get(url)
+		resp, err := client.Get(baseURL + "/info")
 		if err != nil {
 			fmt.Println("[Fatal error]\nRequest failed:", err)
 			return
@@ -105,7 +83,7 @@ to quickly create a Cobra application.`,
 		}
 
 		// Store the key in the node store
-		if err := nodeStore.StoreSharedKey(address, sharedKey); err != nil {
+		if err := nodeStore.StoreSharedKey(optAddress, sharedKey); err != nil {
 			fmt.Println("[Fatal error]\nError while storing the shared key:", err)
 			return
 		}

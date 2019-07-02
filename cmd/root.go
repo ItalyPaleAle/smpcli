@@ -35,6 +35,7 @@ var (
 	httpClient         *http.Client
 	httpClientInsecure *http.Client
 
+	optAddress  string
 	optPort     string
 	optInsecure bool
 	optNoTLS    bool
@@ -89,9 +90,9 @@ func init() {
 		}
 	})
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
+	// Node address
+	rootCmd.PersistentFlags().StringVarP(&optAddress, "node", "n", "", "node address or IP (required)")
+	rootCmd.MarkPersistentFlagRequired("node")
 
 	// Port the server is listening on
 	// Default is 2265
