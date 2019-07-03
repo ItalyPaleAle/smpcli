@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// GET /status
+// GET /status (status)
 type statusResponseModelApp struct {
 	ID         string     `json:"id"` // UUID that doesn't need parsing
 	Domain     string     `json:"domain"`
@@ -17,19 +17,19 @@ type statusResponseModel struct {
 	Health []interface{}            `json:"health"`
 }
 
-// GET /info
+// GET /info (auth)
 type infoResponseModel struct {
 	AuthMethod string `json:"authMethod"`
 	Hostname   string `json:"hostname"`
 	Version    string `json:"version"`
 }
 
-// POST /adopt
+// POST /adopt (adopt)
 type adoptResponseModel struct {
 	Message string `json:"message"`
 }
 
-// POST /site
+// POST /site (site add)
 type siteAddRequestModel struct {
 	Domain         string   `json:"domain"`
 	Aliases        []string `json:"aliases"`
@@ -43,3 +43,6 @@ type siteAddResponseModel struct {
 	TLSCertificate string   `json:"tlsCertificate"`
 	ClientCaching  bool     `json:"clientCaching"`
 }
+
+// GET /site (site list)
+type siteListResponseModel []siteAddResponseModel

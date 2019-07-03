@@ -58,6 +58,10 @@ var adoptCmd = &cobra.Command{
 
 		// Invoke the /adopt endpoint
 		req, err := http.NewRequest("POST", baseURL+"/adopt", nil)
+		if err != nil {
+			fmt.Println("[Fatal error]\nCould not build the request:", err)
+			return
+		}
 		req.Header.Set("Authorization", sharedKey)
 		resp, err := client.Do(req)
 		if err != nil {

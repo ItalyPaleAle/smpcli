@@ -8,3 +8,5 @@ go run . -k -n localhost site add \
     -a site1-alias.local \
     -a mysite.local \
     -c site1
+
+go run . -k -n localhost site list
