@@ -86,7 +86,7 @@ func init() {
 		}
 		httpClientInsecure = &http.Client{
 			Transport: tr,
-			Timeout:   1 * time.Second,
+			Timeout:   30 * time.Second,
 		}
 	})
 

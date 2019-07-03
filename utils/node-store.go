@@ -39,6 +39,31 @@ func (s *NodeStore) Init() error {
 	return nil
 }
 
+// GetSharedKey reads the shared key from the store
+// The second returned value is a boolean that indicates if the key was found
+func (s *NodeStore) GetSharedKey(address string) (sharedKey string, found bool, err error) {
+	sharedKey = ""
+	found = false
+	err = nil
+
+	// Read the current file
+	document, err := s.read()
+	if err != nil {
+		return
+	}
+
+	// Get the value if it exists
+	obj, found := document[address]
+	if found {
+		sharedKey = obj.SharedKey
+	}
+	if len(sharedKey) == 0 {
+		found = false
+	}
+
+	return
+}
+
 // StoreSharedKey adds the shared key to the store
 func (s *NodeStore) StoreSharedKey(address string, sharedKey string) error {
 	// Read the current file

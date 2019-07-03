@@ -18,38 +18,25 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 
 	"github.com/spf13/cobra"
 )
 
-// statusCmd represents the status command
-var statusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Gets the status of a node",
+// siteCmd represents the sites command
+var siteCmd = &cobra.Command{
+	Use:   "site",
+	Short: "Manage sites",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-
 	Run: func(cmd *cobra.Command, args []string) {
-		baseURL, client := getURLClient()
-
-		// Invoke the /status endpoint to see what's the authentication method
-		resp, err := client.Get(baseURL + "/status")
-		if err != nil {
-			fmt.Println("[Fatal error]\nRequest failed:", err)
-			return
-		}
-		defer resp.Body.Close()
-
-		bytes, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println(string(bytes))
+		fmt.Println("site called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(statusCmd)
+	rootCmd.AddCommand(siteCmd)
 }

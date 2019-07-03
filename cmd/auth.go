@@ -28,7 +28,7 @@ import (
 // authCmd represents the auth command
 var authCmd = &cobra.Command{
 	Use:   "auth",
-	Short: "Authenticates with a node",
+	Short: "Authenticate with a node",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
