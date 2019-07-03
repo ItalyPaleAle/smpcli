@@ -6,14 +6,22 @@ import (
 
 // GET /status
 type statusResponseModelApp struct {
-	ID         string    `json:"id"` // UUID that doesn't need parsing
-	Domain     string    `json:"domain"`
-	AppName    string    `json:"appName"`
-	AppVersion string    `json:"appVersion"`
-	Updated    time.Time `json:"updated"`
+	ID         string     `json:"id"` // UUID that doesn't need parsing
+	Domain     string     `json:"domain"`
+	AppName    *string    `json:"appName"`
+	AppVersion *string    `json:"appVersion"`
+	Updated    *time.Time `json:"updated"`
 }
 type statusResponseModel struct {
-	Apps []statusResponseModelApp `json:"apps"`
+	Apps   []statusResponseModelApp `json:"apps"`
+	Health []interface{}            `json:"health"`
+}
+
+// GET /info
+type infoResponseModel struct {
+	AuthMethod string `json:"authMethod"`
+	Hostname   string `json:"hostname"`
+	Version    string `json:"version"`
 }
 
 // POST /adopt

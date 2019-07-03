@@ -65,6 +65,11 @@ var adoptCmd = &cobra.Command{
 			return
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode < 200 || resp.StatusCode > 299 {
+			b, _ := ioutil.ReadAll(resp.Body)
+			fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+			return
+		}
 
 		bytes, _ := ioutil.ReadAll(resp.Body)
 		fmt.Println(string(bytes))

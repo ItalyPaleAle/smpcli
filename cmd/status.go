@@ -17,6 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
@@ -27,12 +28,7 @@ import (
 var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Gets the status of a node",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  ``,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		baseURL, client := getURLClient()
@@ -44,9 +40,20 @@ to quickly create a Cobra application.`,
 			return
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode < 200 || resp.StatusCode > 299 {
+			b, _ := ioutil.ReadAll(resp.Body)
+			fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+			return
+		}
 
-		bytes, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println(string(bytes))
+		// Parse the response
+		var r statusResponseModel
+		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+			fmt.Println("[Fatal error]\nInvalid JSON response:", err)
+			return
+		}
+
+		fmt.Println(r)
 	},
 }
 

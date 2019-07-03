@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -29,12 +30,7 @@ import (
 var authCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Authenticate with a node",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  ``,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		baseURL, client := getURLClient()
@@ -46,20 +42,21 @@ to quickly create a Cobra application.`,
 			return
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode < 200 || resp.StatusCode > 299 {
+			b, _ := ioutil.ReadAll(resp.Body)
+			fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+			return
+		}
 
 		// Parse the response
-		var target struct {
-			AuthMethod string
-			Hostname   string
-			Version    string
-		}
-		if err := json.NewDecoder(resp.Body).Decode(&target); err != nil {
+		var r infoResponseModel
+		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 			fmt.Println("[Fatal error]\nInvalid JSON response:", err)
 			return
 		}
 
 		// Ensure we have the correct data
-		if target.AuthMethod != "sharedkey" {
+		if r.AuthMethod != "sharedkey" {
 			fmt.Println("[Fatal error]\nThe response from the server is invalid")
 			return
 		}
