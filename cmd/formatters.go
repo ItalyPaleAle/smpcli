@@ -75,17 +75,17 @@ func statusResponseModelFormat(m *statusResponseModel) (result string) {
 	for i := 0; i < l; i++ {
 		el := m.Apps[i]
 
-		appName := ""
+		appName := "\033[2m<nil>\033[0m"
 		if el.AppName != nil {
 			appName = *el.AppName
 		}
 
-		appVersion := ""
+		appVersion := "\033[2m<nil>\033[0m"
 		if el.AppVersion != nil {
 			appVersion = *el.AppVersion
 		}
 
-		t := ""
+		t := "\033[2m<nil>\033[0m"
 		if el.Updated != nil {
 			t = el.Updated.Format(time.RFC3339)
 		}
@@ -99,8 +99,48 @@ Updated:    %s
 `, el.ID, el.Domain, appName, appVersion, t)
 	}
 
-	// TODO: Health
+	// Health
 	result += "Health\n------\n\n"
 
+	l = len(m.Health)
+	for i := 0; i < l; i++ {
+		el := m.Health[i]
+
+		err := "\033[2m<nil>\033[0m"
+		if el.Error != nil {
+			err = *el.Error
+		}
+
+		result += fmt.Sprintf(`Domain:       %s
+StatusCode:   %d
+ResponseSize: %d
+Error:        %s
+Time:         %s
+
+`, el.Domain, el.StatusCode, el.ResponseSize, err, el.Time.Format(time.RFC3339))
+	}
+
+	return
+}
+
+// Fromat deployResponseModel
+func deployResponseModelFormat(m *deployResponseModel) (result string) {
+	err := "\033[2m<nil>\033[0m"
+	if m.Error != nil {
+		err = *m.Error
+	}
+
+	t := "\033[2m<nil>\033[0m"
+	if m.Time != nil {
+		t = m.Time.Format(time.RFC3339)
+	}
+
+	result = fmt.Sprintf(`DeploymentID: %s
+SiteID:       %s
+AppName:      %s
+AppVersion:   %s
+Status:       %s
+Error:        %s
+Time: %s`, m.DeploymentID, m.SiteID, m.AppName, m.AppVersion, m.Status, err, t)
 	return
 }

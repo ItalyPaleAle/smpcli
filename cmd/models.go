@@ -29,9 +29,16 @@ type statusResponseModelApp struct {
 	AppVersion *string    `json:"appVersion"`
 	Updated    *time.Time `json:"updated"`
 }
+type statusResponseModelHealth struct {
+	Domain       string    `json:"domain"`
+	StatusCode   int       `json:"status"`
+	ResponseSize int       `json:"size"`
+	Error        *string   `json:"error"`
+	Time         time.Time `json:"time"`
+}
 type statusResponseModel struct {
-	Apps   []statusResponseModelApp `json:"apps"`
-	Health []interface{}            `json:"health"`
+	Apps   []statusResponseModelApp    `json:"apps"`
+	Health []statusResponseModelHealth `json:"health"`
 }
 
 // GET /info (auth)
@@ -72,3 +79,18 @@ type siteGetResponseModel struct {
 
 // GET /site (site list)
 type siteListResponseModel []siteAddResponseModel
+
+// POST /site/<domain>/deploy (deploy app)
+type deployRequestModel struct {
+	App     string `json:"app"`
+	Version string `json:"version"`
+}
+type deployResponseModel struct {
+	DeploymentID string     `json:"id"`
+	SiteID       string     `json:"site"`
+	AppName      string     `json:"app"`
+	AppVersion   string     `json:"version"`
+	Status       string     `json:"status"`
+	Error        *string    `json:"deploymentError"`
+	Time         *time.Time `json:"time"`
+}
