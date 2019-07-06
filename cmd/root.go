@@ -22,9 +22,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"smpcli/utils"
 )
@@ -67,6 +70,11 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(func() {
+		// Load config
+		if err := loadConfig(); err != nil {
+			panic(err)
+		}
+
 		// Init the node store
 		nodeStore = &utils.NodeStore{}
 		if err := nodeStore.Init(); err != nil {
@@ -103,4 +111,26 @@ func init() {
 	// By default, we use TLS and validate the certificate
 	rootCmd.PersistentFlags().BoolVarP(&optInsecure, "insecure", "k", false, "disable TLS certificate validation")
 	rootCmd.PersistentFlags().BoolVarP(&optNoTLS, "http", "s", false, "use HTTP protocol (no TLS)")
+}
+
+func loadConfig() error {
+	// Get the home directory
+	home, err := homedir.Dir()
+	if err != nil {
+		return err
+	}
+
+	// Ensure the config folder exists
+	folder := filepath.FromSlash(home + "/.smpcli")
+	if err := utils.EnsureFolder(folder); err != nil {
+		return err
+	}
+
+	// Load the config file
+	viper.SetConfigFile(folder + "/config.yaml")
+
+	// Read in the config file, ignoring errors
+	_ = viper.ReadInConfig()
+
+	return nil
 }

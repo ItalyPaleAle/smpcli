@@ -23,16 +23,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// siteCmd represents the sites command
-var siteCmd = &cobra.Command{
-	Use:   "site",
-	Short: "Manage sites",
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("site called")
-	},
-}
-
 func init() {
-	rootCmd.AddCommand(siteCmd)
+	// Config command
+	configCmd := &cobra.Command{
+		Use:   "config",
+		Short: "Configuration",
+		Long:  ``,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Usage: config get/set [key] [value]")
+		},
+	}
+	rootCmd.AddCommand(configCmd)
+
+	// Config get
+	configCmd.AddCommand(&cobra.Command{
+		Use:   "set",
+		Short: "Set configuration",
+		Long:  ``,
+		Args:  cobra.ExactArgs(2),
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(args)
+		},
+	})
 }
