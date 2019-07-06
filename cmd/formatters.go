@@ -19,31 +19,31 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
+	"strings"
 )
 
-func getURLClient() (baseURL string, client *http.Client) {
-	// Output some warnings
-	if optNoTLS {
-		fmt.Println("\033[33mWARN: You are connecting to your node without using TLS. The connection (including the authorization token) is not encrypted.\033[0m")
-	} else if optInsecure {
-		fmt.Println("\033[33mWARN: TLS certificate validation is disabled. Your connection might not be secure.\033[0m")
+func siteAddResponseModelFormat(m *siteAddResponseModel) (result string) {
+	clientCaching := "no"
+	if m.ClientCaching {
+		clientCaching = "yes"
 	}
+	aliases := strings.Join(m.Aliases, ", ")
+	result = fmt.Sprintf(`ID:            %s
+Domain:        %s
+Aliases:       %s
+TLSCert:       %s
+ClientCaching: %s`, m.ID, m.Domain, aliases, m.TLSCertificate, clientCaching)
+	return
+}
 
-	// Get the URL
-	protocol := "https"
-	if optNoTLS {
-		protocol = "http"
+func siteListResponseModelFormat(m siteListResponseModel) (result string) {
+	result = ""
+	l := len(m)
+	for i := 0; i < l; i++ {
+		result += siteAddResponseModelFormat(&m[i])
+		if i < l-1 {
+			result += "\n\n"
+		}
 	}
-
-	// Get the URL
-	baseURL = fmt.Sprintf("%s://%s:%s", protocol, optAddress, optPort)
-
-	// What client to use?
-	client = httpClient
-	if optInsecure {
-		client = httpClientInsecure
-	}
-
 	return
 }

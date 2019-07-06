@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+
 package cmd
 
 import (
@@ -71,7 +72,8 @@ func init() {
 				return
 			}
 
-			fmt.Println(r)
+			// Print the response
+			fmt.Println(siteListResponseModelFormat(r))
 		},
 	}
 	siteCmd.AddCommand(c)
