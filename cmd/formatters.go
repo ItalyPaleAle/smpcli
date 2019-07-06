@@ -20,8 +20,10 @@ package cmd
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
+// Fromat siteAddResponseModel
 func siteAddResponseModelFormat(m *siteAddResponseModel) (result string) {
 	clientCaching := "no"
 	if m.ClientCaching {
@@ -36,6 +38,22 @@ ClientCaching: %s`, m.ID, m.Domain, aliases, m.TLSCertificate, clientCaching)
 	return
 }
 
+// Fromat siteGetResponseModel
+func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
+	clientCaching := "no"
+	if m.ClientCaching {
+		clientCaching = "yes"
+	}
+	aliases := strings.Join(m.Aliases, ", ")
+	result = fmt.Sprintf(`ID:            %s
+Domain:        %s
+Aliases:       %s
+TLSCert:       %s
+ClientCaching: %s`, m.ID, m.Domain, aliases, m.TLSCertificate, clientCaching)
+	return
+}
+
+// Format siteListResponseModel
 func siteListResponseModelFormat(m siteListResponseModel) (result string) {
 	result = ""
 	l := len(m)
@@ -45,5 +63,44 @@ func siteListResponseModelFormat(m siteListResponseModel) (result string) {
 			result += "\n\n"
 		}
 	}
+	return
+}
+
+// Format statusResponseModel
+func statusResponseModelFormat(m *statusResponseModel) (result string) {
+	// Apps
+	result = "Apps\n----\n\n"
+
+	l := len(m.Apps)
+	for i := 0; i < l; i++ {
+		el := m.Apps[i]
+
+		appName := ""
+		if el.AppName != nil {
+			appName = *el.AppName
+		}
+
+		appVersion := ""
+		if el.AppVersion != nil {
+			appVersion = *el.AppVersion
+		}
+
+		t := ""
+		if el.Updated != nil {
+			t = el.Updated.Format(time.RFC3339)
+		}
+
+		result += fmt.Sprintf(`ID:         %s
+Domain:     %s
+AppName:    %s
+AppVersion: %s
+Updated:    %s
+
+`, el.ID, el.Domain, appName, appVersion, t)
+	}
+
+	// TODO: Health
+	result += "Health\n------\n\n"
+
 	return
 }

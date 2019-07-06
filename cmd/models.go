@@ -61,5 +61,14 @@ type siteAddResponseModel struct {
 	ClientCaching  bool     `json:"clientCaching"`
 }
 
+// GET /site/<domain> (site get)
+type siteGetResponseModel struct {
+	ID             string   `json:"id"` // UUID that doesn't need parsing
+	Domain         string   `json:"domain"`
+	Aliases        []string `json:"aliases"`
+	TLSCertificate string   `json:"tlsCertificate"`
+	ClientCaching  bool     `json:"clientCaching"`
+}
+
 // GET /site (site list)
 type siteListResponseModel []siteAddResponseModel

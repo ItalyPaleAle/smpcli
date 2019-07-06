@@ -54,7 +54,7 @@ var statusCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println(r)
+		fmt.Println(statusResponseModelFormat(&r))
 	},
 }
 
