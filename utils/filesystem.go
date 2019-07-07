@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package utils
 
 import (
+	"errors"
 	"os"
 )
 
@@ -28,6 +29,22 @@ func PathExists(path string) (bool, error) {
 		return false, nil
 	}
 	return err == nil, err
+}
+
+// IsRegularFile returns true if the path is a file
+func IsRegularFile(path string) (bool, error) {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return false, err
+	}
+	switch mode := stat.Mode(); {
+	case mode.IsDir():
+		return false, nil
+	case mode.IsRegular():
+		return true, nil
+	default:
+		return false, errors.New("Invalid mode")
+	}
 }
 
 // EnsureFolder creates a folder if it doesn't exist already

@@ -141,6 +141,6 @@ AppName:      %s
 AppVersion:   %s
 Status:       %s
 Error:        %s
-Time: %s`, m.DeploymentID, m.SiteID, m.AppName, m.AppVersion, m.Status, err, t)
+Time:         %s`, m.DeploymentID, m.SiteID, m.AppName, m.AppVersion, m.Status, err, t)
 	return
 }
