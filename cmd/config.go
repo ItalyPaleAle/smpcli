@@ -20,6 +20,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -53,7 +54,7 @@ func init() {
 			// Check if the key is valid
 			key := args[0]
 			if !viper.IsSet(key) {
-				return errors.New("Invalid config key: " + key)
+				return errors.New("Invalid config key: " + key + "\n\nValid keys:\n- " + strings.Join(viper.AllKeys()[:], "\n- ") + "\n")
 			}
 
 			return nil
@@ -83,7 +84,7 @@ func init() {
 			// Check if the key is valid
 			key := args[0]
 			if !viper.IsSet(key) {
-				return errors.New("Invalid config key: " + key)
+				return errors.New("Invalid config key: " + key + "\n\nValid keys:\n- " + strings.Join(viper.AllKeys()[:], "\n- ") + "\n")
 			}
 
 			return nil
