@@ -18,3 +18,17 @@ go run . \
 go run . \
     site list \
     -k -n localhost
+
+go run . \
+    site get \
+    -k -n localhost \
+    -d mysite.local
+
+go run . \
+    config set \
+    AzureStorageContainer \
+    "smplatformcistorage"
+
+go run . \
+    config get \
+    AzureStorageContainer

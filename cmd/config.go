@@ -18,9 +18,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {
@@ -30,19 +32,67 @@ func init() {
 		Short: "Configuration",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Usage: config get/set [key] [value]")
+			fmt.Println("Usage:")
+			fmt.Println("config get [key]")
+			fmt.Println("config set [key] [value]")
 		},
 	}
 	rootCmd.AddCommand(configCmd)
 
-	// Config get
+	// Config set
 	configCmd.AddCommand(&cobra.Command{
 		Use:   "set",
 		Short: "Set configuration",
 		Long:  ``,
-		Args:  cobra.ExactArgs(2),
+		Args: func(cmd *cobra.Command, args []string) error {
+			// Need 2 args
+			if len(args) != 2 {
+				return errors.New("Usage: config set [key] [value]")
+			}
+
+			// Check if the key is valid
+			key := args[0]
+			if !viper.IsSet(key) {
+				return errors.New("Invalid config key: " + key)
+			}
+
+			return nil
+		},
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(args)
+			// Set the config
+			key := args[0]
+			value := args[1]
+			viper.Set(key, value)
+
+			// Save
+			viper.WriteConfig()
+		},
+	})
+
+	// Config get
+	configCmd.AddCommand(&cobra.Command{
+		Use:   "get",
+		Short: "Get configuration",
+		Long:  ``,
+		Args: func(cmd *cobra.Command, args []string) error {
+			// Need 1 arg
+			if len(args) != 1 {
+				return errors.New("Usage: config get [key]")
+			}
+
+			// Check if the key is valid
+			key := args[0]
+			if !viper.IsSet(key) {
+				return errors.New("Invalid config key: " + key)
+			}
+
+			return nil
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			// Get the config
+			key := args[0]
+			value := viper.Get(key)
+			fmt.Println(value)
 		},
 	})
 }

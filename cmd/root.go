@@ -108,7 +108,11 @@ func loadConfig() error {
 	}
 
 	// Load the config file
+	viper.SetConfigType("yaml")
 	viper.SetConfigFile(folder + "/config.yaml")
+
+	// Set defaults
+	viper.SetDefault("AzureStorageContainer", "")
 
 	// Read in the config file, ignoring errors
 	_ = viper.ReadInConfig()
