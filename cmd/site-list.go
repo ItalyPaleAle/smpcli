@@ -77,4 +77,7 @@ func init() {
 		},
 	}
 	siteCmd.AddCommand(c)
+
+	// Add shared flags
+	addSharedFlags(c)
 }

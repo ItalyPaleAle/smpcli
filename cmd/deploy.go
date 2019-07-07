@@ -93,10 +93,14 @@ func init() {
 	}
 	rootCmd.AddCommand(c)
 
+	// Flags
 	c.Flags().StringVarP(&domain, "domain", "d", "", "Primary domain name")
 	c.MarkFlagRequired("domain")
 	c.Flags().StringVarP(&app, "app", "a", "", "App's bundle name")
 	c.MarkFlagRequired("app")
 	c.Flags().StringVarP(&version, "version", "v", "", "App's bundle version")
 	c.MarkFlagRequired("version")
+
+	// Add shared flags
+	addSharedFlags(c)
 }

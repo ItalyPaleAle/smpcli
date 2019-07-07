@@ -80,6 +80,10 @@ func init() {
 	}
 	siteCmd.AddCommand(c)
 
+	// Flags
 	c.Flags().StringVarP(&domain, "domain", "d", "", "Primary domain name")
 	c.MarkFlagRequired("domain")
+
+	// Add shared flags
+	addSharedFlags(c)
 }

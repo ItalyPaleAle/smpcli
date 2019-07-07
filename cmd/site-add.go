@@ -96,9 +96,13 @@ func init() {
 	}
 	siteCmd.AddCommand(c)
 
+	// Flags
 	c.Flags().StringVarP(&domain, "domain", "d", "", "Primary domain name")
 	c.MarkFlagRequired("domain")
 	c.Flags().StringArrayVarP(&aliases, "alias", "a", []string{}, "Alias domain (can be used multiple times)")
 	c.Flags().StringVarP(&tlsCertificate, "certificate", "c", "", "Name of the TLS certificate")
 	c.Flags().BoolVar(&noClientCaching, "no-client-caching", false, "Disable setting the Cache-Control for static files")
+
+	// Add shared flags
+	addSharedFlags(c)
 }

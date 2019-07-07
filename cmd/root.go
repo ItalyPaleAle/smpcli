@@ -37,11 +37,6 @@ var (
 
 	httpClient         *http.Client
 	httpClientInsecure *http.Client
-
-	optAddress  string
-	optPort     string
-	optInsecure bool
-	optNoTLS    bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -97,20 +92,6 @@ func init() {
 			Timeout:   30 * time.Second,
 		}
 	})
-
-	// Node address
-	rootCmd.PersistentFlags().StringVarP(&optAddress, "node", "n", "", "node address or IP (required)")
-	rootCmd.MarkPersistentFlagRequired("node")
-
-	// Port the server is listening on
-	// Default is 2265
-	// TODO: SET DEFAULT TO 2265 or another better port
-	rootCmd.PersistentFlags().StringVarP(&optPort, "port", "p", "2265", "port the node listens on")
-
-	// Flags to control communication with the node
-	// By default, we use TLS and validate the certificate
-	rootCmd.PersistentFlags().BoolVarP(&optInsecure, "insecure", "k", false, "disable TLS certificate validation")
-	rootCmd.PersistentFlags().BoolVarP(&optNoTLS, "http", "s", false, "use HTTP protocol (no TLS)")
 }
 
 func loadConfig() error {

@@ -27,67 +27,69 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// authCmd represents the auth command
-var authCmd = &cobra.Command{
-	Use:   "auth",
-	Short: "Authenticate with a node",
-	Long:  ``,
-
-	Run: func(cmd *cobra.Command, args []string) {
-		baseURL, client := getURLClient()
-
-		// Invoke the /info endpoint to see what's the authentication method
-		resp, err := client.Get(baseURL + "/info")
-		if err != nil {
-			fmt.Println("[Fatal error]\nRequest failed:", err)
-			return
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode < 200 || resp.StatusCode > 299 {
-			b, _ := ioutil.ReadAll(resp.Body)
-			fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
-			return
-		}
-
-		// Parse the response
-		var r infoResponseModel
-		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-			fmt.Println("[Fatal error]\nInvalid JSON response:", err)
-			return
-		}
-
-		// Ensure we have the correct data
-		if r.AuthMethod != "sharedkey" {
-			fmt.Println("[Fatal error]\nThe response from the server is invalid")
-			return
-		}
-
-		// Prompt the user for the shared key
-		prompt := promptui.Prompt{
-			Validate: func(input string) error {
-				if len(input) < 1 {
-					return errors.New("Shared key must not be empty")
-				}
-				return nil
-			},
-			Label: "Shared key",
-			Mask:  '*',
-		}
-
-		sharedKey, err := prompt.Run()
-		if err != nil {
-			fmt.Println("[Fatal error]\nPrompt failed:", err)
-			return
-		}
-
-		// Store the key in the node store
-		if err := nodeStore.StoreSharedKey(optAddress, sharedKey); err != nil {
-			fmt.Println("[Fatal error]\nError while storing the shared key:", err)
-			return
-		}
-	},
-}
-
 func init() {
-	rootCmd.AddCommand(authCmd)
+	c := &cobra.Command{
+		Use:   "auth",
+		Short: "Authenticate with a node",
+		Long:  ``,
+
+		Run: func(cmd *cobra.Command, args []string) {
+			baseURL, client := getURLClient()
+
+			// Invoke the /info endpoint to see what's the authentication method
+			resp, err := client.Get(baseURL + "/info")
+			if err != nil {
+				fmt.Println("[Fatal error]\nRequest failed:", err)
+				return
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode < 200 || resp.StatusCode > 299 {
+				b, _ := ioutil.ReadAll(resp.Body)
+				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+				return
+			}
+
+			// Parse the response
+			var r infoResponseModel
+			if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+				fmt.Println("[Fatal error]\nInvalid JSON response:", err)
+				return
+			}
+
+			// Ensure we have the correct data
+			if r.AuthMethod != "sharedkey" {
+				fmt.Println("[Fatal error]\nThe response from the server is invalid")
+				return
+			}
+
+			// Prompt the user for the shared key
+			prompt := promptui.Prompt{
+				Validate: func(input string) error {
+					if len(input) < 1 {
+						return errors.New("Shared key must not be empty")
+					}
+					return nil
+				},
+				Label: "Shared key",
+				Mask:  '*',
+			}
+
+			sharedKey, err := prompt.Run()
+			if err != nil {
+				fmt.Println("[Fatal error]\nPrompt failed:", err)
+				return
+			}
+
+			// Store the key in the node store
+			if err := nodeStore.StoreSharedKey(optAddress, sharedKey); err != nil {
+				fmt.Println("[Fatal error]\nError while storing the shared key:", err)
+				return
+			}
+		},
+	}
+
+	rootCmd.AddCommand(c)
+
+	// Add shared flags
+	addSharedFlags(c)
 }

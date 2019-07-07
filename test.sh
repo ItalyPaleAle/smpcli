@@ -1,12 +1,20 @@
-go run . -k -n localhost auth
+go run . \
+    auth \
+    -k -n localhost
 # Shared Key: hello world
 
-go run . -k -n localhost status
+go run . \
+    status \
+    -k -n localhost
 
-go run . -k -n localhost site add \
+go run . \
+    site add \
+    -k -n localhost \
     -d site1.local \
     -a site1-alias.local \
     -a mysite.local \
     -c site1
 
-go run . -k -n localhost site list
+go run . \
+    site list \
+    -k -n localhost

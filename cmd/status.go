@@ -25,39 +25,40 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// statusCmd represents the status command
-var statusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Gets the status of a node",
-	Long:  ``,
-
-	Run: func(cmd *cobra.Command, args []string) {
-		baseURL, client := getURLClient()
-
-		// Invoke the /status endpoint to see what's the authentication method
-		resp, err := client.Get(baseURL + "/status")
-		if err != nil {
-			fmt.Println("[Fatal error]\nRequest failed:", err)
-			return
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode < 200 || resp.StatusCode > 299 {
-			b, _ := ioutil.ReadAll(resp.Body)
-			fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
-			return
-		}
-
-		// Parse the response
-		var r statusResponseModel
-		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-			fmt.Println("[Fatal error]\nInvalid JSON response:", err)
-			return
-		}
-
-		fmt.Println(statusResponseModelFormat(&r))
-	},
-}
-
 func init() {
-	rootCmd.AddCommand(statusCmd)
+	c := &cobra.Command{
+		Use:   "status",
+		Short: "Gets the status of a node",
+		Long:  ``,
+
+		Run: func(cmd *cobra.Command, args []string) {
+			baseURL, client := getURLClient()
+
+			// Invoke the /status endpoint to see what's the authentication method
+			resp, err := client.Get(baseURL + "/status")
+			if err != nil {
+				fmt.Println("[Fatal error]\nRequest failed:", err)
+				return
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode < 200 || resp.StatusCode > 299 {
+				b, _ := ioutil.ReadAll(resp.Body)
+				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+				return
+			}
+
+			// Parse the response
+			var r statusResponseModel
+			if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+				fmt.Println("[Fatal error]\nInvalid JSON response:", err)
+				return
+			}
+
+			fmt.Println(statusResponseModelFormat(&r))
+		},
+	}
+	rootCmd.AddCommand(c)
+
+	// Add shared flags
+	addSharedFlags(c)
 }

@@ -83,4 +83,7 @@ var adoptCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(adoptCmd)
+
+	// Add shared flags
+	addSharedFlags(adoptCmd)
 }
