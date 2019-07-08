@@ -119,7 +119,7 @@ func init() {
 
 	// This function uploads the tar.bz2 archive to Azure Blob Storage
 	// Returns true in case of success, and false if there's an error
-	var uploadArchive = func(path string) bool {
+	var uploadArchive = func(file io.Reader) bool {
 		// Get config
 		storageAccount := viper.GetString("AzureStorageAccount")
 		storageKey := viper.GetString("AzureStorageKey")
@@ -176,13 +176,6 @@ func init() {
 			},
 		})
 		ctx := context.Background()
-
-		// Get a buffer reader
-		file, err := os.Open(path)
-		if err != nil {
-			fmt.Println("[Fatal error]\nError while reading file:", err)
-			return false
-		}
 
 		// The stream is split between two readers: one for the hashing, one for writing the stream to disk
 		h := sha256.New()
@@ -260,8 +253,31 @@ func init() {
 				// Check if the path is already a tar.bz2 archive
 				pathLc := strings.ToLower(path)
 				if strings.HasSuffix(pathLc, ".tar.bz2") {
+					// Get a buffer reader
+					file, err := os.Open(path)
+					if err != nil {
+						fmt.Println("[Fatal error]\nError while reading file:", err)
+						return
+					}
+
 					// Upload the archive
-					result := uploadArchive(path)
+					result := uploadArchive(file)
+					if !result {
+						return
+					}
+				} else {
+					// Create a tar.bz2 archive
+					r, w := io.Pipe()
+					go func() {
+						if err := utils.TarBZ2(path, w); err != nil {
+							fmt.Println("[Fatal error]\nError while creating tar.bz2 archive:", err)
+							panic(1)
+						}
+						w.Close()
+					}()
+
+					// Upload the archive
+					result := uploadArchive(r)
 					if !result {
 						return
 					}
