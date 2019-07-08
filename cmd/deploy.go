@@ -20,8 +20,17 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -42,6 +51,27 @@ func init() {
 		version string
 		path    string
 	)
+
+	// This function loads the private key
+	var loadSigningKey = func(file string) (*rsa.PrivateKey, error) {
+		// Load certificate from cache
+		dataPEM, err := ioutil.ReadFile(file)
+		if err != nil {
+			return nil, err
+		}
+
+		// Parse the key
+		block, _ := pem.Decode(dataPEM)
+		if block == nil || block.Type != "RSA PRIVATE KEY" {
+			return nil, errors.New("Cannot decode PEM block containing private key")
+		}
+		prv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+
+		return prv, nil
+	}
 
 	// This funtion sends the request to the node to deploy the app
 	// Returns true in case of success, and false if there's an error
@@ -90,14 +120,33 @@ func init() {
 	// This function uploads the tar.bz2 archive to Azure Blob Storage
 	// Returns true in case of success, and false if there's an error
 	var uploadArchive = func(path string) bool {
-		// Get variables
+		// Get config
 		storageAccount := viper.GetString("AzureStorageAccount")
 		storageKey := viper.GetString("AzureStorageKey")
 		storageContainer := viper.GetString("AzureStorageContainer")
+		signingKeyFile := viper.GetString("SigningKey")
 		if len(storageAccount) < 1 || len(storageKey) < 1 || len(storageContainer) < 1 {
 			fmt.Printf("[Error]\nConfiguration variables `AzureStorageAccount`, `AzureStorageKey` and `AzureStorageContainer` must be set before uploading a file.")
 			return false
 		}
+
+		// Check if the key exists
+		if len(signingKeyFile) < 1 {
+			fmt.Printf("[Error]\nNo private signing key set in the `SigningKey` configuration variable")
+			return false
+		}
+		exists, err := utils.PathExists(signingKeyFile)
+		if err != nil {
+			fmt.Println("[Fatal error]\nError while reading filesystem:", err)
+			return false
+		}
+		if !exists {
+			fmt.Println("[Error]\nPrivate signing key not found:", signingKeyFile)
+			return false
+		}
+
+		// Load the signing key
+		signingKey, err := loadSigningKey(signingKeyFile)
 
 		// URL to upload to
 		dstApp := fmt.Sprintf("https://%s.blob.core.windows.net/%s/%s-%s.tar.bz2", storageAccount, storageContainer, app, version)
@@ -121,11 +170,11 @@ func init() {
 			fmt.Println("[Fatal error]\nError while getting credentials:", err)
 			return false
 		}
-		blockBlobURL := azblob.NewBlockBlobURL(*uApp, azblob.NewPipeline(credential, azblob.PipelineOptions{
+		pipeline := azblob.NewPipeline(credential, azblob.PipelineOptions{
 			Retry: azblob.RetryOptions{
 				MaxTries: 3,
 			},
-		}))
+		})
 		ctx := context.Background()
 
 		// Get a buffer reader
@@ -135,8 +184,14 @@ func init() {
 			return false
 		}
 
+		// The stream is split between two readers: one for the hashing, one for writing the stream to disk
+		h := sha256.New()
+		tee := io.TeeReader(file, h)
+
 		// Upload the app's file
-		_, err = azblob.UploadStreamToBlockBlob(ctx, file, blockBlobURL, azblob.UploadStreamToBlockBlobOptions{
+		// This also makes the stream proceed so the hash is calculated
+		blockBlobURL := azblob.NewBlockBlobURL(*uApp, pipeline)
+		_, err = azblob.UploadStreamToBlockBlob(ctx, tee, blockBlobURL, azblob.UploadStreamToBlockBlobOptions{
 			BufferSize: 3 * 1024 * 1024,
 			MaxBuffers: 2,
 		})
@@ -145,6 +200,29 @@ func init() {
 			return false
 		}
 		fmt.Printf("Uploaded %s\n", dstApp)
+
+		// Calculate the SHA256 hash
+		hashed := h.Sum(nil)
+
+		// Calculate the digital signature
+		rng := rand.Reader
+		signatureRaw, err := rsa.SignPKCS1v15(rng, signingKey, crypto.SHA256, hashed[:])
+		if err != nil {
+			fmt.Println("[Fatal error]\nCannot calculate signature:", err)
+			return false
+		}
+
+		// Convert the signature to base64
+		signature := base64.StdEncoding.EncodeToString(signatureRaw)
+
+		// Upload the signature
+		blockBlobURL = azblob.NewBlockBlobURL(*uSig, pipeline)
+		_, err = blockBlobURL.Upload(ctx, strings.NewReader(signature), azblob.BlobHTTPHeaders{}, azblob.Metadata{}, azblob.BlobAccessConditions{})
+		if err != nil {
+			fmt.Println("[Fatal error]\nError while uploading signature:", err)
+			return false
+		}
+		fmt.Printf("Uploaded %s\n", dstSig)
 
 		return true
 	}
