@@ -50,7 +50,7 @@ func init() {
 
 	// This function loads the private key
 	var loadSigningKey = func(file string) (*rsa.PrivateKey, error) {
-		// Load certificate from cache
+		// Load key from disk
 		dataPEM, err := ioutil.ReadFile(file)
 		if err != nil {
 			return nil, err
