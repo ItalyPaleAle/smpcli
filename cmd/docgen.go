@@ -1,3 +1,5 @@
+// +build generator
+
 /*
 Copyright © 2019 Alessandro Segala (@ItalyPaleAle)
 
@@ -14,8 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-
-// +build generator
 
 // This file is built only when trying to generate the documentation for the CLI
 // go run -tags generator .
