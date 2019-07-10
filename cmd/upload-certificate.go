@@ -18,16 +18,24 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault"
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
+	"github.com/Azure/azure-storage-blob-go/azblob"
+	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 
 	"smpcli/utils"
@@ -40,6 +48,67 @@ func init() {
 		key         string
 		dhparams    string
 	)
+
+	// This function gets a client authenticated with Azure Key Vault
+	var getKeyVault = func() *keyvault.BaseClient {
+		/*// Get config
+		tenantID := viper.GetString("AzureSPTenantId")
+		clientID := viper.GetString("AzureSPClientId")
+		clientSecret := viper.GetString("AzureSPClientSecret")
+		vaultName := viper.GetString("AzureKeyVault")
+		if len(tenantID) < 1 || len(clientID) < 1 || len(clientSecret) < 1 || len(vaultName) < 1 {
+			fmt.Println("[Error]\nConfiguration variables `AzureSPTenantId`, `AzureSPClientId`, `AzureSPClientSecret` and `AzureKeyVault` must be set before uploading a certificate.")
+			return nil
+		}
+
+		// Expose the auth data as env vars so the Azure SDK picks them up
+		os.Setenv("AZURE_TENANT_ID", tenantID)
+		os.Setenv("AZURE_CLIENT_ID", clientID)
+		os.Setenv("AZURE_CLIENT_SECRET", clientSecret)*/
+
+		vaultName := viper.GetString("AzureKeyVault")
+		if len(vaultName) < 1 {
+			fmt.Println("[Error]\nConfiguration variable `AzureKeyVault` must be set before uploading a certificate.")
+			return nil
+		}
+
+		// Create a new client
+		akvClient := keyvault.New()
+
+		// Authorize from the Azure CLI
+		authorizer, err := auth.NewAuthorizerFromCLI()
+		if err != nil {
+			fmt.Println("[Fatal error]\nError while authorizing the Azure Key Vault client:", err)
+			return nil
+		}
+		akvClient.Authorizer = authorizer
+
+		return &akvClient
+	}
+
+	// This function uploads the PFX certificate to Azure Key Vault
+	var uploadCertificate = func(pfx []byte, akvClient *keyvault.BaseClient) bool {
+		// Base URL for the vault
+		vaultName := viper.GetString("AzureKeyVault")
+		vaultBaseURL := fmt.Sprintf("https://%s.%s", vaultName, azure.PublicCloud.KeyVaultDNSSuffix)
+
+		// Convert certificate to base64
+		pfxB64 := base64.StdEncoding.EncodeToString(pfx)
+
+		// Store the certificate
+		ctx := context.Background()
+		result, err := akvClient.ImportCertificate(ctx, vaultBaseURL, name, keyvault.CertificateImportParameters{
+			Base64EncodedCertificate: &pfxB64,
+			Password:                 nil,
+		})
+		fmt.Println(result)
+		if err != nil {
+			fmt.Println("[Fatal error]\nError while storing certificate in Azure Key Vault:", err)
+			return false
+		}
+
+		return true
+	}
 
 	// This function loads the certificate
 	var loadCertificate = func(file string) (*x509.Certificate, error) {
@@ -107,6 +176,60 @@ func init() {
 		return pcksData
 	}
 
+	// This function uploads the dhparams file to Azure Storage
+	var uploadDhparams = func() bool {
+		// Get config
+		storageAccount := viper.GetString("AzureStorageAccount")
+		storageKey := viper.GetString("AzureStorageKey")
+		storageContainer := viper.GetString("AzureStorageContainer")
+		if len(storageAccount) < 1 || len(storageKey) < 1 || len(storageContainer) < 1 {
+			fmt.Println("[Error]\nConfiguration variables `AzureStorageAccount`, `AzureStorageKey` and `AzureStorageContainer` must be set before uploading a certificate.")
+			return false
+		}
+
+		// Stream to dhparams file
+		file, err := os.Open(dhparams)
+		if err != nil {
+			fmt.Println("[Fatal error]\nError while opening dhparams file:", err)
+			return false
+		}
+
+		// URL to upload to
+		dst := fmt.Sprintf("https://%s.blob.core.windows.net/%s/dhparams/%s.pem", storageAccount, storageContainer, name)
+		u, err := url.Parse(dst)
+		if err != nil {
+			fmt.Println("[Fatal error]\nError while building dhparams URL:", err)
+			return false
+		}
+
+		// Uploader client
+		credential, err := azblob.NewSharedKeyCredential(storageAccount, storageKey)
+		if err != nil {
+			fmt.Println("[Fatal error]\nError while getting credentials:", err)
+			return false
+		}
+		pipeline := azblob.NewPipeline(credential, azblob.PipelineOptions{
+			Retry: azblob.RetryOptions{
+				MaxTries: 3,
+			},
+		})
+		ctx := context.Background()
+
+		// Upload the app's file
+		blockBlobURL := azblob.NewBlockBlobURL(*u, pipeline)
+		_, err = azblob.UploadStreamToBlockBlob(ctx, file, blockBlobURL, azblob.UploadStreamToBlockBlobOptions{
+			BufferSize: 3 * 1024 * 1024,
+			MaxBuffers: 2,
+		})
+		if err != nil {
+			fmt.Println("[Fatal error]\nError while uploading file:", err)
+			return false
+		}
+		fmt.Printf("Uploaded %s\n", dst)
+
+		return true
+	}
+
 	// This function returns true if the file exists and it's a regular file
 	var checkFile = func(path string) bool {
 		// Check if the path exists
@@ -143,11 +266,28 @@ func init() {
 			}
 
 			// Convert the certificate and key to PCKS12
-			result := createPFX()
-			if result == nil {
+			pfx := createPFX()
+			if pfx == nil {
 				return
 			}
 
+			// Get the Azure Key Vault client
+			akvClient := getKeyVault()
+			if akvClient == nil {
+				return
+			}
+
+			// Upload the certificate to Azure Key Vault
+			result := uploadCertificate(pfx, akvClient)
+			if !result {
+				return
+			}
+
+			// Upload the dhparams file to Azure Storage
+			result = uploadDhparams()
+			if !result {
+				return
+			}
 		},
 	}
 	rootCmd.AddCommand(c)
