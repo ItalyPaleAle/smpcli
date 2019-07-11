@@ -235,7 +235,7 @@ func init() {
 	}
 
 	c := &cobra.Command{
-		Use:   "upload-certificate",
+		Use:   "certificate",
 		Short: "Upload a certificate",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -275,7 +275,7 @@ func init() {
 			}
 		},
 	}
-	rootCmd.AddCommand(c)
+	uploadCmd.AddCommand(c)
 
 	// Flags
 	c.Flags().StringVarP(&name, "name", "n", "", "Certificate name (required)")

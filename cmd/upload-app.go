@@ -173,7 +173,7 @@ func init() {
 	}
 
 	c := &cobra.Command{
-		Use:   "upload",
+		Use:   "app",
 		Short: "Upload an app or bundle",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -224,7 +224,7 @@ func init() {
 			}
 		},
 	}
-	rootCmd.AddCommand(c)
+	uploadCmd.AddCommand(c)
 
 	// Flags
 	c.Flags().StringVarP(&app, "app", "a", "", "App's bundle name (required)")
