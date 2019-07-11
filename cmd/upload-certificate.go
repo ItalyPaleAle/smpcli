@@ -51,21 +51,6 @@ func init() {
 
 	// This function gets a client authenticated with Azure Key Vault
 	var getKeyVault = func() *keyvault.BaseClient {
-		/*// Get config
-		tenantID := viper.GetString("AzureSPTenantId")
-		clientID := viper.GetString("AzureSPClientId")
-		clientSecret := viper.GetString("AzureSPClientSecret")
-		vaultName := viper.GetString("AzureKeyVault")
-		if len(tenantID) < 1 || len(clientID) < 1 || len(clientSecret) < 1 || len(vaultName) < 1 {
-			fmt.Println("[Error]\nConfiguration variables `AzureSPTenantId`, `AzureSPClientId`, `AzureSPClientSecret` and `AzureKeyVault` must be set before uploading a certificate.")
-			return nil
-		}
-
-		// Expose the auth data as env vars so the Azure SDK picks them up
-		os.Setenv("AZURE_TENANT_ID", tenantID)
-		os.Setenv("AZURE_CLIENT_ID", clientID)
-		os.Setenv("AZURE_CLIENT_SECRET", clientSecret)*/
-
 		vaultName := viper.GetString("AzureKeyVault")
 		if len(vaultName) < 1 {
 			fmt.Println("[Error]\nConfiguration variable `AzureKeyVault` must be set before uploading a certificate.")
@@ -101,11 +86,11 @@ func init() {
 			Base64EncodedCertificate: &pfxB64,
 			Password:                 nil,
 		})
-		fmt.Println(result)
 		if err != nil {
 			fmt.Println("[Fatal error]\nError while storing certificate in Azure Key Vault:", err)
 			return false
 		}
+		fmt.Printf("Stored %s\n", *result.ID)
 
 		return true
 	}
