@@ -1,3 +1,7 @@
+# Compiled binaries
+/bin/
+
+# Dev stuff
 test.sh
 
 # Created by https://www.gitignore.io/api/go,linux,macos,windows,visualstudiocode
