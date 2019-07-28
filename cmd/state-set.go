@@ -21,9 +21,10 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 
-	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
 	"smpcli/utils"
@@ -53,36 +54,31 @@ func init() {
 				return
 			}
 
-			// Read the file
-			exists, err := utils.PathExists(stateFile)
-			if err != nil {
-				fmt.Println("[Fatal error]\nError while checking file:", err)
-				return
-			}
-			if !exists {
-				fmt.Println("[Error]\nFile does not exist.")
-				return
-			}
-			state, err := ioutil.ReadFile(stateFile)
-			if err != nil {
-				fmt.Println("[Fatal error]\nError while reading file:", err)
-				return
-			}
-			if state == nil || len(state) == 0 {
-				fmt.Println("[Error]\nFile is empty.")
-				return
-			}
-			stateBuf := bytes.NewBuffer(state)
-
-			// Ask user to confirm a potentially destructive action
-			fmt.Println("Warning: this is a potentially destructive action, that will replace the state of a node. Please type the address (hostname or IP) of the node again to confirm, without quotes.")
-			prompt := promptui.Prompt{
-				Label: fmt.Sprintf("Type '%s'", optAddress),
-			}
-			result, err := prompt.Run()
-			if err != nil || result != optAddress {
-				fmt.Println("Aborted")
-				return
+			// Read the file if we have one
+			var stateBuf io.Reader
+			if len(stateFile) != 0 {
+				exists, err := utils.PathExists(stateFile)
+				if err != nil {
+					fmt.Println("[Fatal error]\nError while checking file:", err)
+					return
+				}
+				if !exists {
+					fmt.Println("[Error]\nFile does not exist.")
+					return
+				}
+				state, err := ioutil.ReadFile(stateFile)
+				if err != nil {
+					fmt.Println("[Fatal error]\nError while reading file:", err)
+					return
+				}
+				if state == nil || len(state) == 0 {
+					fmt.Println("[Error]\nFile is empty.")
+					return
+				}
+				stateBuf = bytes.NewBuffer(state)
+			} else {
+				// Read from stdin
+				stateBuf = os.Stdin
 			}
 
 			// Invoke the /state endpoint
@@ -110,8 +106,7 @@ func init() {
 	stateCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&stateFile, "file", "f", "", "File containing the desired state")
-	c.MarkFlagRequired("file")
+	c.Flags().StringVarP(&stateFile, "file", "f", "", "File containing the desired state (if not set, read from)")
 
 	// Add shared flags
 	addSharedFlags(c)

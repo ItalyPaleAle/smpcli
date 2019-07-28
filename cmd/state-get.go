@@ -72,7 +72,7 @@ func init() {
 
 			// If we have a file, write the response to disk
 			if len(outFile) != 0 {
-				out, err := os.Create("filename.ext")
+				out, err := os.Create(outFile)
 				if err != nil {
 					fmt.Println("[Fatal error]\nCannot create file:", err)
 					return
