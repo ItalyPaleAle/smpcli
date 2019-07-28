@@ -48,11 +48,6 @@ type infoResponseModel struct {
 	Version    string `json:"version"`
 }
 
-// POST /adopt (adopt)
-type adoptResponseModel struct {
-	Message string `json:"message"`
-}
-
 // POST /site (site add)
 type siteAddRequestModel struct {
 	Domain         string   `json:"domain"`

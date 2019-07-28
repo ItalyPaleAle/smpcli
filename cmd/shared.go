@@ -20,6 +20,7 @@ package cmd
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -38,7 +39,6 @@ func addSharedFlags(cmd *cobra.Command) {
 
 	// Port the server is listening on
 	// Default is 2265
-	// TODO: SET DEFAULT TO 2265 or another better port
 	cmd.Flags().StringVarP(&optPort, "port", "p", "2265", "port the node listens on")
 
 	// Flags to control communication with the node
@@ -50,9 +50,9 @@ func addSharedFlags(cmd *cobra.Command) {
 func getURLClient() (baseURL string, client *http.Client) {
 	// Output some warnings
 	if optNoTLS {
-		fmt.Println("\033[33mWARN: You are connecting to your node without using TLS. The connection (including the authorization token) is not encrypted.\033[0m")
+		fmt.Fprintln(os.Stderr, "\033[33mWARN: You are connecting to your node without using TLS. The connection (including the authorization token) is not encrypted.\033[0m")
 	} else if optInsecure {
-		fmt.Println("\033[33mWARN: TLS certificate validation is disabled. Your connection might not be secure.\033[0m")
+		fmt.Fprintln(os.Stderr, "\033[33mWARN: TLS certificate validation is disabled. Your connection might not be secure.\033[0m")
 	}
 
 	// Get the URL
