@@ -36,8 +36,8 @@ func init() {
 	)
 
 	c := &cobra.Command{
-		Use:   "add",
-		Short: "Add a new site",
+		Use:   "set",
+		Short: "Updates the configuration for a site",
 		Long:  ``,
 
 		Run: func(cmd *cobra.Command, args []string) {
@@ -55,8 +55,7 @@ func init() {
 			}
 
 			// Request body
-			reqBody := &siteAddRequestModel{
-				Domain:         domain,
+			reqBody := &siteSetRequestModel{
 				Aliases:        aliases,
 				TLSCertificate: tlsCertificate,
 				ClientCaching:  !noClientCaching,
@@ -65,7 +64,7 @@ func init() {
 			json.NewEncoder(buf).Encode(reqBody)
 
 			// Invoke the /site endpoint and add the site
-			req, err := http.NewRequest("POST", baseURL+"/site", buf)
+			req, err := http.NewRequest("PATCH", baseURL+"/site/"+domain, buf)
 			if err != nil {
 				fmt.Println("[Fatal error]\nCould not build the request:", err)
 				return

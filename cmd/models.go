@@ -54,6 +54,13 @@ type siteAddRequestModel struct {
 	ClientCaching  bool     `json:"clientCaching"`
 }
 
+// PATCH /site/<domain> (site set)
+type siteSetRequestModel struct {
+	Aliases        []string `json:"aliases"`
+	TLSCertificate string   `json:"tlsCertificate"`
+	ClientCaching  bool     `json:"clientCaching"`
+}
+
 // GET /site/<domain> (site get)
 type siteGetResponseModelApp struct {
 	// App details
