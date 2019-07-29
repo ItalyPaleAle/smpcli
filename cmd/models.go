@@ -74,7 +74,7 @@ type siteListResponseModel []siteGetResponseModel
 
 // POST /site/<domain>/deploy (deploy app)
 type deployRequestModel struct {
-	App     string `json:"app"`
+	Name    string `json:"name"`
 	Version string `json:"version"`
 }
 type deployResponseModel struct {

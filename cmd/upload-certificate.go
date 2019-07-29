@@ -27,12 +27,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/url"
 	"os"
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
-	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -46,7 +44,6 @@ func init() {
 		name        string
 		certificate string
 		key         string
-		dhparams    string
 	)
 
 	// This function gets a client authenticated with Azure Key Vault
@@ -161,60 +158,6 @@ func init() {
 		return pcksData
 	}
 
-	// This function uploads the dhparams file to Azure Storage
-	var uploadDhparams = func() bool {
-		// Get config
-		storageAccount := viper.GetString("AzureStorageAccount")
-		storageKey := viper.GetString("AzureStorageKey")
-		storageContainer := viper.GetString("AzureStorageContainer")
-		if len(storageAccount) < 1 || len(storageKey) < 1 || len(storageContainer) < 1 {
-			fmt.Println("[Error]\nConfiguration variables `AzureStorageAccount`, `AzureStorageKey` and `AzureStorageContainer` must be set before uploading a certificate.")
-			return false
-		}
-
-		// Stream to dhparams file
-		file, err := os.Open(dhparams)
-		if err != nil {
-			fmt.Println("[Fatal error]\nError while opening dhparams file:", err)
-			return false
-		}
-
-		// URL to upload to
-		dst := fmt.Sprintf("https://%s.blob.core.windows.net/%s/dhparams/%s.pem", storageAccount, storageContainer, name)
-		u, err := url.Parse(dst)
-		if err != nil {
-			fmt.Println("[Fatal error]\nError while building dhparams URL:", err)
-			return false
-		}
-
-		// Uploader client
-		credential, err := azblob.NewSharedKeyCredential(storageAccount, storageKey)
-		if err != nil {
-			fmt.Println("[Fatal error]\nError while getting credentials:", err)
-			return false
-		}
-		pipeline := azblob.NewPipeline(credential, azblob.PipelineOptions{
-			Retry: azblob.RetryOptions{
-				MaxTries: 3,
-			},
-		})
-		ctx := context.Background()
-
-		// Upload the app's file
-		blockBlobURL := azblob.NewBlockBlobURL(*u, pipeline)
-		_, err = azblob.UploadStreamToBlockBlob(ctx, file, blockBlobURL, azblob.UploadStreamToBlockBlobOptions{
-			BufferSize: 3 * 1024 * 1024,
-			MaxBuffers: 2,
-		})
-		if err != nil {
-			fmt.Println("[Fatal error]\nError while uploading file:", err)
-			return false
-		}
-		fmt.Printf("Uploaded %s\n", dst)
-
-		return true
-	}
-
 	// This function returns true if the file exists and it's a regular file
 	var checkFile = func(path string) bool {
 		// Check if the path exists
@@ -246,9 +189,6 @@ func init() {
 			if !checkFile(key) {
 				return
 			}
-			if !checkFile(dhparams) {
-				return
-			}
 
 			// Convert the certificate and key to PCKS12
 			pfx := createPFX()
@@ -267,12 +207,6 @@ func init() {
 			if !result {
 				return
 			}
-
-			// Upload the dhparams file to Azure Storage
-			result = uploadDhparams()
-			if !result {
-				return
-			}
 		},
 	}
 	uploadCmd.AddCommand(c)
@@ -284,6 +218,4 @@ func init() {
 	c.MarkFlagRequired("certificate")
 	c.Flags().StringVarP(&key, "key", "k", "", "Private key (required)")
 	c.MarkFlagRequired("key")
-	c.Flags().StringVarP(&dhparams, "dhparams", "d", "", "DH Parameters file (required)")
-	c.MarkFlagRequired("dhparams")
 }

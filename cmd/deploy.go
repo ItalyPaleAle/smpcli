@@ -41,14 +41,14 @@ func init() {
 
 		// Request body
 		reqBody := &deployRequestModel{
-			App:     app,
+			Name:    app,
 			Version: version,
 		}
 		buf := new(bytes.Buffer)
 		json.NewEncoder(buf).Encode(reqBody)
 
 		// Invoke the /site endpoint and add the site
-		req, err := http.NewRequest("POST", baseURL+"/site/"+domain+"/deploy", buf)
+		req, err := http.NewRequest("POST", baseURL+"/site/"+domain+"/app", buf)
 		if err != nil {
 			fmt.Println("[Fatal error]\nCould not build the request:", err)
 			return false
@@ -61,20 +61,13 @@ func init() {
 			return false
 		}
 		defer resp.Body.Close()
-		if resp.StatusCode < 200 || resp.StatusCode > 299 {
+
+		// There's no response
+		if resp.StatusCode != http.StatusNoContent {
 			b, _ := ioutil.ReadAll(resp.Body)
 			fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
 			return false
 		}
-
-		// Parse the response
-		var r deployResponseModel
-		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-			fmt.Println("[Fatal error]\nInvalid JSON response:", err)
-			return false
-		}
-
-		fmt.Println(deployResponseModelFormat(&r))
 		return true
 	}
 
