@@ -22,22 +22,20 @@ import (
 )
 
 // GET /status (status)
-type statusResponseModelApp struct {
-	ID         string     `json:"id"` // UUID that doesn't need parsing
-	Domain     string     `json:"domain"`
-	AppName    *string    `json:"appName"`
-	AppVersion *string    `json:"appVersion"`
-	Updated    *time.Time `json:"updated"`
+type statusResponseModelSync struct {
+	Running  bool       `json:"running"`
+	LastSync *time.Time `json:"lastSync"`
 }
 type statusResponseModelHealth struct {
-	Domain       string    `json:"domain"`
-	StatusCode   int       `json:"status"`
-	ResponseSize int       `json:"size"`
-	Error        *string   `json:"error"`
-	Time         time.Time `json:"time"`
+	Domain       string     `json:"domain"`
+	App          *string    `json:"app"`
+	StatusCode   *int       `json:"status"`
+	ResponseSize *int       `json:"size"`
+	Error        *string    `json:"error"`
+	Time         *time.Time `json:"time"`
 }
 type statusResponseModel struct {
-	Apps   []statusResponseModelApp    `json:"apps"`
+	Sync   statusResponseModelSync     `json:"sync"`
 	Health []statusResponseModelHealth `json:"health"`
 }
 
@@ -55,25 +53,24 @@ type siteAddRequestModel struct {
 	TLSCertificate string   `json:"tlsCertificate"`
 	ClientCaching  bool     `json:"clientCaching"`
 }
-type siteAddResponseModel struct {
-	ID             string   `json:"id"` // UUID that doesn't need parsing
-	Domain         string   `json:"domain"`
-	Aliases        []string `json:"aliases"`
-	TLSCertificate string   `json:"tlsCertificate"`
-	ClientCaching  bool     `json:"clientCaching"`
-}
 
 // GET /site/<domain> (site get)
+type siteGetResponseModelApp struct {
+	// App details
+	Name    string `json:"name" binding:"required"`
+	Version string `json:"version" binding:"required"`
+}
 type siteGetResponseModel struct {
-	ID             string   `json:"id"` // UUID that doesn't need parsing
-	Domain         string   `json:"domain"`
-	Aliases        []string `json:"aliases"`
-	TLSCertificate string   `json:"tlsCertificate"`
-	ClientCaching  bool     `json:"clientCaching"`
+	Domain         string                   `json:"domain"`
+	Aliases        []string                 `json:"aliases"`
+	TLSCertificate string                   `json:"tlsCertificate"`
+	ClientCaching  bool                     `json:"clientCaching"`
+	Error          *string                  `json:"error"`
+	App            *siteGetResponseModelApp `json:"app"`
 }
 
 // GET /site (site list)
-type siteListResponseModel []siteAddResponseModel
+type siteListResponseModel []siteGetResponseModel
 
 // POST /site/<domain>/deploy (deploy app)
 type deployRequestModel struct {

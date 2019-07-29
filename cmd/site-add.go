@@ -78,20 +78,13 @@ func init() {
 				return
 			}
 			defer resp.Body.Close()
-			if resp.StatusCode < 200 || resp.StatusCode > 299 {
+
+			// There's no response
+			if resp.StatusCode != http.StatusNoContent {
 				b, _ := ioutil.ReadAll(resp.Body)
 				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
 				return
 			}
-
-			// Parse the response
-			var r siteAddResponseModel
-			if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-				fmt.Println("[Fatal error]\nInvalid JSON response:", err)
-				return
-			}
-
-			fmt.Println(siteAddResponseModelFormat(&r))
 		},
 	}
 	siteCmd.AddCommand(c)

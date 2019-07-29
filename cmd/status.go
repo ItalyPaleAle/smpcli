@@ -20,7 +20,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"net/http"
 
 	"github.com/spf13/cobra"
 )
@@ -41,10 +41,10 @@ func init() {
 				return
 			}
 			defer resp.Body.Close()
-			if resp.StatusCode < 200 || resp.StatusCode > 299 {
-				b, _ := ioutil.ReadAll(resp.Body)
-				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
-				return
+
+			// The /status endpoint returns a non-200 status code also when there's an issue with the apps, so let's still parse it but show an error
+			if resp.StatusCode != http.StatusOK {
+				fmt.Printf("\033[31mStatus endpoint returned a %d status code\033[0m\n", resp.StatusCode)
 			}
 
 			// Parse the response

@@ -19,24 +19,10 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 )
-
-// Fromat siteAddResponseModel
-func siteAddResponseModelFormat(m *siteAddResponseModel) (result string) {
-	clientCaching := "no"
-	if m.ClientCaching {
-		clientCaching = "yes"
-	}
-	aliases := strings.Join(m.Aliases, ", ")
-	result = fmt.Sprintf(`ID:            %s
-Domain:        %s
-Aliases:       %s
-TLSCert:       %s
-ClientCaching: %s`, m.ID, m.Domain, aliases, m.TLSCertificate, clientCaching)
-	return
-}
 
 // Fromat siteGetResponseModel
 func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
@@ -44,12 +30,25 @@ func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
 	if m.ClientCaching {
 		clientCaching = "yes"
 	}
+
 	aliases := strings.Join(m.Aliases, ", ")
-	result = fmt.Sprintf(`ID:            %s
-Domain:        %s
+
+	err := "\033[2m<nil>\033[0m"
+	if m.Error != nil {
+		err = *m.Error
+	}
+
+	app := "\033[2m<nil>\033[0m"
+	if m.App != nil {
+		app = fmt.Sprintf("%s-%s", m.App.Name, m.App.Version)
+	}
+
+	result = fmt.Sprintf(`Domain:        %s
 Aliases:       %s
 TLSCert:       %s
-ClientCaching: %s`, m.ID, m.Domain, aliases, m.TLSCertificate, clientCaching)
+ClientCaching: %s
+Error:         %s
+App:           %s`, m.Domain, aliases, m.TLSCertificate, clientCaching, err, app)
 	return
 }
 
@@ -58,7 +57,7 @@ func siteListResponseModelFormat(m siteListResponseModel) (result string) {
 	result = ""
 	l := len(m)
 	for i := 0; i < l; i++ {
-		result += siteAddResponseModelFormat(&m[i])
+		result += siteGetResponseModelFormat(&m[i])
 		if i < l-1 {
 			result += "\n\n"
 		}
@@ -68,56 +67,56 @@ func siteListResponseModelFormat(m siteListResponseModel) (result string) {
 
 // Format statusResponseModel
 func statusResponseModelFormat(m *statusResponseModel) (result string) {
-	// Apps
-	result = "Apps\n----\n\n"
-
-	l := len(m.Apps)
-	for i := 0; i < l; i++ {
-		el := m.Apps[i]
-
-		appName := "\033[2m<nil>\033[0m"
-		if el.AppName != nil {
-			appName = *el.AppName
-		}
-
-		appVersion := "\033[2m<nil>\033[0m"
-		if el.AppVersion != nil {
-			appVersion = *el.AppVersion
-		}
-
-		t := "\033[2m<nil>\033[0m"
-		if el.Updated != nil {
-			t = el.Updated.Format(time.RFC3339)
-		}
-
-		result += fmt.Sprintf(`ID:         %s
-Domain:     %s
-AppName:    %s
-AppVersion: %s
-Updated:    %s
-
-`, el.ID, el.Domain, appName, appVersion, t)
+	// Info (sync status)
+	syncRunning := "no"
+	if m.Sync.Running {
+		syncRunning = "yes"
 	}
+
+	result = fmt.Sprintf("Info\n----\n"+`
+Sync is running: %s
+Last sync time:  %s
+
+`, syncRunning, m.Sync.LastSync.Format(time.RFC3339))
 
 	// Health
 	result += "Health\n------\n\n"
 
-	l = len(m.Health)
+	l := len(m.Health)
 	for i := 0; i < l; i++ {
 		el := m.Health[i]
 
-		err := "\033[2m<nil>\033[0m"
-		if el.Error != nil {
-			err = *el.Error
-		}
+		if el.App != nil {
+			err := "\033[2m<nil>\033[0m"
+			if el.Error != nil {
+				err = *el.Error
+			}
 
-		result += fmt.Sprintf(`Domain:       %s
-StatusCode:   %d
-ResponseSize: %d
+			statusCode := "\033[2m<nil>\033[0m"
+			if el.StatusCode != nil {
+				statusCode = strconv.Itoa(*el.StatusCode)
+			}
+
+			responseSize := "\033[2m<nil>\033[0m"
+			if el.ResponseSize != nil {
+				responseSize = strconv.Itoa(*el.ResponseSize)
+			}
+
+			result += fmt.Sprintf(`Domain:       %s
+App:          %s
+StatusCode:   %s
+ResponseSize: %s
 Error:        %s
 Time:         %s
 
-`, el.Domain, el.StatusCode, el.ResponseSize, err, el.Time.Format(time.RFC3339))
+`, el.Domain, *el.App, statusCode, responseSize, err, el.Time.Format(time.RFC3339))
+		} else {
+			// If there's no app deployed there's less data
+			result += fmt.Sprintf(`Domain:       %s
+App:          %s
+
+`, el.Domain, "\033[2m<nil>\033[0m")
+		}
 	}
 
 	return
