@@ -29,7 +29,6 @@ jobs:
           set -e
 
           GO111MODULE=on \
-          GOFLAGS=-mod=vendor \
             go build \
               -o bin/smplatform_linux_amd64
         displayName: "Build amd64"
@@ -38,7 +37,6 @@ jobs:
           set -e
 
           GO111MODULE=on \
-          GOFLAGS=-mod=vendor \
           GOOS=linux \
           GOARCH=arm64 \
             go build \
@@ -49,7 +47,6 @@ jobs:
           set -e
 
           GO111MODULE=on \
-          GOFLAGS=-mod=vendor \
           GOOS=linux \
           GOARCH=arm \
           GOARM=7 \
