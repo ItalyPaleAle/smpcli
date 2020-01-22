@@ -29,10 +29,9 @@ import (
 
 func init() {
 	var (
-		domain          string
-		aliases         []string
-		tlsCertificate  string
-		noClientCaching bool
+		domain         string
+		aliases        []string
+		tlsCertificate string
 	)
 
 	c := &cobra.Command{
@@ -58,7 +57,6 @@ func init() {
 			reqBody := &siteSetRequestModel{
 				Aliases:        aliases,
 				TLSCertificate: tlsCertificate,
-				ClientCaching:  !noClientCaching,
 			}
 			buf := new(bytes.Buffer)
 			json.NewEncoder(buf).Encode(reqBody)
@@ -93,7 +91,6 @@ func init() {
 	c.MarkFlagRequired("domain")
 	c.Flags().StringArrayVarP(&aliases, "alias", "a", []string{}, "Alias domain (can be used multiple times)")
 	c.Flags().StringVarP(&tlsCertificate, "certificate", "c", "", "Name of the TLS certificate")
-	c.Flags().BoolVar(&noClientCaching, "no-client-caching", false, "Disable setting the Cache-Control for static files")
 
 	// Add shared flags
 	addSharedFlags(c)

@@ -26,11 +26,6 @@ import (
 
 // Fromat siteGetResponseModel
 func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
-	clientCaching := "no"
-	if m.ClientCaching {
-		clientCaching = "yes"
-	}
-
 	aliases := strings.Join(m.Aliases, ", ")
 
 	err := "\033[2m<nil>\033[0m"
@@ -46,9 +41,8 @@ func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
 	result = fmt.Sprintf(`Domain:        %s
 Aliases:       %s
 TLSCert:       %s
-ClientCaching: %s
 Error:         %s
-App:           %s`, m.Domain, aliases, m.TLSCertificate, clientCaching, err, app)
+App:           %s`, m.Domain, aliases, m.TLSCertificate, err, app)
 	return
 }
 
