@@ -116,10 +116,16 @@ Time:         %s
 `, el.Domain, *el.App, statusCode, responseSize, err, el.Time.Format(time.RFC3339))
 		} else {
 			// If there's no app deployed there's less data
+			err := "\033[2m<nil>\033[0m"
+			if el.Error != nil {
+				err = *el.Error
+			}
+
 			result += fmt.Sprintf(`Domain:       %s
 App:          %s
+Error:        %s
 
-`, el.Domain, "\033[2m<nil>\033[0m")
+`, el.Domain, "\033[2m<nil>\033[0m", err)
 		}
 	}
 

@@ -31,7 +31,7 @@ var versionCmd = &cobra.Command{
 	Short: "Show smpcli version",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("smpcli Build ID:", buildinfo.BuildID, "(", buildinfo.BuildTime, "). Git commit:", buildinfo.CommitHash)
+		fmt.Println("smpcli Build ID:", buildinfo.BuildID, "("+buildinfo.BuildTime+"). Git commit:", buildinfo.CommitHash)
 	},
 }
 
