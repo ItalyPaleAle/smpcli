@@ -26,6 +26,8 @@ import (
 )
 
 func init() {
+	var domain string
+
 	c := &cobra.Command{
 		Use:   "status",
 		Short: "Gets the status of a node",
@@ -34,8 +36,12 @@ func init() {
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
 
-			// Invoke the /status endpoint to see what's the authentication method
-			resp, err := client.Get(baseURL + "/status")
+			// Invoke the /status endpoint to get the status of the node
+			url := baseURL + "/status"
+			if domain != "" {
+				url += "/" + domain
+			}
+			resp, err := client.Get(url)
 			if err != nil {
 				fmt.Println("[Fatal error]\nRequest failed:", err)
 				return
@@ -58,6 +64,9 @@ func init() {
 		},
 	}
 	rootCmd.AddCommand(c)
+
+	// Flags
+	c.Flags().StringVarP(&domain, "domain", "d", "", "Domain name")
 
 	// Add shared flags
 	addSharedFlags(c)

@@ -153,7 +153,7 @@ func init() {
 			if stgErr, ok := err.(azblob.StorageError); !ok {
 				fmt.Println("[Fatal error]\nNetwork error while uploading the archive:\n", err)
 			} else {
-				fmt.Println("[Fatal error]\nUpload failed while uploading the archive:\n", stgErr.Response().Status)
+				fmt.Println("[Fatal error]\nAzure Storage error failed while uploading the archive:\n", stgErr.Response().Status)
 			}
 			return false
 		}
@@ -180,7 +180,7 @@ func init() {
 			if stgErr, ok := err.(azblob.StorageError); !ok {
 				fmt.Println("[Fatal error]\nNetwork error while uploading the signature:\n", err)
 			} else {
-				fmt.Println("[Fatal error]\nUpload failed while uploading the signature:\n", stgErr.Response().Status)
+				fmt.Println("[Fatal error]\nAzure Storage error failed while uploading the signature:\n", stgErr.Response().Status)
 			}
 			return false
 		}
