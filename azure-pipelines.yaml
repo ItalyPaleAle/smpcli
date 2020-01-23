@@ -112,7 +112,7 @@ jobs:
             go build \
               -ldflags "-X smpcli/buildinfo.ENV=production -X smpcli/buildinfo.BuildID=$BUILD_ID -X smpcli/buildinfo.BuildTime=$BUILD_TIME -X smpcli/buildinfo.CommitHash=$COMMIT_HASH" \
               -o bin/smpcli_win32.exe
-        displayName: "Build Windows 64-bit"
+        displayName: "Build Windows 32-bit"
       # Copy binaries to the artifacts staging directory
       - task: CopyFiles@2
         displayName: Copy binaries to the artifacts staging directory
