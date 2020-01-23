@@ -61,17 +61,27 @@ func siteListResponseModelFormat(m siteListResponseModel) (result string) {
 
 // Format statusResponseModel
 func statusResponseModelFormat(m *statusResponseModel) (result string) {
-	// Info (sync status)
+	// Info (Nginx and sync status)
+	nginxRunning := "no"
+	if m.Nginx.Running {
+		nginxRunning = "yes"
+	}
 	syncRunning := "no"
 	if m.Sync.Running {
 		syncRunning = "yes"
 	}
+	syncError := "\033[2m<nil>\033[0m"
+	if m.Sync.SyncError != "" {
+		syncError = m.Sync.SyncError
+	}
 
 	result = fmt.Sprintf("Info\n----\n"+`
-Sync is running: %s
-Last sync time:  %s
+Nginx is running: %s
+Sync is running:  %s
+Last sync time:   %s
+Sync error:       %s
 
-`, syncRunning, m.Sync.LastSync.Format(time.RFC3339))
+`, nginxRunning, syncRunning, m.Sync.LastSync.Format(time.RFC3339), syncError)
 
 	// Health
 	result += "Health\n------\n\n"

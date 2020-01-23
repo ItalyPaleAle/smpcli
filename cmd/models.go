@@ -23,8 +23,9 @@ import (
 
 // GET /status (status)
 type statusResponseModelSync struct {
-	Running  bool       `json:"running"`
-	LastSync *time.Time `json:"lastSync"`
+	Running   bool       `json:"running"`
+	LastSync  *time.Time `json:"lastSync"`
+	SyncError string     `json:"syncError"`
 }
 type statusResponseModelHealth struct {
 	Domain       string     `json:"domain"`
@@ -34,7 +35,11 @@ type statusResponseModelHealth struct {
 	Error        *string    `json:"error"`
 	Time         *time.Time `json:"time"`
 }
+type statusResponseModelNginx struct {
+	Running bool `json:"running"`
+}
 type statusResponseModel struct {
+	Nginx  statusResponseModelNginx    `json:"nginx"`
 	Sync   statusResponseModelSync     `json:"sync"`
 	Health []statusResponseModelHealth `json:"health"`
 }

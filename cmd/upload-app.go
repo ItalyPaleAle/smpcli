@@ -133,15 +133,28 @@ func init() {
 		h := sha256.New()
 		tee := io.TeeReader(file, h)
 
+		// Access conditions for blob uploads: disallow the operation if the blob already exists
+		// See: https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-conditional-headers-for-blob-service-operations#Subheading1
+		accessConditions := azblob.BlobAccessConditions{
+			ModifiedAccessConditions: azblob.ModifiedAccessConditions{
+				IfNoneMatch: "*",
+			},
+		}
+
 		// Upload the app's file
 		// This also makes the stream proceed so the hash is calculated
 		blockBlobURL := azblob.NewBlockBlobURL(*uApp, pipeline)
 		_, err = azblob.UploadStreamToBlockBlob(ctx, tee, blockBlobURL, azblob.UploadStreamToBlockBlobOptions{
-			BufferSize: 3 * 1024 * 1024,
-			MaxBuffers: 2,
+			BufferSize:       3 * 1024 * 1024,
+			MaxBuffers:       2,
+			AccessConditions: accessConditions,
 		})
 		if err != nil {
-			fmt.Println("[Fatal error]\nError while uploading file:", err)
+			if stgErr, ok := err.(azblob.StorageError); !ok {
+				fmt.Println("[Fatal error]\nNetwork error while uploading the archive:\n", err)
+			} else {
+				fmt.Println("[Fatal error]\nUpload failed while uploading the archive:\n", stgErr.Response().Status)
+			}
 			return false
 		}
 		fmt.Printf("Uploaded %s\n", dstApp)
@@ -153,7 +166,7 @@ func init() {
 		rng := rand.Reader
 		signatureRaw, err := rsa.SignPKCS1v15(rng, signingKey, crypto.SHA256, hashed[:])
 		if err != nil {
-			fmt.Println("[Fatal error]\nCannot calculate signature:", err)
+			fmt.Println("[Fatal error]\nCannot calculate signature:\n", err)
 			return false
 		}
 
@@ -162,9 +175,13 @@ func init() {
 
 		// Upload the signature
 		blockBlobURL = azblob.NewBlockBlobURL(*uSig, pipeline)
-		_, err = blockBlobURL.Upload(ctx, strings.NewReader(signature), azblob.BlobHTTPHeaders{}, azblob.Metadata{}, azblob.BlobAccessConditions{})
+		_, err = blockBlobURL.Upload(ctx, strings.NewReader(signature), azblob.BlobHTTPHeaders{}, azblob.Metadata{}, accessConditions)
 		if err != nil {
-			fmt.Println("[Fatal error]\nError while uploading signature:", err)
+			if stgErr, ok := err.(azblob.StorageError); !ok {
+				fmt.Println("[Fatal error]\nNetwork error while uploading the signature:\n", err)
+			} else {
+				fmt.Println("[Fatal error]\nUpload failed while uploading the signature:\n", stgErr.Response().Status)
+			}
 			return false
 		}
 		fmt.Printf("Uploaded %s\n", dstSig)
