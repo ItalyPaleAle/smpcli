@@ -95,3 +95,13 @@ type deployResponseModel struct {
 	Error        *string    `json:"deploymentError"`
 	Time         *time.Time `json:"time"`
 }
+
+// POST /uploadauth (request Azure Storage SAS token)
+type uploadAuthRequestModel struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
+type uploadAuthResponseModel struct {
+	ArchiveURL   string `json:"archiveUrl"`
+	SignatureURL string `json:"signatureUrl"`
+}

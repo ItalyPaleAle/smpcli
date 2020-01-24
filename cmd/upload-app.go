@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"crypto"
 	"crypto/rand"
@@ -25,11 +26,13 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -71,18 +74,9 @@ func init() {
 
 	// This function uploads the tar.bz2 archive to Azure Blob Storage
 	// Returns true in case of success, and false if there's an error
-	var uploadArchive = func(file io.Reader) bool {
-		// Get config
-		storageAccount := viper.GetString("AzureStorageAccount")
-		storageKey := viper.GetString("AzureStorageKey")
-		storageContainer := viper.GetString("AzureStorageContainer")
-		signingKeyFile := viper.GetString("SigningKey")
-		if len(storageAccount) < 1 || len(storageKey) < 1 || len(storageContainer) < 1 {
-			fmt.Printf("[Error]\nConfiguration variables `AzureStorageAccount`, `AzureStorageKey` and `AzureStorageContainer` must be set before uploading a file.")
-			return false
-		}
-
+	var uploadArchive = func(file io.Reader, sasURLs *uploadAuthResponseModel) bool {
 		// Check if the key exists
+		signingKeyFile := viper.GetString("SigningKey")
 		if len(signingKeyFile) < 1 {
 			fmt.Printf("[Error]\nNo private signing key set in the `SigningKey` configuration variable")
 			return false
@@ -100,28 +94,22 @@ func init() {
 		// Load the signing key
 		signingKey, err := loadSigningKey(signingKeyFile)
 
-		// URL to upload to
-		dstApp := fmt.Sprintf("https://%s.blob.core.windows.net/%s/%s-%s.tar.bz2", storageAccount, storageContainer, app, version)
-		uApp, err := url.Parse(dstApp)
+		// URL to upload the archive to
+		uApp, err := url.Parse(sasURLs.ArchiveURL)
 		if err != nil {
 			fmt.Println("[Fatal error]\nError while building app URL:", err)
 			return false
 		}
 
 		// URL where to upload the signature to
-		dstSig := dstApp + ".sig"
-		uSig, err := url.Parse(dstSig)
+		uSig, err := url.Parse(sasURLs.SignatureURL)
 		if err != nil {
 			fmt.Println("[Fatal error]\nError while building signature URL:", err)
 			return false
 		}
 
 		// Uploader client
-		credential, err := azblob.NewSharedKeyCredential(storageAccount, storageKey)
-		if err != nil {
-			fmt.Println("[Fatal error]\nError while getting credentials:", err)
-			return false
-		}
+		credential := azblob.NewAnonymousCredential()
 		pipeline := azblob.NewPipeline(credential, azblob.PipelineOptions{
 			Retry: azblob.RetryOptions{
 				MaxTries: 3,
@@ -157,7 +145,7 @@ func init() {
 			}
 			return false
 		}
-		fmt.Printf("Uploaded %s\n", dstApp)
+		fmt.Println("Uploaded app's bundle")
 
 		// Calculate the SHA256 hash
 		hashed := h.Sum(nil)
@@ -184,7 +172,7 @@ func init() {
 			}
 			return false
 		}
-		fmt.Printf("Uploaded %s\n", dstSig)
+		fmt.Println("Uploaded app's signature")
 
 		return true
 	}
@@ -194,6 +182,19 @@ func init() {
 		Short: "Upload an app or bundle",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
+			baseURL, client := getURLClient()
+
+			// Get the shared key
+			sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
+			if err != nil {
+				fmt.Println("[Fatal error]\nError while reading node store:", err)
+				return
+			}
+			if !found {
+				fmt.Printf("[Error]\nNo authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
+				return
+			}
+
 			// Check if the path exists
 			exists, err := utils.PathExists(path)
 			if err != nil {
@@ -202,6 +203,41 @@ func init() {
 			}
 			if !exists {
 				fmt.Println("[Error]\nFile/folder not found:", path)
+				return
+			}
+
+			// Request body for getting the SAS token for Azure Storage from the node
+			reqBody := &uploadAuthRequestModel{
+				Name:    app,
+				Version: version,
+			}
+			buf := new(bytes.Buffer)
+			json.NewEncoder(buf).Encode(reqBody)
+
+			// Request the SAS token from the node
+			req, err := http.NewRequest("POST", baseURL+"/uploadauth", buf)
+			if err != nil {
+				fmt.Println("[Fatal error]\nCould not build the request:", err)
+				return
+			}
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("Authorization", sharedKey)
+			resp, err := client.Do(req)
+			if err != nil {
+				fmt.Println("[Fatal error]\nRequest failed:", err)
+				return
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				b, _ := ioutil.ReadAll(resp.Body)
+				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+				return
+			}
+
+			// Parse the response
+			var sasURLs uploadAuthResponseModel
+			if err := json.NewDecoder(resp.Body).Decode(&sasURLs); err != nil {
+				fmt.Println("[Fatal error]\nInvalid JSON response:", err)
 				return
 			}
 
@@ -216,7 +252,7 @@ func init() {
 				}
 
 				// Upload the archive
-				result := uploadArchive(file)
+				result := uploadArchive(file, &sasURLs)
 				if !result {
 					// The command has already printed the error
 					return
@@ -233,7 +269,7 @@ func init() {
 				}()
 
 				// Upload the archive
-				result := uploadArchive(r)
+				result := uploadArchive(r, &sasURLs)
 				if !result {
 					// The command has already printed the error
 					return
@@ -249,4 +285,7 @@ func init() {
 	c.Flags().StringVarP(&version, "version", "v", "", "App's bundle version (required)")
 	c.MarkFlagRequired("version")
 	c.Flags().StringVarP(&path, "path", "f", "", "Path to local file or folder to bundle")
+
+	// Add shared flags
+	addSharedFlags(c)
 }
