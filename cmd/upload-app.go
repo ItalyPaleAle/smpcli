@@ -101,13 +101,6 @@ func init() {
 			return false
 		}
 
-		// URL where to upload the signature to
-		uSig, err := url.Parse(sasURLs.SignatureURL)
-		if err != nil {
-			fmt.Println("[Fatal error]\nError while building signature URL:", err)
-			return false
-		}
-
 		// Uploader client
 		credential := azblob.NewAnonymousCredential()
 		pipeline := azblob.NewPipeline(credential, azblob.PipelineOptions{
@@ -161,18 +154,14 @@ func init() {
 		// Convert the signature to base64
 		signature := base64.StdEncoding.EncodeToString(signatureRaw)
 
-		// Upload the signature
-		blockBlobURL = azblob.NewBlockBlobURL(*uSig, pipeline)
-		_, err = blockBlobURL.Upload(ctx, strings.NewReader(signature), azblob.BlobHTTPHeaders{}, azblob.Metadata{}, accessConditions)
+		// Add the signature as metadata
+		metadata := azblob.Metadata{}
+		metadata["signature"] = signature
+		_, err = blockBlobURL.SetMetadata(ctx, metadata, azblob.BlobAccessConditions{})
 		if err != nil {
-			if stgErr, ok := err.(azblob.StorageError); !ok {
-				fmt.Println("[Fatal error]\nNetwork error while uploading the signature:\n", err)
-			} else {
-				fmt.Println("[Fatal error]\nAzure Storage error failed while uploading the signature:\n", stgErr.Response().Status)
-			}
+			fmt.Println("[Fatal error]\nCannot update blob's metadata:\n", err)
 			return false
 		}
-		fmt.Println("Uploaded app's signature")
 
 		return true
 	}

@@ -23,17 +23,17 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
-	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 
 	"smpcli/utils"
@@ -43,17 +43,60 @@ func init() {
 	var (
 		name        string
 		certificate string
-		key         string
+		certKey     string
 	)
+
+	var keyVaultName string
+	var keyVaultURL string
+
+	// This function requests the name of the Azure Key Vault from the node
+	var getKeyVaultName = func() error {
+		baseURL, client := getURLClient()
+		// Get the shared key
+		sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
+		if err != nil {
+			return fmt.Errorf("Error while reading node store: %s", err.Error())
+		}
+		if !found {
+			return fmt.Errorf("No authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
+		}
+
+		// Invoke the /keyvaultname endpoint to get the name and URL of the key vault
+		req, err := http.NewRequest("GET", baseURL+"/keyvaultname", nil)
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Authorization", sharedKey)
+		resp, err := client.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return errors.New("Invalid response status code")
+		}
+
+		// Parse the response
+		var r map[string]string
+		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+			return err
+		}
+
+		var ok bool
+		keyVaultName, ok = r["name"]
+		if !ok || keyVaultName == "" {
+			return errors.New("Invalid response: empty name")
+		}
+		keyVaultURL, ok = r["url"]
+		if !ok || keyVaultURL == "" {
+			return errors.New("Invalid response: empty url")
+		}
+
+		return nil
+	}
 
 	// This function gets a client authenticated with Azure Key Vault
 	var getKeyVault = func() *keyvault.BaseClient {
-		vaultName := viper.GetString("AzureKeyVault")
-		if len(vaultName) < 1 {
-			fmt.Println("[Error]\nConfiguration variable `AzureKeyVault` must be set before uploading a certificate.")
-			return nil
-		}
-
 		// Create a new client
 		akvClient := keyvault.New()
 
@@ -70,16 +113,12 @@ func init() {
 
 	// This function uploads the PFX certificate to Azure Key Vault
 	var uploadCertificate = func(pfx []byte, akvClient *keyvault.BaseClient) bool {
-		// Base URL for the vault
-		vaultName := viper.GetString("AzureKeyVault")
-		vaultBaseURL := fmt.Sprintf("https://%s.%s", vaultName, azure.PublicCloud.KeyVaultDNSSuffix)
-
 		// Convert certificate to base64
 		pfxB64 := base64.StdEncoding.EncodeToString(pfx)
 
 		// Store the certificate
 		ctx := context.Background()
-		result, err := akvClient.ImportCertificate(ctx, vaultBaseURL, name, keyvault.CertificateImportParameters{
+		result, err := akvClient.ImportCertificate(ctx, keyVaultURL, name, keyvault.CertificateImportParameters{
 			Base64EncodedCertificate: &pfxB64,
 			Password:                 nil,
 		})
@@ -142,7 +181,7 @@ func init() {
 			fmt.Println("[Fatal error]\nCannot load certificate:", err)
 			return nil
 		}
-		prv, err := loadPrivateKey(key)
+		prv, err := loadPrivateKey(certKey)
 		if err != nil {
 			fmt.Println("[Fatal error]\nCannot load private key:", err)
 			return nil
@@ -186,13 +225,19 @@ func init() {
 			if !checkFile(certificate) {
 				return
 			}
-			if !checkFile(key) {
+			if !checkFile(certKey) {
 				return
 			}
 
 			// Convert the certificate and key to PCKS12
 			pfx := createPFX()
 			if pfx == nil {
+				return
+			}
+
+			// Get the details of the Azure Key Vault
+			if err := getKeyVaultName(); err != nil {
+				fmt.Println("[Error]:", err)
 				return
 			}
 
@@ -212,10 +257,13 @@ func init() {
 	uploadCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&name, "name", "n", "", "Certificate name (required)")
+	c.Flags().StringVarP(&name, "name", "c", "", "Certificate name (required)")
 	c.MarkFlagRequired("name")
-	c.Flags().StringVarP(&certificate, "certificate", "c", "", "Certificate file (required)")
+	c.Flags().StringVarP(&certificate, "certificate", "f", "", "Certificate file (required)")
 	c.MarkFlagRequired("certificate")
-	c.Flags().StringVarP(&key, "key", "k", "", "Private key (required)")
-	c.MarkFlagRequired("key")
+	c.Flags().StringVarP(&certKey, "certificate-key", "p", "", "Private key (required)")
+	c.MarkFlagRequired("certificate-key")
+
+	// Add shared flags
+	addSharedFlags(c)
 }

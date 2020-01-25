@@ -39,7 +39,7 @@ func addSharedFlags(cmd *cobra.Command) {
 
 	// Port the server is listening on
 	// Default is 2265
-	cmd.Flags().StringVarP(&optPort, "port", "p", "2265", "port the node listens on")
+	cmd.Flags().StringVarP(&optPort, "port", "P", "2265", "port the node listens on")
 
 	// Flags to control communication with the node
 	// By default, we use TLS and validate the certificate

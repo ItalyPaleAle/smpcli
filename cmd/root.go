@@ -112,7 +112,6 @@ func loadConfig() error {
 	viper.SetConfigFile(folder + "/config.yaml")
 
 	// Set defaults
-	viper.SetDefault("AzureKeyVault", "")
 	viper.SetDefault("SigningKey", "")
 
 	// Read in the config file, ignoring errors
