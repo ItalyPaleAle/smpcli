@@ -162,12 +162,27 @@ func init() {
 
 		// Parse the key
 		block, _ := pem.Decode(dataPEM)
-		if block == nil || block.Type != "RSA PRIVATE KEY" {
-			return nil, errors.New("Cannot decode PEM block containing private key")
+		var prv *rsa.PrivateKey
+		if block == nil {
+			return nil, errors.New("Cannot decode PEM block containing private key: empty block")
 		}
-		prv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-		if err != nil {
-			return nil, err
+		if block.Type == "RSA PRIVATE KEY" {
+			prv, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+			if err != nil {
+				return nil, err
+			}
+		} else if block.Type == "PRIVATE KEY" {
+			key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+			if err != nil {
+				return nil, err
+			}
+			var ok bool
+			prv, ok = key.(*rsa.PrivateKey)
+			if !ok {
+				return nil, errors.New("Cannot decode PEM block containing private key: invalid key algorithm")
+			}
+		} else {
+			return nil, errors.New("Cannot decode PEM block containing private key: invalid block type")
 		}
 
 		return prv, nil
