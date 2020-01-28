@@ -20,14 +20,14 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 
 	"github.com/spf13/cobra"
 
-	"smpcli/utils"
+	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 func init() {

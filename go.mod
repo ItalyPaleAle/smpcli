@@ -1,4 +1,4 @@
-module smpcli
+module github.com/ItalyPaleAle/smpcli
 
 go 1.13
 

@@ -36,7 +36,7 @@ import (
 	"github.com/spf13/cobra"
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 
-	"smpcli/utils"
+	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 func init() {

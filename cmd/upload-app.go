@@ -41,7 +41,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"smpcli/utils"
+	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 func init() {

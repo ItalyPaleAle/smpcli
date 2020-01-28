@@ -22,7 +22,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"smpcli/buildinfo"
+	"github.com/ItalyPaleAle/smpcli/buildinfo"
 )
 
 // versionCmd represents the upload command
