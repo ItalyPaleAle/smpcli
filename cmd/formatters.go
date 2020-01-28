@@ -50,6 +50,9 @@ App:           %s`, m.Domain, aliases, m.TLSCertificate, err, app)
 func siteListResponseModelFormat(m siteListResponseModel) (result string) {
 	result = ""
 	l := len(m)
+	if l == 0 {
+		result += "No site configured"
+	}
 	for i := 0; i < l; i++ {
 		result += siteGetResponseModelFormat(&m[i])
 		if i < l-1 {
@@ -83,10 +86,13 @@ Sync error:       %s
 
 `, nginxRunning, syncRunning, m.Sync.LastSync.Format(time.RFC3339), syncError)
 
-	// Health
-	result += "Health\n------\n\n"
+	// Sites
+	result += "Sites\n-----\n\n"
 
 	l := len(m.Health)
+	if l == 0 {
+		result += "No site configured"
+	}
 	for i := 0; i < l; i++ {
 		el := m.Health[i]
 
