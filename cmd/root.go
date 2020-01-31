@@ -22,12 +22,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path/filepath"
 	"time"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/ItalyPaleAle/smpcli/utils"
 )
@@ -65,11 +62,6 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(func() {
-		// Load config
-		if err := loadConfig(); err != nil {
-			panic(err)
-		}
-
 		// Init the node store
 		nodeStore = &utils.NodeStore{}
 		if err := nodeStore.Init(); err != nil {
@@ -92,30 +84,4 @@ func init() {
 			Timeout:   30 * time.Second,
 		}
 	})
-}
-
-func loadConfig() error {
-	// Get the home directory
-	home, err := homedir.Dir()
-	if err != nil {
-		return err
-	}
-
-	// Ensure the config folder exists
-	folder := filepath.FromSlash(home + "/.smpcli")
-	if err := utils.EnsureFolder(folder); err != nil {
-		return err
-	}
-
-	// Load the config file
-	viper.SetConfigType("yaml")
-	viper.SetConfigFile(folder + "/config.yaml")
-
-	// Set defaults
-	viper.SetDefault("SigningKey", "")
-
-	// Read in the config file, ignoring errors
-	_ = viper.ReadInConfig()
-
-	return nil
 }
