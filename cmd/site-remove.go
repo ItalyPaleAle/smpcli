@@ -18,20 +18,24 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	var domain string
+	var (
+		domain string
+		yes    bool
+	)
 
 	c := &cobra.Command{
-		Use:   "get",
-		Short: "Get a site",
+		Use:   "remove",
+		Short: "Remove a site",
 		Long:  ``,
 
 		Run: func(cmd *cobra.Command, args []string) {
@@ -48,8 +52,21 @@ func init() {
 				return
 			}
 
-			// Invoke the /site/:domain endpoint and get the site
-			req, err := http.NewRequest("GET", baseURL+"/site/"+domain, nil)
+			// Ask for confirmatiom (unless we have `--yes`)
+			if !yes {
+				prompt := promptui.Prompt{
+					Label:     "Remove the site",
+					IsConfirm: true,
+				}
+				confirm, err := prompt.Run()
+				if err != nil || strings.ToLower(confirm) != "y" {
+					fmt.Println("Aborted")
+					return
+				}
+			}
+
+			// Invoke the /site/:domain endpoint to delete the site
+			req, err := http.NewRequest("DELETE", baseURL+"/site/"+domain, nil)
 			if err != nil {
 				fmt.Println("[Fatal error]\nCould not build the request:", err)
 				return
@@ -61,26 +78,17 @@ func init() {
 				return
 			}
 			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusOK {
+			if resp.StatusCode != http.StatusNoContent {
 				b, _ := ioutil.ReadAll(resp.Body)
 				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
 				return
 			}
-
-			// Parse the response
-			var r siteGetResponseModel
-			if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-				fmt.Println("[Fatal error]\nInvalid JSON response:", err)
-				return
-			}
-
-			// Print the response
-			fmt.Println(siteGetResponseModelFormat(&r))
 		},
 	}
 	siteCmd.AddCommand(c)
 
 	// Flags
+	c.Flags().BoolVarP(&yes, "yes", "", false, "do not ask for confirmation")
 	c.Flags().StringVarP(&domain, "domain", "d", "", "Primary domain name")
 	c.MarkFlagRequired("domain")
 
