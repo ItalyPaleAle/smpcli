@@ -9,6 +9,7 @@ variables:
   GOVERSION: '1.13'
   GOROOT: '/usr/local/go$(GOVERSION)'
   GOPATH: '/home/vsts/go'
+  GOBIN: '$(GOPATH)/bin'
 
 jobs:
   - job: build
