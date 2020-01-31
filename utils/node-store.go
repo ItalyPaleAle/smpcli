@@ -20,6 +20,7 @@ package utils
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -63,6 +64,13 @@ func (s *NodeStore) GetSharedKey(address string) (sharedKey string, found bool, 
 	found = false
 	err = nil
 
+	// If we have the NODE_KEY environmental variable, use that as fallback
+	env := os.Getenv("NODE_KEY")
+	if env != "" {
+		sharedKey = env
+		found = true
+	}
+
 	// Read the current file
 	document, err := s.read()
 	if err != nil {
@@ -70,9 +78,10 @@ func (s *NodeStore) GetSharedKey(address string) (sharedKey string, found bool, 
 	}
 
 	// Get the value if it exists
-	obj, found := document[address]
-	if found {
+	obj, foundObj := document[address]
+	if foundObj {
 		sharedKey = obj.SharedKey
+		found = true
 	}
 	if len(sharedKey) == 0 {
 		found = false
