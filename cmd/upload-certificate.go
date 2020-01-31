@@ -23,16 +23,13 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
-	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault"
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
 	"github.com/spf13/cobra"
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 
@@ -46,73 +43,15 @@ func init() {
 		certKey     string
 	)
 
-	var keyVaultName string
-	var keyVaultURL string
-
-	// This function requests the name of the Azure Key Vault from the node
-	var getKeyVaultName = func() error {
-		baseURL, client := getURLClient()
-		// Get the shared key
-		sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
-		if err != nil {
-			return fmt.Errorf("Error while reading node store: %s", err.Error())
-		}
-		if !found {
-			return fmt.Errorf("No authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
-		}
-
-		// Invoke the /keyvaultname endpoint to get the name and URL of the key vault
-		req, err := http.NewRequest("GET", baseURL+"/keyvaultname", nil)
-		if err != nil {
-			return err
-		}
-		req.Header.Set("Authorization", sharedKey)
-		resp, err := client.Do(req)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			return errors.New("Invalid response status code")
-		}
-
-		// Parse the response
-		var r map[string]string
-		if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-			return err
-		}
-
-		var ok bool
-		keyVaultName, ok = r["name"]
-		if !ok || keyVaultName == "" {
-			return errors.New("Invalid response: empty name")
-		}
-		keyVaultURL, ok = r["url"]
-		if !ok || keyVaultURL == "" {
-			return errors.New("Invalid response: empty url")
-		}
-
-		return nil
-	}
-
-	// This function gets a client authenticated with Azure Key Vault
-	var getKeyVault = func() *keyvault.BaseClient {
-		// Create a new client
-		akvClient := keyvault.New()
-
-		// Authorize from the Azure CLI
-		authorizer, err := auth.NewAuthorizerFromCLI()
-		if err != nil {
-			fmt.Println("[Fatal error]\nError while authorizing the Azure Key Vault client:", err)
-			return nil
-		}
-		akvClient.Authorizer = authorizer
-
-		return &akvClient
-	}
-
 	// This function uploads the PFX certificate to Azure Key Vault
 	var uploadCertificate = func(pfx []byte, akvClient *keyvault.BaseClient) bool {
+		// Get the URL of the Key Vault, requesting it from the node
+		keyVaultURL, _, _, err := getKeyVaultInfo()
+		if err != nil {
+			fmt.Println("[Fatal error]\nError while requesting name of Key Vault:", err)
+			return false
+		}
+
 		// Convert certificate to base64
 		pfxB64 := base64.StdEncoding.EncodeToString(pfx)
 
@@ -247,12 +186,6 @@ func init() {
 			// Convert the certificate and key to PCKS12
 			pfx := createPFX()
 			if pfx == nil {
-				return
-			}
-
-			// Get the details of the Azure Key Vault
-			if err := getKeyVaultName(); err != nil {
-				fmt.Println("[Error]:", err)
 				return
 			}
 

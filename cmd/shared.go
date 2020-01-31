@@ -18,10 +18,14 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
 	"github.com/spf13/cobra"
 )
 
@@ -44,7 +48,7 @@ func addSharedFlags(cmd *cobra.Command) {
 	// Flags to control communication with the node
 	// By default, we use TLS and validate the certificate
 	cmd.Flags().BoolVarP(&optInsecure, "insecure", "k", false, "disable TLS certificate validation")
-	cmd.Flags().BoolVarP(&optNoTLS, "http", "s", false, "use HTTP protocol (no TLS)")
+	cmd.Flags().BoolVarP(&optNoTLS, "http", "S", false, "use HTTP protocol (no TLS)")
 }
 
 func getURLClient() (baseURL string, client *http.Client) {
@@ -68,6 +72,80 @@ func getURLClient() (baseURL string, client *http.Client) {
 	client = httpClient
 	if optInsecure {
 		client = httpClientInsecure
+	}
+
+	return
+}
+
+// This function gets a client authenticated with Azure Key Vault
+func getKeyVault() *keyvault.BaseClient {
+	// Create a new client
+	akvClient := keyvault.New()
+
+	// Authorize from the Azure CLI
+	authorizer, err := auth.NewAuthorizerFromCLI()
+	if err != nil {
+		fmt.Println("[Fatal error]\nError while authorizing the Azure Key Vault client:", err)
+		return nil
+	}
+	akvClient.Authorizer = authorizer
+
+	return &akvClient
+}
+
+// This function requests the name of the Azure Key Vault from the node
+func getKeyVaultInfo() (keyVaultURL string, codesignKeyName string, codesignKeyVersion string, err error) {
+	baseURL, client := getURLClient()
+
+	// Get the shared key
+	sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
+	if err != nil {
+		err = fmt.Errorf("Error while reading node store: %s", err.Error())
+		return
+	}
+	if !found {
+		err = fmt.Errorf("No authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
+		return
+	}
+
+	// Invoke the /keyvaultinfo endpoint to get the name and URL of the key vault
+	req, err := http.NewRequest("GET", baseURL+"/keyvaultinfo", nil)
+	if err != nil {
+		return
+	}
+	req.Header.Set("Authorization", sharedKey)
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		err = errors.New("Invalid response status code")
+		return
+	}
+
+	// Parse the response
+	var r map[string]string
+	err = json.NewDecoder(resp.Body).Decode(&r)
+	if err != nil {
+		return
+	}
+
+	var ok bool
+	keyVaultURL, ok = r["url"]
+	if !ok || keyVaultURL == "" {
+		err = errors.New("Invalid response: empty url")
+		return
+	}
+	codesignKeyName, ok = r["codesignKeyName"]
+	if !ok || codesignKeyName == "" {
+		err = errors.New("Invalid response: empty codesignKeyName")
+		return
+	}
+	codesignKeyVersion, ok = r["codesignKeyVersion"]
+	if !ok || codesignKeyVersion == "" {
+		err = errors.New("Invalid response: empty codesignKeyVersion")
+		return
 	}
 
 	return

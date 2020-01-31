@@ -20,14 +20,9 @@ package cmd
 import (
 	"bytes"
 	"context"
-	"crypto"
-	"crypto/rand"
-	"crypto/rsa"
 	"crypto/sha256"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
-	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
@@ -37,63 +32,69 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 func init() {
 	var (
-		app     string
-		version string
-		path    string
+		app         string
+		version     string
+		path        string
+		noSignature bool
 	)
 
-	// This function loads the private key
-	var loadSigningKey = func(file string) (*rsa.PrivateKey, error) {
-		// Load key from disk
-		dataPEM, err := ioutil.ReadFile(file)
+	// This function signs the checksum of the app's payload with the key stored in Azure Key Vault
+	var signHash = func(ctx context.Context, hash []byte) (signature string, err error) {
+		// Get the URL of the Key Vault, requesting it from the node
+		keyVaultURL, codesignKeyName, codesignKeyVersion, err := getKeyVaultInfo()
 		if err != nil {
-			return nil, err
+			return
 		}
 
-		// Parse the key
-		block, _ := pem.Decode(dataPEM)
-		if block == nil || block.Type != "RSA PRIVATE KEY" {
-			return nil, errors.New("Cannot decode PEM block containing private key")
-		}
-		prv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-		if err != nil {
-			return nil, err
+		// Convert the hash to base64
+		hashB64 := base64.URLEncoding.EncodeToString(hash)
+
+		// Get the Azure Key Vault client
+		akvClient := getKeyVault()
+		if akvClient == nil {
+			return
 		}
 
-		return prv, nil
+		// Request Azure Key Vault to sign the message
+		res, err := akvClient.Sign(ctx, keyVaultURL, codesignKeyName, codesignKeyVersion, keyvault.KeySignParameters{
+			Algorithm: "RS256",
+			Value:     &hashB64,
+		})
+		if err != nil {
+			return
+		}
+
+		// Check the response
+		if res.Result == nil || *res.Result == "" {
+			err = errors.New("Empty response")
+		}
+
+		// The response is encded with Base64 with URL-encoding; we need to switch to the standard encoding
+		signature = strings.ReplaceAll(*res.Result, "-", "+")
+		signature = strings.ReplaceAll(signature, "_", "/")
+
+		// Ensure that we have the proper padding
+		if len(signature)%4 == 2 {
+			signature += "=="
+		} else if len(signature)%4 == 3 {
+			signature += "="
+		}
+
+		return
 	}
 
 	// This function uploads the tar.bz2 archive to Azure Blob Storage
 	// Returns true in case of success, and false if there's an error
 	var uploadArchive = func(file io.Reader, sasURLs *uploadAuthResponseModel) bool {
-		// Check if the key exists
-		signingKeyFile := viper.GetString("SigningKey")
-		if len(signingKeyFile) < 1 {
-			fmt.Printf("[Error]\nNo private signing key set in the `SigningKey` configuration variable")
-			return false
-		}
-		exists, err := utils.PathExists(signingKeyFile)
-		if err != nil {
-			fmt.Println("[Fatal error]\nError while reading filesystem:", err)
-			return false
-		}
-		if !exists {
-			fmt.Println("[Error]\nPrivate signing key not found:", signingKeyFile)
-			return false
-		}
-
-		// Load the signing key
-		signingKey, err := loadSigningKey(signingKeyFile)
-
 		// URL to upload the archive to
 		uApp, err := url.Parse(sasURLs.ArchiveURL)
 		if err != nil {
@@ -144,23 +145,23 @@ func init() {
 		hashed := h.Sum(nil)
 
 		// Calculate the digital signature
-		rng := rand.Reader
-		signatureRaw, err := rsa.SignPKCS1v15(rng, signingKey, crypto.SHA256, hashed[:])
-		if err != nil {
-			fmt.Println("[Fatal error]\nCannot calculate signature:\n", err)
-			return false
-		}
+		if !noSignature {
+			signature, err := signHash(ctx, hashed)
+			if err != nil {
+				fmt.Println("[Fatal error]\nCannot calculate signature:\n", err)
+				return false
+			}
 
-		// Convert the signature to base64
-		signature := base64.StdEncoding.EncodeToString(signatureRaw)
-
-		// Add the signature as metadata
-		metadata := azblob.Metadata{}
-		metadata["signature"] = signature
-		_, err = blockBlobURL.SetMetadata(ctx, metadata, azblob.BlobAccessConditions{})
-		if err != nil {
-			fmt.Println("[Fatal error]\nCannot update blob's metadata:\n", err)
-			return false
+			// Add the signature as metadata
+			metadata := azblob.Metadata{}
+			metadata["signature"] = signature
+			_, err = blockBlobURL.SetMetadata(ctx, metadata, azblob.BlobAccessConditions{})
+			if err != nil {
+				fmt.Println("[Fatal error]\nCannot update blob's metadata:\n", err)
+				return false
+			}
+		} else {
+			fmt.Fprintln(os.Stderr, "\033[33mWARN: Skipping cryptographically signing the app's bundle. Nodes will not be able to verify the integrity and the origin of the code.\033[0m")
 		}
 
 		return true
@@ -274,6 +275,7 @@ func init() {
 	c.Flags().StringVarP(&version, "version", "v", "", "App's bundle version (required)")
 	c.MarkFlagRequired("version")
 	c.Flags().StringVarP(&path, "path", "f", "", "Path to local file or folder to bundle")
+	c.Flags().BoolVarP(&noSignature, "no-signature", "", false, "do not cryptographically sign the app's bundle")
 
 	// Add shared flags
 	addSharedFlags(c)
