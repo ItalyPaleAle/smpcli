@@ -19,10 +19,10 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -40,33 +40,26 @@ func init() {
 			baseURL, client := getURLClient()
 
 			// Invoke the /info endpoint to see what's the authentication method
-			resp, err := client.Get(baseURL + "/info")
+			var rInfo infoResponseModel
+			err := utils.RequestJSON(utils.RequestOpts{
+				Client: client,
+				Target: &rInfo,
+				URL:    baseURL + "/info",
+			})
 			if err != nil {
 				fmt.Println("[Fatal error]\nRequest failed:", err)
 				return
 			}
-			defer resp.Body.Close()
-			if resp.StatusCode < 200 || resp.StatusCode > 299 {
-				b, _ := ioutil.ReadAll(resp.Body)
-				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
-				return
-			}
-
-			// Parse the response
-			var r infoResponseModel
-			if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-				fmt.Println("[Fatal error]\nInvalid JSON response:", err)
-				return
-			}
 
 			// Ensure the node supports pre-shared key authentication
-			if !utils.SliceContainsString(r.AuthMethods, "azureAD") || r.AzureADAuthURL == "" {
+			if !utils.SliceContainsString(rInfo.AuthMethods, "azureAD") || rInfo.AzureAD == nil {
 				fmt.Println("[Fatal error]\nThis node does not support authenticating with an Azure AD account")
 				return
 			}
 
 			// Redirect users to the authentication URL
-			utils.LaunchBrowser(r.AzureADAuthURL)
+			authorizeURL := fmt.Sprintf("%s?client_id=%s&response_type=code&redirect_uri=%s&response_mode=query&domain_hint=organizations&scope=openid+offline_access", rInfo.AzureAD.AuthorizeURL, rInfo.AzureAD.ClientID, url.QueryEscape("http://localhost:3993"))
+			utils.LaunchBrowser(authorizeURL)
 
 			// Start a web server to listen to authorization codes
 			authCode := ""
@@ -85,7 +78,7 @@ func init() {
 				query := r.URL.Query()
 				if query != nil && query.Get("code") != "" {
 					authCode = query.Get("code")
-					fmt.Fprintf(w, "All good, you can close this window")
+					fmt.Fprintf(w, "Authenticated with Azure AD. You can close this window.")
 					ctxCancel()
 				} else {
 					fmt.Fprintf(w, "Error: response did not contain an authorization code")
@@ -102,39 +95,64 @@ func init() {
 				server.Shutdown(ctx)
 			}
 
-			fmt.Println(authCode)
+			// Exchange the authorization code for a token
+			body := url.Values{}
+			// No client_secret because this is a client-side app
+			body.Set("client_id", rInfo.AzureAD.ClientID)
+			body.Set("code", authCode)
+			body.Set("grant_type", "authorization_code")
+			body.Set("redirect_uri", "http://localhost:3993")
+			body.Set("scope", "openid offline_access")
 
-			// TODO
-			sharedKey := ""
-
-			// Test the auth token by requesting the node's state, invoking the /state endpoint
-			req, err := http.NewRequest("GET", baseURL+"/state", nil)
-			if err != nil {
-				fmt.Println("[Fatal error]\nCould not build the request:", err)
-				return
+			// Request
+			var rToken struct {
+				ExpiresIn    int    `json:"expires_in"`
+				IDToken      string `json:"id_token"`
+				RefreshToken string `json:"refresh_token"`
 			}
-			req.Header.Set("Authorization", sharedKey)
-			resp, err = client.Do(req)
+			err = utils.RequestJSON(utils.RequestOpts{
+				Body:            strings.NewReader(body.Encode()),
+				BodyContentType: "application/x-www-form-urlencoded",
+				Method:          utils.RequestPOST,
+				Target:          &rToken,
+				URL:             rInfo.AzureAD.TokenURL,
+			})
 			if err != nil {
 				fmt.Println("[Fatal error]\nRequest failed:", err)
 				return
 			}
-			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusOK {
-				if resp.StatusCode == http.StatusUnauthorized {
+
+			if rToken.IDToken == "" || rToken.RefreshToken == "" {
+				fmt.Println("[Fatal error]\nResponse did not contain an id_token or a refresh_token")
+				return
+			}
+
+			// Test the auth token by requesting the node's state, invoking the /state endpoint
+			// We're not requesting anything from the response
+			var rState struct{}
+			err = utils.RequestJSON(utils.RequestOpts{
+				Authorization: rToken.IDToken,
+				Client:        client,
+				Target:        &rState,
+				URL:           baseURL + "/state",
+			})
+			if err != nil {
+				// Check if the error is a 401
+				if strings.HasPrefix(err.Error(), "invalid response status code: 401") {
 					fmt.Println("[Error]\nInvalid pre-shared key")
 				} else {
-					b, _ := ioutil.ReadAll(resp.Body)
-					fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+					fmt.Println("[Server error]\n", err)
 				}
 				return
 			}
 
 			// Store the key in the node store
-			if err := nodeStore.StoreSharedKey(optAddress, sharedKey); err != nil {
+			/*if err := nodeStore.StoreSharedKey(optAddress, sharedKey); err != nil {
 				fmt.Println("[Fatal error]\nError while storing the pre-shared key:", err)
 				return
-			}
+			}*/
+
+			fmt.Println("Success! You're authenticated")
 		},
 	}
 

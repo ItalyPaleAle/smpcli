@@ -43,8 +43,8 @@ func LaunchBrowser(url string) {
 	case "linux":
 		exec.Command("xdg-open", url).Start()
 	default:
-		fmt.Println("Please open a web browser to this URL to authenticate:\n", url)
+		fmt.Printf("Please open a web browser to this URL to authenticate:\n%s\n", url)
 		return
 	}
-	fmt.Println("If your browser didn't automatically open, please visit this URL to authenticate:\n", url)
+	fmt.Printf("If your browser didn't automatically open, please visit this URL to authenticate:\n%s\n", url)
 }
