@@ -46,9 +46,10 @@ type statusResponseModel struct {
 
 // GET /info (auth)
 type infoResponseModel struct {
-	AuthMethod string `json:"authMethod"`
-	Hostname   string `json:"hostname"`
-	Version    string `json:"version"`
+	AuthMethods    []string `json:"authMethods"`
+	AzureADAuthURL string   `json:"azureADAuthURL,omitempty"`
+	Hostname       string   `json:"hostname"`
+	Version        string   `json:"version"`
 }
 
 // POST /site (site add)
