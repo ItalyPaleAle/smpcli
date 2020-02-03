@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -47,18 +48,19 @@ func init() {
 				URL:    baseURL + "/info",
 			})
 			if err != nil {
-				fmt.Println("[Fatal error]\nRequest failed:", err)
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
 
 			// Ensure the node supports pre-shared key authentication
 			if !utils.SliceContainsString(rInfo.AuthMethods, "azureAD") || rInfo.AzureAD == nil {
-				fmt.Println("[Fatal error]\nThis node does not support authenticating with an Azure AD account")
+				utils.ExitWithError(utils.ErrorUser, "This node does not support authenticating with an Azure AD account", nil)
 				return
 			}
 
 			// Redirect users to the authentication URL
-			authorizeURL := fmt.Sprintf("%s?client_id=%s&response_type=code&redirect_uri=%s&response_mode=query&domain_hint=organizations&scope=openid+offline_access", rInfo.AzureAD.AuthorizeURL, rInfo.AzureAD.ClientID, url.QueryEscape("http://localhost:3993"))
+			state := time.Now().Unix()
+			authorizeURL := fmt.Sprintf("%s?client_id=%s&response_type=code&redirect_uri=%s&response_mode=query&domain_hint=organizations&scope=openid+offline_access&state=%d", rInfo.AzureAD.AuthorizeURL, rInfo.AzureAD.ClientID, url.QueryEscape("http://localhost:3993"), state)
 			utils.LaunchBrowser(authorizeURL)
 
 			// Start a web server to listen to authorization codes
@@ -77,9 +79,13 @@ func init() {
 				// Ensure we have the code in the response
 				query := r.URL.Query()
 				if query != nil && query.Get("code") != "" {
-					authCode = query.Get("code")
-					fmt.Fprintf(w, "Authenticated with Azure AD. You can close this window.")
-					ctxCancel()
+					if query.Get("state") == strconv.FormatInt(state, 10) {
+						authCode = query.Get("code")
+						fmt.Fprintf(w, "Authenticated with Azure AD. You can close this window.")
+						ctxCancel()
+					} else {
+						fmt.Fprintf(w, "Error: invalid state in response")
+					}
 				} else {
 					fmt.Fprintf(w, "Error: response did not contain an authorization code")
 				}
@@ -118,39 +124,39 @@ func init() {
 				URL:             rInfo.AzureAD.TokenURL,
 			})
 			if err != nil {
-				fmt.Println("[Fatal error]\nRequest failed:", err)
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
 
 			if rToken.IDToken == "" || rToken.RefreshToken == "" {
-				fmt.Println("[Fatal error]\nResponse did not contain an id_token or a refresh_token")
+				utils.ExitWithError(utils.ErrorNode, "Response did not contain an id_token or a refresh_token", nil)
 				return
 			}
 
-			// Test the auth token by requesting the node's state, invoking the /state endpoint
+			// Test the auth token by requesting the node's site list, invoking the /site endpoint
 			// We're not requesting anything from the response
-			var rState struct{}
+			var rEmpty []struct{}
 			err = utils.RequestJSON(utils.RequestOpts{
 				Authorization: rToken.IDToken,
 				Client:        client,
-				Target:        &rState,
-				URL:           baseURL + "/state",
+				Target:        &rEmpty,
+				URL:           baseURL + "/site",
 			})
 			if err != nil {
 				// Check if the error is a 401
 				if strings.HasPrefix(err.Error(), "invalid response status code: 401") {
-					fmt.Println("[Error]\nInvalid pre-shared key")
+					utils.ExitWithError(utils.ErrorUser, "Node did not accept the token provided by Azure AD", nil)
 				} else {
-					fmt.Println("[Server error]\n", err)
+					utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				}
 				return
 			}
 
 			// Store the key in the node store
-			/*if err := nodeStore.StoreSharedKey(optAddress, sharedKey); err != nil {
-				fmt.Println("[Fatal error]\nError while storing the pre-shared key:", err)
+			if err := nodeStore.StoreAuthToken(optAddress, rToken.IDToken, rToken.RefreshToken, rInfo.AzureAD.ClientID, rInfo.AzureAD.TokenURL); err != nil {
+				utils.ExitWithError(utils.ErrorApp, "Error while storing the token", err)
 				return
-			}*/
+			}
 
 			fmt.Println("Success! You're authenticated")
 		},

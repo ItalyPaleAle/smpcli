@@ -18,11 +18,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"io/ioutil"
-	"net/http"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -40,28 +37,20 @@ func init() {
 			baseURL, client := getURLClient()
 
 			// Invoke the /info endpoint to see what's the authentication method
-			resp, err := client.Get(baseURL + "/info")
+			var rInfo infoResponseModel
+			err := utils.RequestJSON(utils.RequestOpts{
+				Client: client,
+				Target: &rInfo,
+				URL:    baseURL + "/info",
+			})
 			if err != nil {
-				fmt.Println("[Fatal error]\nRequest failed:", err)
-				return
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode < 200 || resp.StatusCode > 299 {
-				b, _ := ioutil.ReadAll(resp.Body)
-				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
-				return
-			}
-
-			// Parse the response
-			var r infoResponseModel
-			if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-				fmt.Println("[Fatal error]\nInvalid JSON response:", err)
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
 
 			// Ensure the node supports pre-shared key authentication
-			if !utils.SliceContainsString(r.AuthMethods, "psk") {
-				fmt.Println("[Fatal error]\nThis node does not support authenticating with a pre-shared key")
+			if !utils.SliceContainsString(rInfo.AuthMethods, "psk") {
+				utils.ExitWithError(utils.ErrorUser, "This node does not support authenticating with a pre-shared key", nil)
 				return
 			}
 
@@ -79,36 +68,32 @@ func init() {
 
 			sharedKey, err := prompt.Run()
 			if err != nil {
-				fmt.Println("[Fatal error]\nPrompt failed:", err)
+				utils.ExitWithError(utils.ErrorUser, "Pre-shared key must not be empty", nil)
 				return
 			}
 
-			// Test the shared key by requesting the node's state, invoking the /state endpoint
-			req, err := http.NewRequest("GET", baseURL+"/state", nil)
+			// Test the shared key by requesting the node's site list, invoking the /site endpoint
+			// We're not requesting anything from the response
+			var rEmpty []struct{}
+			err = utils.RequestJSON(utils.RequestOpts{
+				Authorization: sharedKey,
+				Client:        client,
+				Target:        &rEmpty,
+				URL:           baseURL + "/site",
+			})
 			if err != nil {
-				fmt.Println("[Fatal error]\nCould not build the request:", err)
-				return
-			}
-			req.Header.Set("Authorization", sharedKey)
-			resp, err = client.Do(req)
-			if err != nil {
-				fmt.Println("[Fatal error]\nRequest failed:", err)
-				return
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusOK {
-				if resp.StatusCode == http.StatusUnauthorized {
-					fmt.Println("[Error]\nInvalid pre-shared key")
+				// Check if the error is a 401
+				if strings.HasPrefix(err.Error(), "invalid response status code: 401") {
+					utils.ExitWithError(utils.ErrorUser, "Invalid pre-shared key", nil)
 				} else {
-					b, _ := ioutil.ReadAll(resp.Body)
-					fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+					utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				}
 				return
 			}
 
 			// Store the key in the node store
 			if err := nodeStore.StoreSharedKey(optAddress, sharedKey); err != nil {
-				fmt.Println("[Fatal error]\nError while storing the pre-shared key:", err)
+				utils.ExitWithError(utils.ErrorApp, "Error while storing the pre-shared key", err)
 				return
 			}
 		},

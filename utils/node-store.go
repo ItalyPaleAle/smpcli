@@ -20,15 +20,21 @@ package utils
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
 )
 
 // Format of the nodes.json document
 type nodeProperties struct {
-	SharedKey string `json:"sharedKey"`
+	SharedKey    string `json:"sharedKey,omitempty"`
+	IDToken      string `json:"idToken,omitempty"`
+	RefreshToken string `json:"refreshToken,omitempty"`
+	ClientID     string `json:"clientId,omitempty"`
+	TokenURL     string `json:"tokenUrl,omitempty"`
 }
 type nodeDocument map[string]*nodeProperties
 
@@ -55,6 +61,86 @@ func (s *NodeStore) Init() error {
 	s.path = filepath.FromSlash(storeFolder + "/nodes.json")
 
 	return nil
+}
+
+// GetAuthToken returns the value for the Authorization header
+// It will throw an error and terminate the app if there's no token or if the auth token has expired and can't be refreshed
+func (s *NodeStore) GetAuthToken(address string) string {
+	/* if !found {
+		fmt.Printf("[Error]\nNo authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
+		return
+	}*/
+
+	// If we have the NODE_KEY environmental variable, use that as fallback
+	env := os.Getenv("NODE_KEY")
+
+	// First, check if we have the data in the store
+	document, err := s.read()
+	if err != nil {
+		ExitWithError(ErrorApp, "Could not read store file", err)
+		return ""
+	}
+
+	// Check if we have something
+	obj, foundObj := document[address]
+	if !foundObj || (obj.SharedKey == "" && obj.IDToken == "" && obj.RefreshToken == "") {
+		if env != "" {
+			return env
+		} else {
+			ExitWithError(ErrorUser, "No authentication data for the node "+address+"; please make sure you've executed the 'auth' command.", nil)
+			return ""
+		}
+	}
+
+	// If we have a pre-shared key, we can proceed right away
+	if obj.SharedKey != "" {
+		return obj.SharedKey
+	} else {
+		// If we have an ID Token, check if it's still valid
+		if CheckJWTValid(obj.IDToken) {
+			return obj.IDToken
+		}
+
+		// Token has expired, so try refreshing it
+		body := url.Values{}
+		// No client_secret because this is a client-side app
+		body.Set("client_id", obj.ClientID)
+		body.Set("grant_type", "refresh_token")
+		body.Set("refresh_token", obj.RefreshToken)
+		body.Set("scope", "openid offline_access")
+
+		// Request a new token
+		var resp struct {
+			ExpiresIn    int    `json:"expires_in"`
+			IDToken      string `json:"id_token"`
+			RefreshToken string `json:"refresh_token"`
+		}
+		err = RequestJSON(RequestOpts{
+			Body:            strings.NewReader(body.Encode()),
+			BodyContentType: "application/x-www-form-urlencoded",
+			Method:          RequestPOST,
+			Target:          &resp,
+			URL:             obj.TokenURL,
+		})
+		if err != nil || resp.IDToken == "" || resp.RefreshToken == "" {
+			ExitWithError(ErrorUser, "Your session for the node "+address+" has expired. Please authenticate again with the 'auth' command.", nil)
+			return ""
+		}
+
+		// Store the updated tokens
+		err = s.StoreAuthToken(address, resp.IDToken, resp.RefreshToken, obj.ClientID, obj.TokenURL)
+		if err != nil {
+			ExitWithError(ErrorApp, "Error while trying to save the new tokens", err)
+			return ""
+		}
+
+		// Return the token
+		return resp.IDToken
+	}
+
+	// We should never get here
+	ExitWithError(ErrorApp, "Reaching unexpected code", nil)
+	return ""
 }
 
 // GetSharedKey reads the shared key from the store
@@ -101,6 +187,30 @@ func (s *NodeStore) StoreSharedKey(address string, sharedKey string) error {
 	// Add the item
 	document[address] = &nodeProperties{
 		SharedKey: sharedKey,
+	}
+
+	// Store the updated object
+	if err := s.save(document); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// StoreAuthToken adds the ID Token and the Refresh Token to the store
+func (s *NodeStore) StoreAuthToken(address string, idToken string, refreshToken string, clientID string, tokenURL string) error {
+	// Read the current file
+	document, err := s.read()
+	if err != nil {
+		return err
+	}
+
+	// Add the item
+	document[address] = &nodeProperties{
+		IDToken:      idToken,
+		RefreshToken: refreshToken,
+		ClientID:     clientID,
+		TokenURL:     tokenURL,
 	}
 
 	// Store the updated object

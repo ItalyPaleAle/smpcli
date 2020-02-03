@@ -20,11 +20,11 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/spf13/cobra"
+
+	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 func init() {
@@ -34,62 +34,41 @@ func init() {
 		version string
 	)
 
-	// This funtion sends the request to the node to deploy the app
-	// Returns true in case of success, and false if there's an error
-	var sendRequest = func(sharedKey string) bool {
-		baseURL, client := getURLClient()
-
-		// Request body
-		reqBody := &deployRequestModel{
-			Name:    app,
-			Version: version,
-		}
-		buf := new(bytes.Buffer)
-		json.NewEncoder(buf).Encode(reqBody)
-
-		// Invoke the /site endpoint and add the site
-		req, err := http.NewRequest("POST", baseURL+"/site/"+domain+"/app", buf)
-		if err != nil {
-			fmt.Println("[Fatal error]\nCould not build the request:", err)
-			return false
-		}
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", sharedKey)
-		resp, err := client.Do(req)
-		if err != nil {
-			fmt.Println("[Fatal error]\nRequest failed:", err)
-			return false
-		}
-		defer resp.Body.Close()
-
-		// There's no response
-		if resp.StatusCode != http.StatusNoContent {
-			b, _ := ioutil.ReadAll(resp.Body)
-			fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
-			return false
-		}
-		return true
-	}
-
 	c := &cobra.Command{
 		Use:   "deploy",
 		Short: "Deploy an app",
 		Long:  ``,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			// Get the shared key
-			sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
-			if err != nil {
-				fmt.Println("[Fatal error]\nError while reading node store:", err)
-				return
+			baseURL, client := getURLClient()
+			auth := nodeStore.GetAuthToken(optAddress)
+
+			// Request body
+			reqBody := &deployRequestModel{
+				Name:    app,
+				Version: version,
 			}
-			if !found {
-				fmt.Printf("[Error]\nNo authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
+			buf := new(bytes.Buffer)
+			err := json.NewEncoder(buf).Encode(reqBody)
+			if err != nil {
+				utils.ExitWithError(utils.ErrorNode, "Error while encoding to JSON", err)
 				return
 			}
 
-			// Returns true if succeeded
-			_ = sendRequest(sharedKey)
+			// Invoke the /site endpoint and add the site
+			err = utils.RequestJSON(utils.RequestOpts{
+				Authorization:   auth,
+				Body:            buf,
+				BodyContentType: "application/json",
+				Client:          client,
+				Method:          utils.RequestPOST,
+				StatusCode:      http.StatusNoContent,
+				URL:             baseURL + "/site/" + domain + "/app",
+			})
+			if err != nil {
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
+				return
+			}
 		},
 	}
 	rootCmd.AddCommand(c)

@@ -40,23 +40,19 @@ const (
 
 // RequestOpts contains the parameters for the RequestJSON function
 type RequestOpts struct {
-	Authorization    string
-	Body             io.Reader
-	BodyContentType  string
-	Client           *http.Client
-	IgnoreStatusCode bool
-	Method           string
-	StatusCode       int
-	Target           interface{}
-	URL              string
+	Authorization   string
+	Body            io.Reader
+	BodyContentType string
+	Client          *http.Client
+	Method          string
+	StatusCode      int
+	Target          interface{}
+	URL             string
 }
 
 // RequestJSON fetches a JSON document from the web
 func RequestJSON(opts RequestOpts) (err error) {
 	// Check options and default values
-	if opts.Target == nil {
-		return errors.New("empty target object")
-	}
 	if opts.URL == "" {
 		return errors.New("empty URL")
 	}
@@ -106,10 +102,12 @@ func RequestJSON(opts RequestOpts) (err error) {
 		return fmt.Errorf("invalid response status code: %d; content: %s", resp.StatusCode, string(b))
 	}
 
-	// Decode the JSON into the target
-	err = json.NewDecoder(resp.Body).Decode(opts.Target)
-	if err != nil {
-		return err
+	if opts.Target != nil {
+		// Decode the JSON into the target
+		err = json.NewDecoder(resp.Body).Decode(opts.Target)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

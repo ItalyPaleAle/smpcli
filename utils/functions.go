@@ -18,9 +18,14 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package utils
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"os/exec"
 	"runtime"
+	"strconv"
+	"strings"
+	"time"
 )
 
 // SliceContainsString returns true if the slice of strings contains a certain string
@@ -47,4 +52,51 @@ func LaunchBrowser(url string) {
 		return
 	}
 	fmt.Printf("If your browser didn't automatically open, please visit this URL to authenticate:\n%s\n", url)
+}
+
+// CheckJWTValid returns true if the JWT token is well-formed and not expired
+// This function does not validate the JWT token beyond checking if it's still valid
+func CheckJWTValid(jwt string) bool {
+	// Split the token in its 3 parts
+	parts := strings.Split(jwt, ".")
+	if len(parts) != 3 {
+		return false
+	}
+
+	// Decode the header
+	headerData, err := base64.URLEncoding.DecodeString(parts[0])
+	if err != nil {
+		return false
+	}
+	var header map[string]string
+	err = json.Unmarshal(headerData, &header)
+	if err != nil {
+		return false
+	}
+	if header["typ"] != "JWT" {
+		return false
+	}
+
+	// Decode the claims
+	claimsData, err := base64.URLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return false
+	}
+	var claims map[string]string
+	err = json.Unmarshal(claimsData, &claims)
+	if err != nil {
+		return false
+	}
+
+	// Check the expiration
+	now := time.Now().Unix()
+	if claims["exp"] == "" {
+		return false
+	}
+	exp, err := strconv.ParseInt(claims["exp"], 10, 64)
+	if err != nil || exp < now {
+		return false
+	}
+
+	return true
 }
