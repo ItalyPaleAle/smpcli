@@ -20,8 +20,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ItalyPaleAle/smpcli/utils"
 	"github.com/spf13/cobra"
+
+	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 func init() {
@@ -39,6 +40,7 @@ func init() {
 			err := utils.RequestJSON(utils.RequestOpts{
 				Authorization: auth,
 				Client:        client,
+				Target:        &r,
 				URL:           baseURL + "/site",
 			})
 			if err != nil {

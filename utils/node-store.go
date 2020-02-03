@@ -66,11 +66,6 @@ func (s *NodeStore) Init() error {
 // GetAuthToken returns the value for the Authorization header
 // It will throw an error and terminate the app if there's no token or if the auth token has expired and can't be refreshed
 func (s *NodeStore) GetAuthToken(address string) string {
-	/* if !found {
-		fmt.Printf("[Error]\nNo authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
-		return
-	}*/
-
 	// If we have the NODE_KEY environmental variable, use that as fallback
 	env := os.Getenv("NODE_KEY")
 
@@ -141,39 +136,6 @@ func (s *NodeStore) GetAuthToken(address string) string {
 	// We should never get here
 	ExitWithError(ErrorApp, "Reaching unexpected code", nil)
 	return ""
-}
-
-// GetSharedKey reads the shared key from the store
-// The second returned value is a boolean that indicates if the key was found
-func (s *NodeStore) GetSharedKey(address string) (sharedKey string, found bool, err error) {
-	sharedKey = ""
-	found = false
-	err = nil
-
-	// If we have the NODE_KEY environmental variable, use that as fallback
-	env := os.Getenv("NODE_KEY")
-	if env != "" {
-		sharedKey = env
-		found = true
-	}
-
-	// Read the current file
-	document, err := s.read()
-	if err != nil {
-		return
-	}
-
-	// Get the value if it exists
-	obj, foundObj := document[address]
-	if foundObj {
-		sharedKey = obj.SharedKey
-		found = true
-	}
-	if len(sharedKey) == 0 {
-		found = false
-	}
-
-	return
 }
 
 // StoreSharedKey adds the shared key to the store

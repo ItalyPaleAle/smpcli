@@ -23,6 +23,8 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
+
+	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 func init() {
@@ -37,13 +39,14 @@ func init() {
 			baseURL, client := getURLClient()
 
 			// Invoke the /status endpoint to get the status of the node
+			// We're not using utils.RequestJSON here because we need to get the status code and parse the response regardless
 			url := baseURL + "/status"
 			if domain != "" {
 				url += "/" + domain
 			}
 			resp, err := client.Get(url)
 			if err != nil {
-				fmt.Println("[Fatal error]\nRequest failed:", err)
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
 			defer resp.Body.Close()
@@ -56,7 +59,7 @@ func init() {
 			// Parse the response
 			var r statusResponseModel
 			if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-				fmt.Println("[Fatal error]\nInvalid JSON response:", err)
+				utils.ExitWithError(utils.ErrorNode, "Invalid JSON response", err)
 				return
 			}
 

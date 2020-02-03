@@ -26,8 +26,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -98,7 +96,7 @@ func init() {
 		// URL to upload the archive to
 		uApp, err := url.Parse(sasURLs.ArchiveURL)
 		if err != nil {
-			fmt.Println("[Fatal error]\nError while building app URL:", err)
+			utils.ExitWithError(utils.ErrorApp, "Error while building app URL", err)
 			return false
 		}
 
@@ -133,9 +131,9 @@ func init() {
 		})
 		if err != nil {
 			if stgErr, ok := err.(azblob.StorageError); !ok {
-				fmt.Println("[Fatal error]\nNetwork error while uploading the archive:\n", err)
+				utils.ExitWithError(utils.ErrorApp, "Network error while uploading the archive", err)
 			} else {
-				fmt.Println("[Fatal error]\nAzure Storage error failed while uploading the archive:\n", stgErr.Response().Status)
+				utils.ExitWithError(utils.ErrorApp, "Azure Storage error failed while uploading the archive:\n"+stgErr.Response().Status, nil)
 			}
 			return false
 		}
@@ -148,7 +146,7 @@ func init() {
 		if !noSignature {
 			signature, err := signHash(ctx, hashed)
 			if err != nil {
-				fmt.Println("[Fatal error]\nCannot calculate signature:\n", err)
+				utils.ExitWithError(utils.ErrorApp, "Cannot calculate signature", err)
 				return false
 			}
 
@@ -157,7 +155,7 @@ func init() {
 			metadata["signature"] = signature
 			_, err = blockBlobURL.SetMetadata(ctx, metadata, azblob.BlobAccessConditions{})
 			if err != nil {
-				fmt.Println("[Fatal error]\nCannot update blob's metadata:\n", err)
+				utils.ExitWithError(utils.ErrorApp, "Cannot update blob's metadata", err)
 				return false
 			}
 		} else {
@@ -173,26 +171,16 @@ func init() {
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
-
-			// Get the shared key
-			sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
-			if err != nil {
-				fmt.Println("[Fatal error]\nError while reading node store:", err)
-				return
-			}
-			if !found {
-				fmt.Printf("[Error]\nNo authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
-				return
-			}
+			auth := nodeStore.GetAuthToken(optAddress)
 
 			// Check if the path exists
 			exists, err := utils.PathExists(path)
 			if err != nil {
-				fmt.Println("[Fatal error]\nError while reading filesystem:", err)
+				utils.ExitWithError(utils.ErrorApp, "Error while reading filesystem", err)
 				return
 			}
 			if !exists {
-				fmt.Println("[Error]\nFile/folder not found:", path)
+				utils.ExitWithError(utils.ErrorUser, "File or folder not found", err)
 				return
 			}
 
@@ -202,32 +190,25 @@ func init() {
 				Version: version,
 			}
 			buf := new(bytes.Buffer)
-			json.NewEncoder(buf).Encode(reqBody)
-
-			// Request the SAS token from the node
-			req, err := http.NewRequest("POST", baseURL+"/uploadauth", buf)
+			err = json.NewEncoder(buf).Encode(reqBody)
 			if err != nil {
-				fmt.Println("[Fatal error]\nCould not build the request:", err)
-				return
-			}
-			req.Header.Set("Content-Type", "application/json")
-			req.Header.Set("Authorization", sharedKey)
-			resp, err := client.Do(req)
-			if err != nil {
-				fmt.Println("[Fatal error]\nRequest failed:", err)
-				return
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusOK {
-				b, _ := ioutil.ReadAll(resp.Body)
-				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+				utils.ExitWithError(utils.ErrorNode, "Error while encoding to JSON", err)
 				return
 			}
 
-			// Parse the response
+			// Invoke the /uploadauth endpoing and request the SAS token from the node
 			var sasURLs uploadAuthResponseModel
-			if err := json.NewDecoder(resp.Body).Decode(&sasURLs); err != nil {
-				fmt.Println("[Fatal error]\nInvalid JSON response:", err)
+			err = utils.RequestJSON(utils.RequestOpts{
+				Authorization:   auth,
+				Body:            buf,
+				BodyContentType: "application/json",
+				Client:          client,
+				Method:          utils.RequestPOST,
+				Target:          &sasURLs,
+				URL:             baseURL + "/uploadauth",
+			})
+			if err != nil {
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
 
@@ -237,7 +218,7 @@ func init() {
 				// Get a buffer reader
 				file, err := os.Open(path)
 				if err != nil {
-					fmt.Println("[Fatal error]\nError while reading file:", err)
+					utils.ExitWithError(utils.ErrorApp, "Error while reading file", err)
 					return
 				}
 
@@ -252,7 +233,7 @@ func init() {
 				r, w := io.Pipe()
 				go func() {
 					if err := utils.TarBZ2(path, w); err != nil {
-						fmt.Println("[Fatal error]\nError while creating tar.bz2 archive:", err)
+						utils.ExitWithError(utils.ErrorApp, "Error while creating a tar.bz2 archive", err)
 						panic(1)
 					}
 					w.Close()

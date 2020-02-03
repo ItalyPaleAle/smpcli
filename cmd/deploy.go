@@ -55,7 +55,7 @@ func init() {
 				return
 			}
 
-			// Invoke the /site endpoint and add the site
+			// Invoke the /site/:domain/app endpoint and deploy the app
 			err = utils.RequestJSON(utils.RequestOpts{
 				Authorization:   auth,
 				Body:            buf,

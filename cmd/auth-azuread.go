@@ -135,11 +135,9 @@ func init() {
 
 			// Test the auth token by requesting the node's site list, invoking the /site endpoint
 			// We're not requesting anything from the response
-			var rEmpty []struct{}
 			err = utils.RequestJSON(utils.RequestOpts{
 				Authorization: rToken.IDToken,
 				Client:        client,
-				Target:        &rEmpty,
 				URL:           baseURL + "/site",
 			})
 			if err != nil {

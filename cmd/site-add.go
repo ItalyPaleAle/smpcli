@@ -20,11 +20,11 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/spf13/cobra"
+
+	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 func init() {
@@ -41,17 +41,7 @@ func init() {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
-
-			// Get the shared key
-			sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
-			if err != nil {
-				fmt.Println("[Fatal error]\nError while reading node store:", err)
-				return
-			}
-			if !found {
-				fmt.Printf("[Error]\nNo authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
-				return
-			}
+			auth := nodeStore.GetAuthToken(optAddress)
 
 			// Request body
 			reqBody := &siteAddRequestModel{
@@ -60,27 +50,24 @@ func init() {
 				TLSCertificate: tlsCertificate,
 			}
 			buf := new(bytes.Buffer)
-			json.NewEncoder(buf).Encode(reqBody)
+			err := json.NewEncoder(buf).Encode(reqBody)
+			if err != nil {
+				utils.ExitWithError(utils.ErrorNode, "Error while encoding to JSON", err)
+				return
+			}
 
 			// Invoke the /site endpoint and add the site
-			req, err := http.NewRequest("POST", baseURL+"/site", buf)
+			err = utils.RequestJSON(utils.RequestOpts{
+				Authorization:   auth,
+				Body:            buf,
+				BodyContentType: "application/json",
+				Client:          client,
+				Method:          utils.RequestPOST,
+				StatusCode:      http.StatusNoContent,
+				URL:             baseURL + "/site",
+			})
 			if err != nil {
-				fmt.Println("[Fatal error]\nCould not build the request:", err)
-				return
-			}
-			req.Header.Set("Content-Type", "application/json")
-			req.Header.Set("Authorization", sharedKey)
-			resp, err := client.Do(req)
-			if err != nil {
-				fmt.Println("[Fatal error]\nRequest failed:", err)
-				return
-			}
-			defer resp.Body.Close()
-
-			// There's no response
-			if resp.StatusCode != http.StatusNoContent {
-				b, _ := ioutil.ReadAll(resp.Body)
-				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
 		},

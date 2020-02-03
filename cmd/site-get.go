@@ -18,12 +18,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 
 	"github.com/spf13/cobra"
+
+	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 func init() {
@@ -36,41 +35,18 @@ func init() {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
-
-			// Get the shared key
-			sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
-			if err != nil {
-				fmt.Println("[Fatal error]\nError while reading node store:", err)
-				return
-			}
-			if !found {
-				fmt.Printf("[Error]\nNo authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
-				return
-			}
+			auth := nodeStore.GetAuthToken(optAddress)
 
 			// Invoke the /site/:domain endpoint and get the site
-			req, err := http.NewRequest("GET", baseURL+"/site/"+domain, nil)
-			if err != nil {
-				fmt.Println("[Fatal error]\nCould not build the request:", err)
-				return
-			}
-			req.Header.Set("Authorization", sharedKey)
-			resp, err := client.Do(req)
-			if err != nil {
-				fmt.Println("[Fatal error]\nRequest failed:", err)
-				return
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusOK {
-				b, _ := ioutil.ReadAll(resp.Body)
-				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
-				return
-			}
-
-			// Parse the response
 			var r siteGetResponseModel
-			if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-				fmt.Println("[Fatal error]\nInvalid JSON response:", err)
+			err := utils.RequestJSON(utils.RequestOpts{
+				Authorization: auth,
+				Client:        client,
+				Target:        &r,
+				URL:           baseURL + "/site/" + domain,
+			})
+			if err != nil {
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
 

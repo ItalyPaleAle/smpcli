@@ -48,7 +48,7 @@ func init() {
 		// Get the URL of the Key Vault, requesting it from the node
 		keyVaultURL, _, _, err := getKeyVaultInfo()
 		if err != nil {
-			fmt.Println("[Fatal error]\nError while requesting name of Key Vault:", err)
+			utils.ExitWithError(utils.ErrorApp, "Error while requesting name of Key Vault", err)
 			return false
 		}
 
@@ -62,7 +62,7 @@ func init() {
 			Password:                 nil,
 		})
 		if err != nil {
-			fmt.Println("[Fatal error]\nError while storing certificate in Azure Key Vault:", err)
+			utils.ExitWithError(utils.ErrorApp, "Error while storing certificate in Azure Key Vault", err)
 			return false
 		}
 		fmt.Printf("Stored %s\n", *result.ID)
@@ -103,7 +103,7 @@ func init() {
 		block, _ := pem.Decode(dataPEM)
 		var prv *rsa.PrivateKey
 		if block == nil {
-			return nil, errors.New("Cannot decode PEM block containing private key: empty block")
+			return nil, errors.New("cannot decode PEM block containing private key: empty block")
 		}
 		if block.Type == "RSA PRIVATE KEY" {
 			prv, err = x509.ParsePKCS1PrivateKey(block.Bytes)
@@ -118,10 +118,10 @@ func init() {
 			var ok bool
 			prv, ok = key.(*rsa.PrivateKey)
 			if !ok {
-				return nil, errors.New("Cannot decode PEM block containing private key: invalid key algorithm")
+				return nil, errors.New("cannot decode PEM block containing private key: invalid key algorithm")
 			}
 		} else {
-			return nil, errors.New("Cannot decode PEM block containing private key: invalid block type")
+			return nil, errors.New("cannot decode PEM block containing private key: invalid block type")
 		}
 
 		return prv, nil
@@ -132,19 +132,19 @@ func init() {
 		// Load the certificate and key
 		crt, err := loadCertificate(certificate)
 		if err != nil {
-			fmt.Println("[Fatal error]\nCannot load certificate:", err)
+			utils.ExitWithError(utils.ErrorApp, "Cannot load certificate", err)
 			return nil
 		}
 		prv, err := loadPrivateKey(certKey)
 		if err != nil {
-			fmt.Println("[Fatal error]\nCannot load private key:", err)
+			utils.ExitWithError(utils.ErrorApp, "Cannot load private key", err)
 			return nil
 		}
 
 		// Crete the PCKS12 bag
 		pcksData, err := pkcs12.Encode(rand.Reader, prv, crt, nil, "")
 		if err != nil {
-			fmt.Println("[Fatal error]\nCannot create PKCS12 bag:", err)
+			utils.ExitWithError(utils.ErrorApp, "Cannot create PKCS12 bag", err)
 			return nil
 		}
 
@@ -157,14 +157,14 @@ func init() {
 		isFile, err := utils.IsRegularFile(path)
 		if err != nil {
 			if os.IsNotExist(err) {
-				fmt.Println("[Error]\nFile not found:", path)
+				utils.ExitWithError(utils.ErrorApp, "File not found: "+path, nil)
 				return false
 			}
-			fmt.Println("[Fatal error]\nError while reading filesystem:", err)
+			utils.ExitWithError(utils.ErrorApp, "Error while reading filesystem", err)
 			return false
 		}
 		if !isFile {
-			fmt.Println("[Error]\nFile not found:", path)
+			utils.ExitWithError(utils.ErrorApp, "File not found: "+path, nil)
 			return false
 		}
 		return true

@@ -18,13 +18,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"fmt"
 	"io"
-	"io/ioutil"
-	"net/http"
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 func init() {
@@ -39,49 +38,32 @@ func init() {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
-
-			// Get the shared key
-			sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
-			if err != nil {
-				fmt.Println("[Fatal error]\nError while reading node store:", err)
-				return
-			}
-			if !found {
-				fmt.Printf("[Error]\nNo authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
-				return
-			}
+			auth := nodeStore.GetAuthToken(optAddress)
 
 			// Invoke the /state endpoint and get the state
-			req, err := http.NewRequest("GET", baseURL+"/state", nil)
+			body, err := utils.RequestRaw(utils.RequestOpts{
+				Authorization: auth,
+				Client:        client,
+				URL:           baseURL + "/state",
+			})
 			if err != nil {
-				fmt.Println("[Fatal error]\nCould not build the request:", err)
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
-			req.Header.Set("Authorization", sharedKey)
-			resp, err := client.Do(req)
-			if err != nil {
-				fmt.Println("[Fatal error]\nRequest failed:", err)
-				return
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusOK {
-				b, _ := ioutil.ReadAll(resp.Body)
-				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
-				return
-			}
+			defer body.Close()
 
 			// If we have a file, write the response to disk
 			if len(outFile) != 0 {
 				out, err := os.Create(outFile)
 				if err != nil {
-					fmt.Println("[Fatal error]\nCannot create file:", err)
+					utils.ExitWithError(utils.ErrorApp, "Cannot create file", err)
 					return
 				}
 				defer out.Close()
-				io.Copy(out, resp.Body)
+				io.Copy(out, body)
 			} else {
 				// Write to stdout
-				io.Copy(os.Stdout, resp.Body)
+				io.Copy(os.Stdout, body)
 			}
 		},
 	}

@@ -46,15 +46,34 @@ type RequestOpts struct {
 	Client          *http.Client
 	Method          string
 	StatusCode      int
-	Target          interface{}
+	Target          interface{} // Only used by RequestJSON
 	URL             string
 }
 
 // RequestJSON fetches a JSON document from the web
 func RequestJSON(opts RequestOpts) (err error) {
+	// Make the request
+	response, err := RequestRaw(opts)
+	if err != nil {
+		return err
+	}
+	defer response.Close()
+
+	if opts.Target != nil {
+		// Decode the JSON into the target
+		err = json.NewDecoder(response).Decode(opts.Target)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// RequestRaw fetches a document from the web and returns the stream as is
+func RequestRaw(opts RequestOpts) (response io.ReadCloser, err error) {
 	// Check options and default values
 	if opts.URL == "" {
-		return errors.New("empty URL")
+		return nil, errors.New("empty URL")
 	}
 	if opts.Client == nil {
 		if defaultHTTPClient == nil {
@@ -68,10 +87,10 @@ func RequestJSON(opts RequestOpts) (err error) {
 		opts.Method = RequestGET
 	}
 	if opts.Method == RequestGET && opts.Body != nil {
-		return errors.New("cannot have a request body for GET requests")
+		return nil, errors.New("cannot have a request body for GET requests")
 	}
 	if opts.Body != nil && opts.BodyContentType == "" {
-		return errors.New("must specify a content type for the body when there's a request body")
+		return nil, errors.New("must specify a content type for the body when there's a request body")
 	}
 
 	// Build the request
@@ -86,28 +105,21 @@ func RequestJSON(opts RequestOpts) (err error) {
 	// Authorization, if any
 	if opts.Authorization != "" {
 		req.Header.Set("Authorization", opts.Authorization)
-
 	}
 
 	// Send the request
 	resp, err := opts.Client.Do(req)
 	if err != nil {
-		return err
+		defer resp.Body.Close()
+		return nil, err
 	}
-	defer resp.Body.Close()
 
 	// If we're expecting a specific status code, check for that, otherwise fallback to check that we're below 400
 	if (opts.StatusCode > 0 && resp.StatusCode != opts.StatusCode) || (opts.StatusCode <= 0 && resp.StatusCode >= 399) {
 		b, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("invalid response status code: %d; content: %s", resp.StatusCode, string(b))
+		defer resp.Body.Close()
+		return nil, fmt.Errorf("invalid response status code: %d; content: %s", resp.StatusCode, string(b))
 	}
 
-	if opts.Target != nil {
-		// Decode the JSON into the target
-		err = json.NewDecoder(resp.Body).Decode(opts.Target)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return resp.Body, nil
 }

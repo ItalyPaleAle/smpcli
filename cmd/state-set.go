@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -42,37 +41,27 @@ func init() {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
-
-			// Get the shared key
-			sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
-			if err != nil {
-				fmt.Println("[Fatal error]\nError while reading node store:", err)
-				return
-			}
-			if !found {
-				fmt.Printf("[Error]\nNo authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
-				return
-			}
+			auth := nodeStore.GetAuthToken(optAddress)
 
 			// Read the file if we have one
 			var stateBuf io.Reader
 			if len(stateFile) != 0 {
 				exists, err := utils.PathExists(stateFile)
 				if err != nil {
-					fmt.Println("[Fatal error]\nError while checking file:", err)
+					utils.ExitWithError(utils.ErrorApp, "Error while checking file", err)
 					return
 				}
 				if !exists {
-					fmt.Println("[Error]\nFile does not exist.")
+					utils.ExitWithError(utils.ErrorUser, "Files does not exist", nil)
 					return
 				}
 				state, err := ioutil.ReadFile(stateFile)
 				if err != nil {
-					fmt.Println("[Fatal error]\nError while reading file:", err)
+					utils.ExitWithError(utils.ErrorApp, "Error while reading file", err)
 					return
 				}
 				if state == nil || len(state) == 0 {
-					fmt.Println("[Error]\nFile is empty.")
+					utils.ExitWithError(utils.ErrorUser, "Files is empty", nil)
 					return
 				}
 				stateBuf = bytes.NewBuffer(state)
@@ -82,22 +71,17 @@ func init() {
 			}
 
 			// Invoke the /state endpoint
-			req, err := http.NewRequest("POST", baseURL+"/state", stateBuf)
+			err := utils.RequestJSON(utils.RequestOpts{
+				Authorization:   auth,
+				Body:            stateBuf,
+				BodyContentType: "application/json",
+				Client:          client,
+				Method:          utils.RequestPOST,
+				StatusCode:      http.StatusNoContent,
+				URL:             baseURL + "/state",
+			})
 			if err != nil {
-				fmt.Println("[Fatal error]\nCould not build the request:", err)
-				return
-			}
-			req.Header.Set("Content-Type", "application/json")
-			req.Header.Set("Authorization", sharedKey)
-			resp, err := client.Do(req)
-			if err != nil {
-				fmt.Println("[Fatal error]\nRequest failed:", err)
-				return
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusNoContent {
-				b, _ := ioutil.ReadAll(resp.Body)
-				fmt.Printf("[Server error]\n%d: %s\n", resp.StatusCode, string(b))
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
 		},

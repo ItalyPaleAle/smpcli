@@ -18,7 +18,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -27,6 +26,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
 	"github.com/spf13/cobra"
+
+	"github.com/ItalyPaleAle/smpcli/utils"
 )
 
 var (
@@ -85,7 +86,7 @@ func getKeyVault() *keyvault.BaseClient {
 	// Authorize from the Azure CLI
 	authorizer, err := auth.NewAuthorizerFromCLI()
 	if err != nil {
-		fmt.Println("[Fatal error]\nError while authorizing the Azure Key Vault client:", err)
+		utils.ExitWithError(utils.ErrorApp, "Error while authorizing the Azure Key Vault client", err)
 		return nil
 	}
 	akvClient.Authorizer = authorizer
@@ -96,55 +97,35 @@ func getKeyVault() *keyvault.BaseClient {
 // This function requests the name of the Azure Key Vault from the node
 func getKeyVaultInfo() (keyVaultURL string, codesignKeyName string, codesignKeyVersion string, err error) {
 	baseURL, client := getURLClient()
-
-	// Get the shared key
-	sharedKey, found, err := nodeStore.GetSharedKey(optAddress)
-	if err != nil {
-		err = fmt.Errorf("Error while reading node store: %s", err.Error())
-		return
-	}
-	if !found {
-		err = fmt.Errorf("No authentication data for the domain %s; please make sure you've executed the 'auth' command.\n", optAddress)
-		return
-	}
+	auth := nodeStore.GetAuthToken(optAddress)
 
 	// Invoke the /keyvaultinfo endpoint to get the name and URL of the key vault
-	req, err := http.NewRequest("GET", baseURL+"/keyvaultinfo", nil)
-	if err != nil {
-		return
-	}
-	req.Header.Set("Authorization", sharedKey)
-	resp, err := client.Do(req)
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		err = errors.New("Invalid response status code")
-		return
-	}
-
-	// Parse the response
 	var r map[string]string
-	err = json.NewDecoder(resp.Body).Decode(&r)
+	err = utils.RequestJSON(utils.RequestOpts{
+		Authorization: auth,
+		Client:        client,
+		Target:        &r,
+		URL:           baseURL + "/keyvaultinfo",
+	})
 	if err != nil {
 		return
 	}
 
+	// Check the response
 	var ok bool
 	keyVaultURL, ok = r["url"]
 	if !ok || keyVaultURL == "" {
-		err = errors.New("Invalid response: empty url")
+		err = errors.New("invalid response: empty url")
 		return
 	}
 	codesignKeyName, ok = r["codesignKeyName"]
 	if !ok || codesignKeyName == "" {
-		err = errors.New("Invalid response: empty codesignKeyName")
+		err = errors.New("invalid response: empty codesignKeyName")
 		return
 	}
 	codesignKeyVersion, ok = r["codesignKeyVersion"]
 	if !ok || codesignKeyVersion == "" {
-		err = errors.New("Invalid response: empty codesignKeyVersion")
+		err = errors.New("invalid response: empty codesignKeyVersion")
 		return
 	}
 
