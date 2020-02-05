@@ -38,11 +38,16 @@ func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
 		app = fmt.Sprintf("%s-%s", m.App.Name, m.App.Version)
 	}
 
+	tlsCert := m.TLSCertificate
+	if m.TLSCertificateSelfSigned {
+		tlsCert = "selfsigned"
+	}
+
 	result = fmt.Sprintf(`Domain:        %s
 Aliases:       %s
 TLSCert:       %s
-Error:         %s
-App:           %s`, m.Domain, aliases, m.TLSCertificate, err, app)
+App:           %s
+Error:         %s`, m.Domain, aliases, tlsCert, app, err)
 	return
 }
 

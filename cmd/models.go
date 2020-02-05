@@ -77,11 +77,12 @@ type siteGetResponseModelApp struct {
 	Version string `json:"version" binding:"required"`
 }
 type siteGetResponseModel struct {
-	Domain         string                   `json:"domain"`
-	Aliases        []string                 `json:"aliases"`
-	TLSCertificate string                   `json:"tlsCertificate"`
-	Error          *string                  `json:"error"`
-	App            *siteGetResponseModelApp `json:"app"`
+	Domain                   string                   `json:"domain"`
+	Aliases                  []string                 `json:"aliases"`
+	TLSCertificateSelfSigned bool                     `json:"tlsCertificateSelfSigned"`
+	TLSCertificate           string                   `json:"tlsCertificate"`
+	Error                    *string                  `json:"error"`
+	App                      *siteGetResponseModelApp `json:"app"`
 }
 
 // GET /site (site list)

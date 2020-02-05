@@ -110,14 +110,18 @@ func RequestRaw(opts RequestOpts) (response io.ReadCloser, err error) {
 	// Send the request
 	resp, err := opts.Client.Do(req)
 	if err != nil {
-		defer resp.Body.Close()
+		if resp != nil && resp.Body != nil {
+			resp.Body.Close()
+		}
 		return nil, err
 	}
 
 	// If we're expecting a specific status code, check for that, otherwise fallback to check that we're below 400
 	if (opts.StatusCode > 0 && resp.StatusCode != opts.StatusCode) || (opts.StatusCode <= 0 && resp.StatusCode >= 399) {
 		b, _ := ioutil.ReadAll(resp.Body)
-		defer resp.Body.Close()
+		if resp != nil && resp.Body != nil {
+			resp.Body.Close()
+		}
 		return nil, fmt.Errorf("invalid response status code: %d; content: %s", resp.StatusCode, string(b))
 	}
 
