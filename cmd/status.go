@@ -24,7 +24,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ItalyPaleAle/smpcli/utils"
+	"github.com/ItalyPaleAle/stkcli/utils"
 )
 
 func init() {

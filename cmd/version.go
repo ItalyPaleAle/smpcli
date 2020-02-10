@@ -22,16 +22,20 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ItalyPaleAle/smpcli/buildinfo"
+	"github.com/ItalyPaleAle/stkcli/buildinfo"
 )
 
 // versionCmd represents the upload command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Show smpcli version",
+	Short: "Show stkcli version",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("smpcli Build ID:", buildinfo.BuildID, "("+buildinfo.BuildTime+"). Git commit:", buildinfo.CommitHash)
+		if buildinfo.BuildID == "" || buildinfo.CommitHash == "" {
+			fmt.Println("This stkcli build does not contain a build identifier, and it was probably fetched from the repository as source")
+		} else {
+			fmt.Println("stkcli Build ID:", buildinfo.BuildID, "("+buildinfo.BuildTime+"). Git commit:", buildinfo.CommitHash)
+		}
 	},
 }
 

@@ -17,7 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
-import "github.com/ItalyPaleAle/smpcli/cmd"
+import "github.com/ItalyPaleAle/stkcli/cmd"
 
 func main() {
 	cmd.Execute()

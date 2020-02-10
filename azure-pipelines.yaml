@@ -35,8 +35,8 @@ jobs:
 
           GO111MODULE=on \
             go build \
-              -ldflags "-X github.com/ItalyPaleAle/smpcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/smpcli/buildinfo.CommitHash=$COMMIT_HASH" \
-              -o bin/smpcli_linux_amd64
+              -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+              -o bin/stkcli_linux_amd64
         displayName: "Build amd64"
       # Build arm64
       - bash: |
@@ -50,8 +50,8 @@ jobs:
           GOOS=linux \
           GOARCH=arm64 \
             go build \
-              -ldflags "-X github.com/ItalyPaleAle/smpcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/smpcli/buildinfo.CommitHash=$COMMIT_HASH" \
-              -o bin/smpcli_linux_arm64
+              -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+              -o bin/stkcli_linux_arm64
         displayName: "Build arm64"
       # Build armhf
       - bash: |
@@ -66,8 +66,8 @@ jobs:
           GOARCH=arm \
           GOARM=7 \
             go build \
-              -ldflags "-X github.com/ItalyPaleAle/smpcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/smpcli/buildinfo.CommitHash=$COMMIT_HASH" \
-              -o bin/smpcli_linux_armhf
+              -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+              -o bin/stkcli_linux_armhf
         displayName: "Build armhf"
       # Build macOS
       - bash: |
@@ -81,8 +81,8 @@ jobs:
           GOOS=darwin \
           GOARCH=amd64 \
             go build \
-              -ldflags "-X github.com/ItalyPaleAle/smpcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/smpcli/buildinfo.CommitHash=$COMMIT_HASH" \
-              -o bin/smpcli_macos
+              -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+              -o bin/stkcli_macos
         displayName: "Build macOS"
       # Build Windows 64-bit
       - bash: |
@@ -96,8 +96,8 @@ jobs:
           GOOS=windows \
           GOARCH=amd64 \
             go build \
-              -ldflags "-X github.com/ItalyPaleAle/smpcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/smpcli/buildinfo.CommitHash=$COMMIT_HASH" \
-              -o bin/smpcli_win64.exe
+              -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+              -o bin/stkcli_win64.exe
         displayName: "Build Windows 64-bit"
       # Build Windows 32-bit
       - bash: |
@@ -111,8 +111,8 @@ jobs:
           GOOS=windows \
           GOARCH=386 \
             go build \
-              -ldflags "-X github.com/ItalyPaleAle/smpcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/smpcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/smpcli/buildinfo.CommitHash=$COMMIT_HASH" \
-              -o bin/smpcli_win32.exe
+              -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+              -o bin/stkcli_win32.exe
         displayName: "Build Windows 32-bit"
       # Copy binaries to the artifacts staging directory
       - task: CopyFiles@2

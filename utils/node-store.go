@@ -52,7 +52,7 @@ func (s *NodeStore) Init() error {
 	}
 
 	// Ensure the folder exists
-	storeFolder := filepath.FromSlash(home + "/.smpcli")
+	storeFolder := filepath.FromSlash(home + "/.stkcli")
 	if err := EnsureFolder(storeFolder); err != nil {
 		return err
 	}
