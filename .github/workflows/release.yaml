@@ -29,8 +29,7 @@ jobs:
     - name: Set variables
       run: |
         # Trim the first 10 characters, which are "refs/tags/"
-        #BUILD_ID="${GITHUB_REF:10}"
-        BUILD_ID=$GITHUB_REF
+        BUILD_ID="${GITHUB_REF:10}"
         BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%S')
         COMMIT_HASH=$(echo $GITHUB_SHA | head -c 7)
         echo ::set-env name=BUILD_ID::$BUILD_ID
@@ -43,6 +42,7 @@ jobs:
           go build \
             -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
             -o bin/stkcli_linux_amd64
+        chmod +x bin/stkcli_linux_amd64
     
     - name: Build Linux arm64
       run: |
@@ -52,6 +52,7 @@ jobs:
           go build \
             -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
             -o bin/stkcli_linux_arm64
+        chmod +x bin/stkcli_linux_arm64
     
     - name: Build Linux armhf
       run: |
@@ -62,6 +63,7 @@ jobs:
           go build \
             -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
             -o bin/stkcli_linux_armhf
+        chmod +x bin/stkcli_linux_armhf
     
     - name: Build macOS
       run: |
@@ -71,6 +73,7 @@ jobs:
           go build \
             -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
             -o bin/stkcli_macos
+        chmod +x bin/stkcli_macos
     
     - name: Build Windows 64-bit
       run: |
@@ -157,7 +160,7 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: bin/stkcli_win64.exe
         asset_name: stkcli_win64.exe
-        asset_content_type: application/x-msdownload
+        asset_content_type: application/octet-stream
 
     - name: Upload release asset Windows 32-bit
       uses: actions/upload-release-asset@v1
@@ -167,4 +170,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: bin/stkcli_win32.exe
         asset_name: stkcli_win32.exe
-        asset_content_type: application/x-msdownload
+        asset_content_type: application/octet-stream
