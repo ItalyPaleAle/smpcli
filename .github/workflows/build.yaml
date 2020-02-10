@@ -1,0 +1,115 @@
+name: Build stkcli
+
+on:
+  - push
+  
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    steps:
+
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    # Build Linux amd64
+    - name: Build Linnux amd64
+      run: |
+        set -e
+
+        BUILD_ID=$(Build.BuildNumber)
+        BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%S')
+        COMMIT_HASH=$(git log --pretty=format:'%h' -n 1)
+
+        GO111MODULE=on \
+          go build \
+            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_linux_amd64
+    
+    # Build Linux arm64
+    - name: Build Linnux arm64
+      run: |
+        set -e
+
+        BUILD_ID=$(Build.BuildNumber)
+        BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%S')
+        COMMIT_HASH=$(git log --pretty=format:'%h' -n 1)
+
+        GO111MODULE=on \
+        GOOS=linux \
+        GOARCH=arm64 \
+          go build \
+            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_linux_arm64
+    
+    # Build Linux armhf
+    - name: Build Linnux armhf
+      run: |
+        set -e
+
+        BUILD_ID=$(Build.BuildNumber)
+        BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%S')
+        COMMIT_HASH=$(git log --pretty=format:'%h' -n 1)
+
+        GO111MODULE=on \
+        GOOS=linux \
+        GOARCH=arm \
+        GOARM=7 \
+          go build \
+            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_linux_armhf
+    
+    # Build macOS
+    - name: Build macOS
+      run: |
+        set -e
+
+        BUILD_ID=$(Build.BuildNumber)
+        BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%S')
+        COMMIT_HASH=$(git log --pretty=format:'%h' -n 1)
+
+        GO111MODULE=on \
+        GOOS=darwin \
+        GOARCH=amd64 \
+          go build \
+            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_macos
+    
+    # Build Windows 64-bit
+    - name: Build Windows 64-bit
+      run: |
+        set -e
+
+        BUILD_ID=$(Build.BuildNumber)
+        BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%S')
+        COMMIT_HASH=$(git log --pretty=format:'%h' -n 1)
+
+        GO111MODULE=on \
+        GOOS=windows \
+        GOARCH=amd64 \
+          go build \
+            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_win64.exe
+    
+    # Build Windows 32-bit
+    - name: Build Windows 32-bit
+      run: |
+        set -e
+
+        BUILD_ID=$(Build.BuildNumber)
+        BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%S')
+        COMMIT_HASH=$(git log --pretty=format:'%h' -n 1)
+
+        GO111MODULE=on \
+        GOOS=windows \
+        GOARCH=i386 \
+          go build \
+            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_win32.exe

@@ -13,7 +13,7 @@ variables:
 
 jobs:
   - job: build
-    displayName: Build artifacts for Linux (amd64, arm64, armhf)
+    displayName: Build stkcli
     pool:
       vmImage: ubuntu-18.04
     steps:
@@ -25,7 +25,7 @@ jobs:
           echo '##vso[task.prependpath]$(GOBIN)'
           echo '##vso[task.prependpath]$(GOROOT)/bin'
         displayName: "Set up go environment"
-      # Build amd64
+      # Build Linux amd64
       - bash: |
           set -e
 
@@ -37,8 +37,8 @@ jobs:
             go build \
               -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
               -o bin/stkcli_linux_amd64
-        displayName: "Build amd64"
-      # Build arm64
+        displayName: "Build Linux amd64"
+      # Build Linux arm64
       - bash: |
           set -e
 
@@ -52,8 +52,8 @@ jobs:
             go build \
               -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
               -o bin/stkcli_linux_arm64
-        displayName: "Build arm64"
-      # Build armhf
+        displayName: "Build Linux arm64"
+      # Build Linux armhf
       - bash: |
           set -e
 
@@ -68,7 +68,7 @@ jobs:
             go build \
               -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
               -o bin/stkcli_linux_armhf
-        displayName: "Build armhf"
+        displayName: "Build Linux armhf"
       # Build macOS
       - bash: |
           set -e
