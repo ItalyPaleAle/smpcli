@@ -44,17 +44,17 @@ jobs:
             -o bin/stkcli_linux_amd64
         chmod +x bin/stkcli_linux_amd64
     
-    - name: Build Linux arm64
+    - name: Build Linux arm64v8
       run: |
         GO111MODULE=on \
         GOOS=linux \
         GOARCH=arm64 \
           go build \
             -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
-            -o bin/stkcli_linux_arm64
-        chmod +x bin/stkcli_linux_arm64
+            -o bin/stkcli_linux_arm64v8
+        chmod +x bin/stkcli_linux_arm64v8
     
-    - name: Build Linux armhf
+    - name: Build Linux arm32v7
       run: |
         GO111MODULE=on \
         GOOS=linux \
@@ -62,8 +62,8 @@ jobs:
         GOARM=7 \
           go build \
             -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
-            -o bin/stkcli_linux_armhf
-        chmod +x bin/stkcli_linux_armhf
+            -o bin/stkcli_linux_arm32v7
+        chmod +x bin/stkcli_linux_arm32v7
     
     - name: Build macOS
       run: |
@@ -122,24 +122,24 @@ jobs:
         asset_name: stkcli_linux_amd64
         asset_content_type: application/octet-stream
 
-    - name: Upload release asset Linux arm64
+    - name: Upload release asset Linux arm64v8
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: bin/stkcli_linux_arm64
-        asset_name: stkcli_linux_arm64
+        asset_path: bin/stkcli_linux_arm64v8
+        asset_name: stkcli_linux_arm64v8
         asset_content_type: application/octet-stream
 
-    - name: Upload release asset Linux armhf
+    - name: Upload release asset Linux arm32v7
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: bin/stkcli_linux_armhf
-        asset_name: stkcli_linux_armhf
+        asset_path: bin/stkcli_linux_arm32v7
+        asset_name: stkcli_linux_arm32v7
         asset_content_type: application/octet-stream
 
     - name: Upload release asset macOS
