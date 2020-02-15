@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/spf13/cobra"
 
@@ -34,7 +35,7 @@ var versionCmd = &cobra.Command{
 		if buildinfo.BuildID == "" || buildinfo.CommitHash == "" {
 			fmt.Println("This stkcli build does not contain a build identifier, and it was probably fetched from the repository as source")
 		} else {
-			fmt.Println("stkcli Build ID:", buildinfo.BuildID, "("+buildinfo.BuildTime+"). Git commit:", buildinfo.CommitHash)
+			fmt.Println("stkcli Build ID:", buildinfo.BuildID, "("+buildinfo.BuildTime+"). Git commit:", buildinfo.CommitHash, "Runtime:", runtime.Version())
 		}
 	},
 }
