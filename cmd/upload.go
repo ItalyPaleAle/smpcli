@@ -18,8 +18,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +26,6 @@ var uploadCmd = &cobra.Command{
 	Use:   "upload",
 	Short: "Upload apps and certificates",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("upload called")
-	},
 }
 
 func init() {

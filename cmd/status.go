@@ -32,7 +32,7 @@ func init() {
 
 	c := &cobra.Command{
 		Use:   "status",
-		Short: "Gets the status of a node",
+		Short: "Shows the status of a node",
 		Long:  ``,
 
 		Run: func(cmd *cobra.Command, args []string) {

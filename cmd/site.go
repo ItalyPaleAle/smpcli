@@ -18,8 +18,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +26,6 @@ var siteCmd = &cobra.Command{
 	Use:   "site",
 	Short: "Manage sites",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("site called")
-	},
 }
 
 func init() {

@@ -18,8 +18,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +26,6 @@ var stateCmd = &cobra.Command{
 	Use:   "state",
 	Short: "Get or restore state",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("state called")
-	},
 }
 
 func init() {

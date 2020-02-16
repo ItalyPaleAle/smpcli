@@ -172,7 +172,7 @@ func init() {
 
 	c := &cobra.Command{
 		Use:   "certificate",
-		Short: "Upload a certificate",
+		Short: "Upload a TLS certificate",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
 			// Check if all files exist
