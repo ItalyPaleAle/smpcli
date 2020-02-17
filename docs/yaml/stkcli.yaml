@@ -1,0 +1,23 @@
+name: stkcli
+synopsis: Manage a Statiko node
+description: |
+  This CLI is part of the Statiko project: https://statiko.dev
+
+  stkcli allows managing Statiko nodes conveniently, by offering a command-line experience that interacts with nodes' REST APIs.
+  Additionally, stkcli offers commands that simplify uploading and signing app bundles, and uploading TLS certificates.
+
+  stkcli is released under a GNU General Public License v3.0 license. Source code is available on GitHub: https://github.com/ItalyPaleAle/stkcli
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for stkcli
+see_also:
+- auth - Authenticate with a node
+- defaults - View or set defaults for stkcli
+- deploy - Deploy an app
+- site - Manage sites
+- state - Get or restore state
+- status - Shows the status of a node
+- upload - Upload apps and certificates
+- version - Show stkcli version

@@ -1,0 +1,32 @@
+name: stkcli site get
+synopsis: Get a site
+description: |
+  Show the details of a site configured in the node.
+
+  Specify the primary domain name (no aliases) with the '--domain' parameter to select the site.
+options:
+- name: domain
+  shorthand: d
+  usage: primary domain name
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for get
+- name: http
+  shorthand: S
+  default_value: "false"
+  usage: use HTTP protocol, without TLS
+- name: insecure
+  shorthand: k
+  default_value: "true"
+  usage: disable TLS certificate validation
+- name: node
+  shorthand: "n"
+  default_value: localhost
+  usage: node address or IP
+- name: port
+  shorthand: P
+  default_value: "2265"
+  usage: port the node listens on
+see_also:
+- stkcli site - Manage sites

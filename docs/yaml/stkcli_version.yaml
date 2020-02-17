@@ -1,0 +1,11 @@
+name: stkcli version
+synopsis: Show stkcli version
+description: |
+  Prints the version of this stkcli build, and other information on the binary.
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for version
+see_also:
+- stkcli - Manage a Statiko node

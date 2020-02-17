@@ -1,0 +1,35 @@
+name: stkcli state set
+synopsis: Restores the state of a node
+description: |
+  Replaces the state of the node with the one read from file (or stdin if the '--file' parameter is not set).
+
+  The state is a JSON document containing the list of sites and apps to be configured in the web server, and it's normally exported from another node (useful for backups or migrations).
+
+  This command completely replaces the state of the node with the one you're passing to the command, discarding any site or app currently configured in the node.
+options:
+- name: file
+  shorthand: f
+  usage: |
+    file containing the desired state; if not set, read from stdin
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for set
+- name: http
+  shorthand: S
+  default_value: "false"
+  usage: use HTTP protocol, without TLS
+- name: insecure
+  shorthand: k
+  default_value: "true"
+  usage: disable TLS certificate validation
+- name: node
+  shorthand: "n"
+  default_value: localhost
+  usage: node address or IP
+- name: port
+  shorthand: P
+  default_value: "2265"
+  usage: port the node listens on
+see_also:
+- stkcli state - Get or restore state

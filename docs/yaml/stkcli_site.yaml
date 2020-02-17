@@ -1,0 +1,16 @@
+name: stkcli site
+synopsis: Manage sites
+description: |
+  The sites namespace contains commands to add, show, list, remove, and edit sites that are currently configured in the node.
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for site
+see_also:
+- stkcli - Manage a Statiko node
+- add - Add a new site
+- get - Get a site
+- list - List sites
+- remove - Remove a site
+- set - Updates the configuration for a site

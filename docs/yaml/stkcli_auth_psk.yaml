@@ -1,0 +1,30 @@
+name: stkcli auth psk
+synopsis: Authenticate using a pre-shared key
+description: |
+  Sets the pre-shared key used to authenticate API calls to a node.
+
+  The pre-shared key is defined in the node's configuration, and clients are authenticated if they send the same key in the header of API calls.
+  Note that the key is not hashed nor encrypted, so using TLS to connect to nodes is strongly recommended.
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for psk
+- name: http
+  shorthand: S
+  default_value: "false"
+  usage: use HTTP protocol, without TLS
+- name: insecure
+  shorthand: k
+  default_value: "true"
+  usage: disable TLS certificate validation
+- name: node
+  shorthand: "n"
+  default_value: localhost
+  usage: node address or IP
+- name: port
+  shorthand: P
+  default_value: "2265"
+  usage: port the node listens on
+see_also:
+- stkcli auth - Authenticate with a node

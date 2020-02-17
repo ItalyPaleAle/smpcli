@@ -27,7 +27,14 @@ import (
 )
 
 func init() {
+	// Generate Markdown docs
 	err := doc.GenMarkdownTree(rootCmd, "./docs")
+	if err != nil {
+		panic(err)
+	}
+
+	// Generate YAML docs
+	err = doc.GenYamlTree(rootCmd, "./docs/yaml")
 	if err != nil {
 		panic(err)
 	}

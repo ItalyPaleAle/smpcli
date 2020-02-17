@@ -1,0 +1,46 @@
+name: stkcli upload certificate
+synopsis: Upload a TLS certificate
+description: |
+  Adds a TLS certificate (public certificate and private key) to the Azure Key Vault instance connected to the node.
+
+  IMPORTANT: In order to use this command, you must have the Azure CLI installed and you must be authenticated to the Azure subscription where the Key Vault resides (with 'az login'). Additionally, your Azure account must have the following permissions in the Key Vault's data plane: keys (create, update, import, sign), certificate (create, update, import).
+
+  This command accepts three parameters:
+
+  - '--name' or '-c' is the name of the certificate, which you can use to reference it in sites' configuration. Per Azure, it can only contain uppercase and lowercase letters, numbers and the dash symbol (-)
+  - '--certificate' or '-f' is the file with the public part of the TLS certificate
+  - '--certificate-key' or '-p' is the file with the private key of the certificate
+
+  Note that only certificates with RSA keys are supported. Additionally, both the certificate and the key must be in PEM format.
+options:
+- name: certificate
+  shorthand: f
+  usage: certificate file (required)
+- name: certificate-key
+  shorthand: p
+  usage: private key (required)
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for certificate
+- name: http
+  shorthand: S
+  default_value: "false"
+  usage: use HTTP protocol, without TLS
+- name: insecure
+  shorthand: k
+  default_value: "true"
+  usage: disable TLS certificate validation
+- name: name
+  shorthand: c
+  usage: certificate name (required)
+- name: node
+  shorthand: "n"
+  default_value: localhost
+  usage: node address or IP
+- name: port
+  shorthand: P
+  default_value: "2265"
+  usage: port the node listens on
+see_also:
+- stkcli upload - Upload apps and certificates

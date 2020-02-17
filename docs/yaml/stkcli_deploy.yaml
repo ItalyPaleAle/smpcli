@@ -1,0 +1,38 @@
+name: stkcli deploy
+synopsis: Deploy an app
+description: |
+  Deploys an app to a site.
+
+  This command tells the node to deploy the app (already uploaded beforehand) with the specific name and version to a site identified by the domain option.
+options:
+- name: app
+  shorthand: a
+  usage: app's bundle name (required)
+- name: domain
+  shorthand: d
+  usage: primary domain name (required)
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for deploy
+- name: http
+  shorthand: S
+  default_value: "false"
+  usage: use HTTP protocol, without TLS
+- name: insecure
+  shorthand: k
+  default_value: "true"
+  usage: disable TLS certificate validation
+- name: node
+  shorthand: "n"
+  default_value: localhost
+  usage: node address or IP
+- name: port
+  shorthand: P
+  default_value: "2265"
+  usage: port the node listens on
+- name: version
+  shorthand: v
+  usage: app's bundle version (required)
+see_also:
+- stkcli - Manage a Statiko node

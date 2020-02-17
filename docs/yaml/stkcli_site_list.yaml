@@ -1,0 +1,26 @@
+name: stkcli site list
+synopsis: List sites
+description: Shows the list of all sites configured in the node.
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for list
+- name: http
+  shorthand: S
+  default_value: "false"
+  usage: use HTTP protocol, without TLS
+- name: insecure
+  shorthand: k
+  default_value: "true"
+  usage: disable TLS certificate validation
+- name: node
+  shorthand: "n"
+  default_value: localhost
+  usage: node address or IP
+- name: port
+  shorthand: P
+  default_value: "2265"
+  usage: port the node listens on
+see_also:
+- stkcli site - Manage sites

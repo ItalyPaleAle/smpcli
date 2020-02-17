@@ -1,0 +1,35 @@
+name: stkcli site remove
+synopsis: Remove a site
+description: |
+  Removes a site from the node, so the web server stops accepting requests for it.
+
+  You must specify the primary domain name (no aliases) in the '--domain' parameter to select the site to be removed.
+options:
+- name: domain
+  shorthand: d
+  usage: primary domain name
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for remove
+- name: http
+  shorthand: S
+  default_value: "false"
+  usage: use HTTP protocol, without TLS
+- name: insecure
+  shorthand: k
+  default_value: "true"
+  usage: disable TLS certificate validation
+- name: node
+  shorthand: "n"
+  default_value: localhost
+  usage: node address or IP
+- name: port
+  shorthand: P
+  default_value: "2265"
+  usage: port the node listens on
+- name: "yes"
+  default_value: "false"
+  usage: do not ask for confirmation
+see_also:
+- stkcli site - Manage sites

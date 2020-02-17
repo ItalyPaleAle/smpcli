@@ -1,0 +1,41 @@
+name: stkcli site add
+synopsis: Add a new site
+description: |
+  Configures a new site in the node.
+
+  Each site is identified by a primary domain, and it can have multiple aliases (domain names that are redirected to the primary one).
+
+  When creating a site, you can add the name of a TLS certificate stored on the associated Azure Key Vault instance. You can also specify 'selfsigned' as a value for the TLS certificate to have the node automatically generate a self-signed certificate for your site.
+options:
+- name: alias
+  shorthand: a
+  default_value: '[]'
+  usage: alias domain (can be used multiple times)
+- name: certificate
+  shorthand: c
+  usage: name of the TLS certificate
+- name: domain
+  shorthand: d
+  usage: primary domain name
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for add
+- name: http
+  shorthand: S
+  default_value: "false"
+  usage: use HTTP protocol, without TLS
+- name: insecure
+  shorthand: k
+  default_value: "true"
+  usage: disable TLS certificate validation
+- name: node
+  shorthand: "n"
+  default_value: localhost
+  usage: node address or IP
+- name: port
+  shorthand: P
+  default_value: "2265"
+  usage: port the node listens on
+see_also:
+- stkcli site - Manage sites
