@@ -22,6 +22,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
+
+	"github.com/spf13/viper"
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
@@ -38,18 +41,33 @@ var (
 )
 
 func addSharedFlags(cmd *cobra.Command) {
+	// Get deafaults
+	defaultNode := viper.GetString("node")
+	defaultPort := viper.GetInt("port")
+	defaultPortString := ""
+	if defaultPort > 0 {
+		defaultPortString = strconv.Itoa(defaultPort)
+	}
+	defaultInsecure := viper.GetBool("insecure")
+	defaultHTTP := viper.GetBool("http")
+
 	// Node address
-	cmd.Flags().StringVarP(&optAddress, "node", "n", "", "node address or IP (required)")
-	cmd.MarkFlagRequired("node")
+	// Mark as required if we don't have a default value
+	if defaultNode == "" {
+		cmd.Flags().StringVarP(&optAddress, "node", "n", defaultNode, "node address or IP (required)")
+		cmd.MarkFlagRequired("node")
+	} else {
+		cmd.Flags().StringVarP(&optAddress, "node", "n", defaultNode, "node address or IP")
+	}
 
 	// Port the server is listening on
 	// Default is 2265
-	cmd.Flags().StringVarP(&optPort, "port", "P", "2265", "port the node listens on")
+	cmd.Flags().StringVarP(&optPort, "port", "P", defaultPortString, "port the node listens on")
 
 	// Flags to control communication with the node
 	// By default, we use TLS and validate the certificate
-	cmd.Flags().BoolVarP(&optInsecure, "insecure", "k", false, "disable TLS certificate validation")
-	cmd.Flags().BoolVarP(&optNoTLS, "http", "S", false, "use HTTP protocol (no TLS)")
+	cmd.Flags().BoolVarP(&optInsecure, "insecure", "k", defaultInsecure, "disable TLS certificate validation")
+	cmd.Flags().BoolVarP(&optNoTLS, "http", "S", defaultHTTP, "use HTTP protocol (no TLS)")
 }
 
 func getURLClient() (baseURL string, client *http.Client) {
