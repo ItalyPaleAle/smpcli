@@ -37,7 +37,12 @@ func init() {
 	c := &cobra.Command{
 		Use:   "set",
 		Short: "Updates the configuration for a site",
-		Long:  ``,
+		Long: `Updates a site configured in the node.
+
+Use the '--certificate' parameter to set a new TLS certificate. This should be the name of a certificate stored in the associated Azure Key Vault. You can also use the value "selfsigned" to have the node automatically generate a self-signed certificate for your site.
+
+The '--alias' parameter is used to replace the list of aliases configured for the domain. You can use this parameter multiple time to add more than one alias. Note that using the '--alias' flag will replace the entire list of aliases with the new one.
+`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
@@ -74,10 +79,10 @@ func init() {
 	siteCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&domain, "domain", "d", "", "Primary domain name")
+	c.Flags().StringVarP(&domain, "domain", "d", "", "primary domain name")
 	c.MarkFlagRequired("domain")
-	c.Flags().StringArrayVarP(&aliases, "alias", "a", []string{}, "Alias domain (can be used multiple times)")
-	c.Flags().StringVarP(&tlsCertificate, "certificate", "c", "", "Name of the TLS certificate")
+	c.Flags().StringArrayVarP(&aliases, "alias", "a", []string{}, "alias domain (can be used multiple times)")
+	c.Flags().StringVarP(&tlsCertificate, "certificate", "c", "", "name of the TLS certificate")
 
 	// Add shared flags
 	addSharedFlags(c)

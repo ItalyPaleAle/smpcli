@@ -33,7 +33,10 @@ func init() {
 	c := &cobra.Command{
 		Use:   "status",
 		Short: "Shows the status of a node",
-		Long:  ``,
+		Long: `Prints information about the status and health of the node.
+
+The '--domain' flag allows selecting a specific site only.
+`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
@@ -69,7 +72,7 @@ func init() {
 	rootCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&domain, "domain", "d", "", "Domain name")
+	c.Flags().StringVarP(&domain, "domain", "d", "", "domain name")
 
 	// Add shared flags
 	addSharedFlags(c)

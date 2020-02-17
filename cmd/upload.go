@@ -25,7 +25,10 @@ import (
 var uploadCmd = &cobra.Command{
 	Use:   "upload",
 	Short: "Upload apps and certificates",
-	Long:  ``,
+	Long: `The upload namespace contains commands to conveniently upload app bundles and TLS certificates.
+
+IMPORTANT: In order to use these commands, you must have the Azure CLI installed and you must be authenticated to the Azure subscription where the Key Vault resides (with 'az login'). Additionally, your Azure account must have the following permissions in the Key Vault's data plane: keys (create, update, import, sign), certificate (create, update, import).
+`,
 }
 
 func init() {

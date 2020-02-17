@@ -36,7 +36,10 @@ func init() {
 	c := &cobra.Command{
 		Use:   "remove",
 		Short: "Remove a site",
-		Long:  ``,
+		Long: `Removes a site from the node, so the web server stops accepting requests for it.
+
+You must specify the primary domain name (no aliases) in the '--domain' parameter to select the site to be removed.
+`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
@@ -73,7 +76,7 @@ func init() {
 
 	// Flags
 	c.Flags().BoolVarP(&yes, "yes", "", false, "do not ask for confirmation")
-	c.Flags().StringVarP(&domain, "domain", "d", "", "Primary domain name")
+	c.Flags().StringVarP(&domain, "domain", "d", "", "primary domain name")
 	c.MarkFlagRequired("domain")
 
 	// Add shared flags

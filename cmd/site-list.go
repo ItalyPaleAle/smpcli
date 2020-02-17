@@ -29,7 +29,7 @@ func init() {
 	c := &cobra.Command{
 		Use:   "list",
 		Short: "List sites",
-		Long:  ``,
+		Long:  `Shows the list of all sites configured in the node.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()

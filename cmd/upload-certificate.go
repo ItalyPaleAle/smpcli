@@ -173,7 +173,18 @@ func init() {
 	c := &cobra.Command{
 		Use:   "certificate",
 		Short: "Upload a TLS certificate",
-		Long:  ``,
+		Long: `Adds a TLS certificate (public certificate and private key) to the Azure Key Vault instance connected to the node.
+
+IMPORTANT: In order to use this command, you must have the Azure CLI installed and you must be authenticated to the Azure subscription where the Key Vault resides (with 'az login'). Additionally, your Azure account must have the following permissions in the Key Vault's data plane: keys (create, update, import, sign), certificate (create, update, import).
+
+This command accepts three parameters:
+
+- '--name' or '-c' is the name of the certificate, which you can use to reference it in sites' configuration. Per Azure, it can only contain uppercase and lowercase letters, numbers and the dash symbol (-)
+- '--certificate' or '-f' is the file with the public part of the TLS certificate
+- '--certificate-key' or '-p' is the file with the private key of the certificate
+
+Note that only certificates with RSA keys are supported. Additionally, both the certificate and the key must be in PEM format.
+`,
 		Run: func(cmd *cobra.Command, args []string) {
 			// Check if all files exist
 			if !checkFile(certificate) {
@@ -205,11 +216,11 @@ func init() {
 	uploadCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&name, "name", "c", "", "Certificate name (required)")
+	c.Flags().StringVarP(&name, "name", "c", "", "certificate name (required)")
 	c.MarkFlagRequired("name")
-	c.Flags().StringVarP(&certificate, "certificate", "f", "", "Certificate file (required)")
+	c.Flags().StringVarP(&certificate, "certificate", "f", "", "certificate file (required)")
 	c.MarkFlagRequired("certificate")
-	c.Flags().StringVarP(&certKey, "certificate-key", "p", "", "Private key (required)")
+	c.Flags().StringVarP(&certKey, "certificate-key", "p", "", "private key (required)")
 	c.MarkFlagRequired("certificate-key")
 
 	// Add shared flags

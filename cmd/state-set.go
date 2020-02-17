@@ -37,7 +37,12 @@ func init() {
 	c := &cobra.Command{
 		Use:   "set",
 		Short: "Restores the state of a node",
-		Long:  ``,
+		Long: `Replaces the state of the node with the one read from file (or stdin if the '--file' parameter is not set).
+
+The state is a JSON document containing the list of sites and apps to be configured in the web server, and it's normally exported from another node (useful for backups or migrations).
+
+This command completely replaces the state of the node with the one you're passing to the command, discarding any site or app currently configured in the node.
+`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
@@ -90,7 +95,7 @@ func init() {
 	stateCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&stateFile, "file", "f", "", "File containing the desired state (if not set, read from)")
+	c.Flags().StringVarP(&stateFile, "file", "f", "", "file containing the desired state; if not set, read from stdin")
 
 	// Add shared flags
 	addSharedFlags(c)

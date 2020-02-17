@@ -67,7 +67,7 @@ func addSharedFlags(cmd *cobra.Command) {
 	// Flags to control communication with the node
 	// By default, we use TLS and validate the certificate
 	cmd.Flags().BoolVarP(&optInsecure, "insecure", "k", defaultInsecure, "disable TLS certificate validation")
-	cmd.Flags().BoolVarP(&optNoTLS, "http", "S", defaultHTTP, "use HTTP protocol (no TLS)")
+	cmd.Flags().BoolVarP(&optNoTLS, "http", "S", defaultHTTP, "use HTTP protocol, without TLS")
 }
 
 func getURLClient() (baseURL string, client *http.Client) {

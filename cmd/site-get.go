@@ -31,7 +31,10 @@ func init() {
 	c := &cobra.Command{
 		Use:   "get",
 		Short: "Get a site",
-		Long:  ``,
+		Long: `Show the details of a site configured in the node.
+
+Specify the primary domain name (no aliases) with the '--domain' parameter to select the site.
+`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
@@ -57,7 +60,7 @@ func init() {
 	siteCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&domain, "domain", "d", "", "Primary domain name")
+	c.Flags().StringVarP(&domain, "domain", "d", "", "primary domain name")
 	c.MarkFlagRequired("domain")
 
 	// Add shared flags

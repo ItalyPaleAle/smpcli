@@ -168,7 +168,23 @@ func init() {
 	c := &cobra.Command{
 		Use:   "app",
 		Short: "Upload an app or bundle",
-		Long:  ``,
+		Long: `Uploads an app to the Azure Storage Account associated with the node's instance
+
+IMPORTANT: In order to use this command, you must have the Azure CLI installed and you must be authenticated to the Azure subscription where the Key Vault resides (with 'az login'). Additionally, your Azure account must have the following permissions in the Key Vault's data plane: keys (create, update, import, sign), certificate (create, update, import).
+
+This command accepts four parameters:
+
+- '--path' or '-f' is the path of the app to upload
+- '--app' or '-a' is the name of the app's bundle, which can be used to identify the app when you want to deploy it in a node
+- '--version' or '-v' is the version of the app, as an arbitrary string
+- '--no-signature' is a boolean that when present will skip calculating the checksum of the app's bundle and signing it with the codesign key
+
+Paths can be folders containing your app's files; stkcli will automatically create a tar.bz2 archive for you. Alternatively, you can point the '--path' parameter to an existing tar.bz2 archive, and it will uploaded as-is.
+
+Versions are unique for each app. For example, if you upload the app 'myapp' and version '1.0', you cannot re-upload that; the version must be different. Statiko does not parse the version and does not enforce any specific versioning convention, as long as the versions are different.
+
+When using '--no-signature', stkcli will not calculate the checksum of the app's bundle, and it will not cryptographically sign it with the codesigning key. Statiko nodes do not accept unsigned app bundles by default for security reasons, and the admin must manually enable this option in the node's configuration file. However, when uploading unsigned bundles, you do not need to be signed into an Azure account in the local system.
+`,
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
 			auth := nodeStore.GetAuthToken(optAddress)
@@ -251,11 +267,11 @@ func init() {
 	uploadCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&app, "app", "a", "", "App's bundle name (required)")
+	c.Flags().StringVarP(&app, "app", "a", "", "app's bundle name (required)")
 	c.MarkFlagRequired("app")
-	c.Flags().StringVarP(&version, "version", "v", "", "App's bundle version (required)")
+	c.Flags().StringVarP(&version, "version", "v", "", "app's bundle version (required)")
 	c.MarkFlagRequired("version")
-	c.Flags().StringVarP(&path, "path", "f", "", "Path to local file or folder to bundle")
+	c.Flags().StringVarP(&path, "path", "f", "", "path to local file or folder to bundle")
 	c.Flags().BoolVarP(&noSignature, "no-signature", "", false, "do not cryptographically sign the app's bundle")
 
 	// Add shared flags

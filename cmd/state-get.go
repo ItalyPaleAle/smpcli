@@ -34,7 +34,10 @@ func init() {
 	c := &cobra.Command{
 		Use:   "get",
 		Short: "Retrieve state and save to file",
-		Long:  ``,
+		Long: `Dumps the state of the node to a file or stdout (if the '--output' parameter is not set).
+
+The state is a JSON document containing the list of sites and apps currently configured in the web server. You can store the state in a file for backups, or to restore it to another node using the 'state set' command.
+`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
@@ -70,7 +73,7 @@ func init() {
 	stateCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&outFile, "out", "o", "", "Output file where to store state (if not set, print to stdout)")
+	c.Flags().StringVarP(&outFile, "out", "o", "", "output file where to store state; if not set, print to stdout")
 
 	// Add shared flags
 	addSharedFlags(c)

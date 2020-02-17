@@ -77,11 +77,11 @@ This command tells the node to deploy the app (already uploaded beforehand) with
 	rootCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&domain, "domain", "d", "", "Primary domain name (required)")
+	c.Flags().StringVarP(&domain, "domain", "d", "", "primary domain name (required)")
 	c.MarkFlagRequired("domain")
-	c.Flags().StringVarP(&app, "app", "a", "", "App's bundle name (required)")
+	c.Flags().StringVarP(&app, "app", "a", "", "app's bundle name (required)")
 	c.MarkFlagRequired("app")
-	c.Flags().StringVarP(&version, "version", "v", "", "App's bundle version (required)")
+	c.Flags().StringVarP(&version, "version", "v", "", "app's bundle version (required)")
 	c.MarkFlagRequired("version")
 
 	// Add shared flags

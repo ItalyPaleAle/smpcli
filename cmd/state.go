@@ -25,7 +25,12 @@ import (
 var stateCmd = &cobra.Command{
 	Use:   "state",
 	Short: "Get or restore state",
-	Long:  ``,
+	Long: `The state namespace contains commands used to manage the state of the node: dump to a file, or restore from a local file.
+
+The node's state is a JSON document containing the list of apps and sites configured. You can dump it to a local file and restore it on the same node or a different one.
+
+The state file can contains secrets (e.g self-signed TLS certificates) which are encrypted with the symmetric key from the node's configuration file.
+`,
 }
 
 func init() {

@@ -30,7 +30,7 @@ func init() {
 	c := &cobra.Command{
 		Use:   "version",
 		Short: "Show stkcli version",
-		Long:  `Prints the version of this stkcli build, and other information on the binary`,
+		Long:  `Prints the version of this stkcli build, and other information on the binary.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if buildinfo.BuildID == "" || buildinfo.CommitHash == "" {
 				fmt.Println("This stkcli build does not contain a build identifier, and it was probably fetched from the repository as source")
