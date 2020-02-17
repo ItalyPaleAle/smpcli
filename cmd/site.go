@@ -25,7 +25,7 @@ import (
 var siteCmd = &cobra.Command{
 	Use:   "site",
 	Short: "Manage sites",
-	Long:  ``,
+	Long:  `The sites namespace contains commands to add, show, list, remove, and edit sites that are currently configured in the node.`,
 }
 
 func init() {

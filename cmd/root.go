@@ -39,16 +39,14 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "stkcli",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "Manage a Statiko node",
+	Long: `This CLI is part of the Statiko project: https://statiko.dev
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+stkcli allows managing Statiko nodes conveniently, by offering a command-line experience that interacts with nodes' REST APIs.
+Additionally, stkcli offers commands that simplify uploading and signing app bundles, and uploading TLS certificates.
+
+stkcli is released under a GNU General Public License v3.0 license. Source code is available on GitHub: https://github.com/ItalyPaleAle/stkcli
+`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

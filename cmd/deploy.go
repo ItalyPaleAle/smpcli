@@ -37,7 +37,10 @@ func init() {
 	c := &cobra.Command{
 		Use:   "deploy",
 		Short: "Deploy an app",
-		Long:  ``,
+		Long: `Deploys an app to a site.
+
+This command tells the node to deploy the app (already uploaded beforehand) with the specific name and version to a site identified by the domain option.
+`,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
