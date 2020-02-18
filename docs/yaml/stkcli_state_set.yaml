@@ -6,6 +6,7 @@ description: |
   The state is a JSON document containing the list of sites and apps to be configured in the web server, and it's normally exported from another node (useful for backups or migrations).
 
   This command completely replaces the state of the node with the one you're passing to the command, discarding any site or app currently configured in the node.
+usage: stkcli state set [flags]
 options:
 - name: file
   shorthand: f

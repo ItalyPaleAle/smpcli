@@ -3,6 +3,7 @@ synopsis: Show all default connection options
 description: |
   Shows all the default flags that are used to connect to a node.
   The output of the command resembles the flags that users would pass on the command line to stkcli.
+usage: stkcli defaults get [flags]
 options:
 - name: help
   shorthand: h

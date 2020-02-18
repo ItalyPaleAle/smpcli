@@ -4,6 +4,7 @@ description: |
   Show the details of a site configured in the node.
 
   Specify the primary domain name (no aliases) with the '--domain' parameter to select the site.
+usage: stkcli site get [flags]
 options:
 - name: domain
   shorthand: d

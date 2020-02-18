@@ -12,6 +12,7 @@ description: |
   - '--certificate-key' or '-p' is the file with the private key of the certificate
 
   Note that only certificates with RSA keys are supported. Additionally, both the certificate and the key must be in PEM format.
+usage: stkcli upload certificate [flags]
 options:
 - name: certificate
   shorthand: f

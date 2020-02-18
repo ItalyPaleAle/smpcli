@@ -13,6 +13,7 @@ description: "Set the value for the shared flags that will be used as default in
   \ System default: false (use TLS)\n\nNote that calling the 'defaults set' command
   overrides the default values for all the four flags above. If those values are not
   set, the system defaults are used. \n"
+usage: stkcli defaults set [flags]
 options:
 - name: help
   shorthand: h

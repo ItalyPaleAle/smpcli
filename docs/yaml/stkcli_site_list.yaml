@@ -1,6 +1,7 @@
 name: stkcli site list
 synopsis: List sites
 description: Shows the list of all sites configured in the node.
+usage: stkcli site list [flags]
 options:
 - name: help
   shorthand: h

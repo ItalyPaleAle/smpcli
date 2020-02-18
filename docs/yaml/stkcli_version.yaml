@@ -2,6 +2,7 @@ name: stkcli version
 synopsis: Show stkcli version
 description: |
   Prints the version of this stkcli build, and other information on the binary.
+usage: stkcli version [flags]
 options:
 - name: help
   shorthand: h

@@ -4,6 +4,7 @@ description: |
   Prints information about the status and health of the node.
 
   The '--domain' flag allows selecting a specific site only.
+usage: stkcli status [flags]
 options:
 - name: domain
   shorthand: d
