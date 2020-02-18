@@ -31,8 +31,8 @@ stkcli upload app [flags]
 ```
   -a, --app string       app's bundle name (required)
   -h, --help             help for app
-  -S, --http             use HTTP protocol, without TLS
-  -k, --insecure         disable TLS certificate validation
+  -S, --http             use HTTP protocol, without TLS, for node connections
+  -k, --insecure         disable TLS certificate validation for node connections
       --no-signature     do not cryptographically sign the app's bundle
   -n, --node string      node address or IP (required)
   -f, --path string      path to local file or folder to bundle

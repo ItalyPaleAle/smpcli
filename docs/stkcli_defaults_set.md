@@ -31,8 +31,8 @@ stkcli defaults set [flags]
 
 ```
   -h, --help          help for set
-  -S, --http          use HTTP protocol, without TLS
-  -k, --insecure      disable TLS certificate validation
+  -S, --http          use HTTP protocol, without TLS, for node connections
+  -k, --insecure      disable TLS certificate validation for node connections
   -n, --node string   node address or IP (required)
   -P, --port string   port the node listens on
 ```

@@ -16,11 +16,11 @@ options:
 - name: http
   shorthand: S
   default_value: "false"
-  usage: use HTTP protocol, without TLS
+  usage: use HTTP protocol, without TLS, for node connections
 - name: insecure
   shorthand: k
   default_value: "false"
-  usage: disable TLS certificate validation
+  usage: disable TLS certificate validation for node connections
 - name: node
   shorthand: "n"
   usage: node address or IP (required)

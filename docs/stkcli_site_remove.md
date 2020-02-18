@@ -18,8 +18,8 @@ stkcli site remove [flags]
 ```
   -d, --domain string   primary domain name
   -h, --help            help for remove
-  -S, --http            use HTTP protocol, without TLS
-  -k, --insecure        disable TLS certificate validation
+  -S, --http            use HTTP protocol, without TLS, for node connections
+  -k, --insecure        disable TLS certificate validation for node connections
   -n, --node string     node address or IP (required)
   -P, --port string     port the node listens on
       --yes             do not ask for confirmation
