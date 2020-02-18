@@ -25,15 +25,13 @@ options:
   usage: use HTTP protocol, without TLS
 - name: insecure
   shorthand: k
-  default_value: "true"
+  default_value: "false"
   usage: disable TLS certificate validation
 - name: node
   shorthand: "n"
-  default_value: localhost
-  usage: node address or IP
+  usage: node address or IP (required)
 - name: port
   shorthand: P
-  default_value: "2265"
   usage: port the node listens on
 see_also:
 - stkcli defaults - View or set defaults for stkcli

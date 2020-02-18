@@ -18,10 +18,10 @@ stkcli state get [flags]
 ```
   -h, --help          help for get
   -S, --http          use HTTP protocol, without TLS
-  -k, --insecure      disable TLS certificate validation (default true)
-  -n, --node string   node address or IP (default "localhost")
+  -k, --insecure      disable TLS certificate validation
+  -n, --node string   node address or IP (required)
   -o, --out string    output file where to store state; if not set, print to stdout
-  -P, --port string   port the node listens on (default "2265")
+  -P, --port string   port the node listens on
 ```
 
 ### SEE ALSO

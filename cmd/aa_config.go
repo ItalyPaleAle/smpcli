@@ -1,3 +1,5 @@
+// +build !docsgen
+
 /*
 Copyright © 2019 Alessandro Segala (@ItalyPaleAle)
 

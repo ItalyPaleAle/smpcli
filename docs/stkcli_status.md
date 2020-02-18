@@ -19,9 +19,9 @@ stkcli status [flags]
   -d, --domain string   domain name
   -h, --help            help for status
   -S, --http            use HTTP protocol, without TLS
-  -k, --insecure        disable TLS certificate validation (default true)
-  -n, --node string     node address or IP (default "localhost")
-  -P, --port string     port the node listens on (default "2265")
+  -k, --insecure        disable TLS certificate validation
+  -n, --node string     node address or IP (required)
+  -P, --port string     port the node listens on
 ```
 
 ### SEE ALSO

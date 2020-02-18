@@ -32,11 +32,11 @@ stkcli upload app [flags]
   -a, --app string       app's bundle name (required)
   -h, --help             help for app
   -S, --http             use HTTP protocol, without TLS
-  -k, --insecure         disable TLS certificate validation (default true)
+  -k, --insecure         disable TLS certificate validation
       --no-signature     do not cryptographically sign the app's bundle
-  -n, --node string      node address or IP (default "localhost")
+  -n, --node string      node address or IP (required)
   -f, --path string      path to local file or folder to bundle
-  -P, --port string      port the node listens on (default "2265")
+  -P, --port string      port the node listens on
   -v, --version string   app's bundle version (required)
 ```
 

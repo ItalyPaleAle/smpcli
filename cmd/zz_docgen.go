@@ -1,4 +1,4 @@
-// +build generator
+// +build docsgen
 
 /*
 Copyright © 2019 Alessandro Segala (@ItalyPaleAle)
@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 // This file is built only when trying to generate the documentation for the CLI
-// go run -tags generator .
+// go run -tags docsgen .
 
 package cmd
 

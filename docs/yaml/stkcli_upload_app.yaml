@@ -32,21 +32,19 @@ options:
   usage: use HTTP protocol, without TLS
 - name: insecure
   shorthand: k
-  default_value: "true"
+  default_value: "false"
   usage: disable TLS certificate validation
 - name: no-signature
   default_value: "false"
   usage: do not cryptographically sign the app's bundle
 - name: node
   shorthand: "n"
-  default_value: localhost
-  usage: node address or IP
+  usage: node address or IP (required)
 - name: path
   shorthand: f
   usage: path to local file or folder to bundle
 - name: port
   shorthand: P
-  default_value: "2265"
   usage: port the node listens on
 - name: version
   shorthand: v
