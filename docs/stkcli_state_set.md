@@ -4,7 +4,7 @@ Restores the state of a node
 
 ### Synopsis
 
-Replaces the state of the node with the one read from file (or stdin if the '--file' parameter is not set).
+Replaces the state of the node with the one read from file (or stdin if the `--file` parameter is not set).
 
 The state is a JSON document containing the list of sites and apps to be configured in the web server, and it's normally exported from another node (useful for backups or migrations).
 

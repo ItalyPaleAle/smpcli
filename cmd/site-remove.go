@@ -38,7 +38,7 @@ func init() {
 		Short: "Remove a site",
 		Long: `Removes a site from the node, so the web server stops accepting requests for it.
 
-You must specify the primary domain name (no aliases) in the '--domain' parameter to select the site to be removed.
+You must specify the primary domain name (no aliases) in the ` + "`" + `--domain` + "`" + ` parameter to select the site to be removed.
 `,
 		DisableAutoGenTag: true,
 

@@ -1,16 +1,16 @@
 name: stkcli defaults set
 synopsis: Set default connection options
 description: "Set the value for the shared flags that will be used as default in all
-  commands:\n\n- '--node address' or '-n address':\n  Sets the address (IP or hostname)
-  of the node to connect to.\n  This option is required.\n- '--port port' or '-P port':\n
+  commands:\n\n- `--node address` or `-n address`:\n  Sets the address (IP or hostname)
+  of the node to connect to.\n  This option is required.\n- `--port port` or `-P port`:\n
   \ If set, will communicate with the node using the port specified.\n  System default:
-  2265\n- '--insecure' or '-k' (boolean):\n  If set, disables TLS certificate validation
+  2265\n- `--insecure` or `-k` (boolean):\n  If set, disables TLS certificate validation
   when communicating with the node (e.g. to use self-signed certificates).\n  System
-  default: false (requires valid TLS certificate)\n- '--http' or '-S' (boolean):\n
+  default: false (requires valid TLS certificate)\n- `--http` or `-S` (boolean):\n
   \ If set, communicates with the node using unencrypted HTTP.\n  This option is considered
-  insecure, and should only be used if the node is 'localhost', or if you're connecting
+  insecure, and should only be used if the node is `localhost`, or if you're connecting
   to the node over an already-encrypted tunnel (e.g. VPN or SSH port forwarding).\n
-  \ System default: false (use TLS)\n\nNote that calling the 'defaults set' command
+  \ System default: false (use TLS)\n\nNote that calling the `defaults set` command
   overrides the default values for all the four flags above. If those values are not
   set, the system defaults are used. \n"
 usage: stkcli defaults set [flags]

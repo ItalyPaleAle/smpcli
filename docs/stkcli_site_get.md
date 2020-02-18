@@ -6,7 +6,7 @@ Get a site
 
 Show the details of a site configured in the node.
 
-Specify the primary domain name (no aliases) with the '--domain' parameter to select the site.
+Specify the primary domain name (no aliases) with the `--domain` parameter to select the site.
 
 
 ```

@@ -3,7 +3,7 @@ synopsis: Shows the status of a node
 description: |
   Prints information about the status and health of the node.
 
-  The '--domain' flag allows selecting a specific site only.
+  The `--domain` flag allows selecting a specific site only.
 usage: stkcli status [flags]
 options:
 - name: domain

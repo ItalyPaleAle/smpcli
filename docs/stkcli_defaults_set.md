@@ -6,21 +6,21 @@ Set default connection options
 
 Set the value for the shared flags that will be used as default in all commands:
 
-- '--node address' or '-n address':
+- `--node address` or `-n address`:
   Sets the address (IP or hostname) of the node to connect to.
   This option is required.
-- '--port port' or '-P port':
+- `--port port` or `-P port`:
   If set, will communicate with the node using the port specified.
   System default: 2265
-- '--insecure' or '-k' (boolean):
+- `--insecure` or `-k` (boolean):
   If set, disables TLS certificate validation when communicating with the node (e.g. to use self-signed certificates).
   System default: false (requires valid TLS certificate)
-- '--http' or '-S' (boolean):
+- `--http` or `-S` (boolean):
   If set, communicates with the node using unencrypted HTTP.
-  This option is considered insecure, and should only be used if the node is 'localhost', or if you're connecting to the node over an already-encrypted tunnel (e.g. VPN or SSH port forwarding).
+  This option is considered insecure, and should only be used if the node is `localhost`, or if you're connecting to the node over an already-encrypted tunnel (e.g. VPN or SSH port forwarding).
   System default: false (use TLS)
 
-Note that calling the 'defaults set' command overrides the default values for all the four flags above. If those values are not set, the system defaults are used. 
+Note that calling the `defaults set` command overrides the default values for all the four flags above. If those values are not set, the system defaults are used. 
 
 
 ```

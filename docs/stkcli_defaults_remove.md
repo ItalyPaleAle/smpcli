@@ -4,9 +4,9 @@ Remove all default connection options
 
 ### Synopsis
 
-Removes all default connection options that were set with 'defaults set', and goes back to the system defaults.
+Removes all default connection options that were set with `defaults set`, and goes back to the system defaults.
 
-After invoking this command, you're required to specify the '--node' (or '-n') flag for all stkcli commands that interact with a node.
+After invoking this command, you're required to specify the `--node` (or `-n`) flag for all stkcli commands that interact with a node.
 
 
 ```

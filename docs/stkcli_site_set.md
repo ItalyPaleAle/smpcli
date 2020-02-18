@@ -6,9 +6,9 @@ Updates the configuration for a site
 
 Updates a site configured in the node.
 
-Use the '--certificate' parameter to set a new TLS certificate. This should be the name of a certificate stored in the associated Azure Key Vault. You can also use the value "selfsigned" to have the node automatically generate a self-signed certificate for your site.
+Use the `--certificate` parameter to set a new TLS certificate. This should be the name of a certificate stored in the associated Azure Key Vault. You can also use the value `selfsigned` to have the node automatically generate a self-signed certificate for your site.
 
-The '--alias' parameter is used to replace the list of aliases configured for the domain. You can use this parameter multiple time to add more than one alias. Note that using the '--alias' flag will replace the entire list of aliases with the new one.
+The `--alias` parameter is used to replace the list of aliases configured for the domain. You can use this parameter multiple time to add more than one alias. Note that using the `--alias` flag will replace the entire list of aliases with the new one.
 
 
 ```

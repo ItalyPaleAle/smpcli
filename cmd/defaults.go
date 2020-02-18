@@ -27,7 +27,7 @@ var defaultsCmd = &cobra.Command{
 	Short: "View or set defaults for stkcli",
 	Long: `The defaults namespace contains the commands to view or set the default node stkcli connects to.
 
-You can use 'defaults set' to set the default options to connect to a node, so you don't have to repeat the shared flags: --node --port --insecure --http
+You can use 'defaults set' to set the default options to connect to a node, so you don't have to repeat the shared flags: ` + "`" + `--node --port --insecure --http` + "`" + `
 `,
 	DisableAutoGenTag: true,
 }

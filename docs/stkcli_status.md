@@ -6,7 +6,7 @@ Shows the status of a node
 
 Prints information about the status and health of the node.
 
-The '--domain' flag allows selecting a specific site only.
+The `--domain` flag allows selecting a specific site only.
 
 
 ```

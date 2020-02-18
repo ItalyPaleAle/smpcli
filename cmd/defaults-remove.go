@@ -28,9 +28,9 @@ func init() {
 	c := &cobra.Command{
 		Use:   "remove",
 		Short: "Remove all default connection options",
-		Long: `Removes all default connection options that were set with 'defaults set', and goes back to the system defaults.
+		Long: `Removes all default connection options that were set with ` + "`" + `defaults set` + "`" + `, and goes back to the system defaults.
 
-After invoking this command, you're required to specify the '--node' (or '-n') flag for all stkcli commands that interact with a node.
+After invoking this command, you're required to specify the ` + "`" + `--node` + "`" + ` (or ` + "`" + `-n` + "`" + `) flag for all stkcli commands that interact with a node.
 `,
 		DisableAutoGenTag: true,
 
