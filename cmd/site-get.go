@@ -35,6 +35,7 @@ func init() {
 
 Specify the primary domain name (no aliases) with the '--domain' parameter to select the site.
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()

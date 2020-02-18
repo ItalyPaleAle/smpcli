@@ -40,6 +40,7 @@ The CLI supports two authentication methods:
 Note that your Statiko nodes might not be configured to support all authentication methods.
 If you're the admin of a Statiko node, please refer to the documentation for configuring authentication methods.
 `,
+	DisableAutoGenTag: true,
 }
 
 func init() {

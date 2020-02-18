@@ -41,6 +41,7 @@ func init() {
 
 This command tells the node to deploy the app (already uploaded beforehand) with the specific name and version to a site identified by the domain option.
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()

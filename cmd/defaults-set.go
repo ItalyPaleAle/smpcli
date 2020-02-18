@@ -48,6 +48,7 @@ func init() {
 
 Note that calling the 'defaults set' command overrides the default values for all the four flags above. If those values are not set, the system defaults are used. 
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error

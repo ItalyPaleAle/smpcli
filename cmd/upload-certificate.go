@@ -185,6 +185,8 @@ This command accepts three parameters:
 
 Note that only certificates with RSA keys are supported. Additionally, both the certificate and the key must be in PEM format.
 `,
+		DisableAutoGenTag: true,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			// Check if all files exist
 			if !checkFile(certificate) {

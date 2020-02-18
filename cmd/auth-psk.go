@@ -36,6 +36,7 @@ func init() {
 The pre-shared key is defined in the node's configuration, and clients are authenticated if they send the same key in the header of API calls.
 Note that the key is not hashed nor encrypted, so using TLS to connect to nodes is strongly recommended.
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()

@@ -29,6 +29,7 @@ var defaultsCmd = &cobra.Command{
 
 You can use 'defaults set' to set the default options to connect to a node, so you don't have to repeat the shared flags: --node --port --insecure --http
 `,
+	DisableAutoGenTag: true,
 }
 
 func init() {

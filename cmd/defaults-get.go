@@ -33,6 +33,7 @@ func init() {
 		Long: `Shows all the default flags that are used to connect to a node.
 The output of the command resembles the flags that users would pass on the command line to stkcli.
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			// Check if we have defaults

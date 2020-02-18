@@ -40,6 +40,7 @@ func init() {
 
 You must specify the primary domain name (no aliases) in the '--domain' parameter to select the site to be removed.
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()

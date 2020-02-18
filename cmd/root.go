@@ -47,6 +47,7 @@ Additionally, stkcli offers commands that simplify uploading and signing app bun
 
 stkcli is released under a GNU General Public License v3.0 license. Source code is available on GitHub: https://github.com/ItalyPaleAle/stkcli
 `,
+	DisableAutoGenTag: true,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

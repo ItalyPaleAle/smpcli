@@ -32,6 +32,7 @@ func init() {
 
 After invoking this command, you're required to specify the '--node' (or '-n') flag for all stkcli commands that interact with a node.
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			// Reset all values to the default

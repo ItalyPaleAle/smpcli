@@ -43,6 +43,7 @@ The state is a JSON document containing the list of sites and apps to be configu
 
 This command completely replaces the state of the node with the one you're passing to the command, discarding any site or app currently configured in the node.
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()

@@ -31,6 +31,7 @@ The node's state is a JSON document containing the list of apps and sites config
 
 The state file can contains secrets (e.g self-signed TLS certificates) which are encrypted with the symmetric key from the node's configuration file.
 `,
+	DisableAutoGenTag: true,
 }
 
 func init() {

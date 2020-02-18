@@ -38,6 +38,7 @@ func init() {
 
 The state is a JSON document containing the list of sites and apps currently configured in the web server. You can store the state in a file for backups, or to restore it to another node using the 'state set' command.
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()

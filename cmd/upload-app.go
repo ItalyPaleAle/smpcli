@@ -185,6 +185,8 @@ Versions are unique for each app. For example, if you upload the app 'myapp' and
 
 When using '--no-signature', stkcli will not calculate the checksum of the app's bundle, and it will not cryptographically sign it with the codesigning key. Statiko nodes do not accept unsigned app bundles by default for security reasons, and the admin must manually enable this option in the node's configuration file. However, when uploading unsigned bundles, you do not need to be signed into an Azure account in the local system.
 `,
+		DisableAutoGenTag: true,
+
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
 			auth := nodeStore.GetAuthToken(optAddress)

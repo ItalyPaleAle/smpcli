@@ -27,9 +27,10 @@ import (
 
 func init() {
 	c := &cobra.Command{
-		Use:   "list",
-		Short: "List sites",
-		Long:  `Shows the list of all sites configured in the node.`,
+		Use:               "list",
+		Short:             "List sites",
+		Long:              `Shows the list of all sites configured in the node.`,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()

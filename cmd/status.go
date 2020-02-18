@@ -37,6 +37,7 @@ func init() {
 
 The '--domain' flag allows selecting a specific site only.
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()

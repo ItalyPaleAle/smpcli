@@ -29,6 +29,7 @@ var uploadCmd = &cobra.Command{
 
 IMPORTANT: In order to use these commands, you must have the Azure CLI installed and you must be authenticated to the Azure subscription where the Key Vault resides (with 'az login'). Additionally, your Azure account must have the following permissions in the Key Vault's data plane: keys (create, update, import, sign), certificate (create, update, import).
 `,
+	DisableAutoGenTag: true,
 }
 
 func init() {

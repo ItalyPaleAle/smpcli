@@ -43,6 +43,7 @@ Use the '--certificate' parameter to set a new TLS certificate. This should be t
 
 The '--alias' parameter is used to replace the list of aliases configured for the domain. You can use this parameter multiple time to add more than one alias. Note that using the '--alias' flag will replace the entire list of aliases with the new one.
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()

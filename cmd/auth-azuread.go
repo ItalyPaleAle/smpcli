@@ -41,6 +41,7 @@ The Azure AD application is defined in the node's configuration. Users must be p
 
 Once you have authenticated with Azure AD, the client obtains an OAuth token which it uses to authorize API calls with the node. Tokens have a limited lifespan, which is configurable by the admin (stkcli supports automatically refreshing tokens when possible).
 `,
+		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
