@@ -9,6 +9,10 @@ options:
 - name: domain
   shorthand: d
   usage: domain name
+- name: force
+  shorthand: f
+  default_value: "false"
+  usage: force a recheck of all sites, ignoring status cache
 - name: help
   shorthand: h
   default_value: "false"

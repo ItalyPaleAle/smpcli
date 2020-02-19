@@ -29,6 +29,7 @@ import (
 
 func init() {
 	var domain string
+	var force bool
 
 	c := &cobra.Command{
 		Use:   "status",
@@ -47,6 +48,9 @@ The ` + "`" + `--domain` + "`" + ` flag allows selecting a specific site only.
 			url := baseURL + "/status"
 			if domain != "" {
 				url += "/" + domain
+			}
+			if force {
+				url += "?force=1"
 			}
 			resp, err := client.Get(url)
 			if err != nil {
@@ -74,6 +78,7 @@ The ` + "`" + `--domain` + "`" + ` flag allows selecting a specific site only.
 
 	// Flags
 	c.Flags().StringVarP(&domain, "domain", "d", "", "domain name")
+	c.Flags().BoolVarP(&force, "force", "f", false, "force a recheck of all sites, ignoring status cache")
 
 	// Add shared flags
 	addSharedFlags(c)
