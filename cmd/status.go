@@ -20,6 +20,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/spf13/cobra"
@@ -59,19 +60,26 @@ The ` + "`" + `--domain` + "`" + ` flag allows selecting a specific site only.
 			}
 			defer resp.Body.Close()
 
-			// The /status endpoint returns a non-200 status code also when there's an issue with the apps, so let's still parse it but show an error
-			if resp.StatusCode != http.StatusOK {
-				fmt.Printf("\033[31mStatus endpoint returned a %d status code\033[0m\n", resp.StatusCode)
-			}
+			// If the status is 2xx or 503 (when the apps are down) parse the /status endpoint response
+			if (resp.StatusCode >= 200 && resp.StatusCode <= 299) || resp.StatusCode == 503 {
+				// The /status endpoint returns a 503 status code also when there's an issue with the apps, so let's still parse it but show an error
+				if resp.StatusCode != http.StatusOK {
+					fmt.Printf("\033[31mStatus endpoint returned a %d status code\033[0m\n", resp.StatusCode)
+				}
 
-			// Parse the response
-			var r statusResponseModel
-			if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-				utils.ExitWithError(utils.ErrorNode, "Invalid JSON response", err)
+				var r statusResponseModel
+				if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+					utils.ExitWithError(utils.ErrorNode, "Invalid JSON response", err)
+					return
+				}
+
+				fmt.Println(statusResponseModelFormat(&r))
+			} else {
+				b, _ := ioutil.ReadAll(resp.Body)
+				err := fmt.Errorf("invalid response status code: %d; content: %s", resp.StatusCode, string(b))
+				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
-
-			fmt.Println(statusResponseModelFormat(&r))
 		},
 	}
 	rootCmd.AddCommand(c)
