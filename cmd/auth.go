@@ -39,6 +39,8 @@ The CLI supports two authentication methods:
 
 Note that your Statiko nodes might not be configured to support all authentication methods.
 If you're the admin of a Statiko node, please refer to the documentation for configuring authentication methods.
+
+Please also note that, in lieu of authorizing stkcli with one of the commands above, you can pass the value for the Authorization header in the REST calls (either the pre-shared key or an Azure AD auth token) using the ` + "`" + `NODE_KEY` + "`" + ` environmental variable, for each command (e.g. ` + "`" + `NODE_KEY=my-psk stkcli site list` + "`" + `).
 `,
 	DisableAutoGenTag: true,
 }

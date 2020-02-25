@@ -41,7 +41,7 @@ func init() {
 
 Each site is identified by a primary domain, and it can have multiple aliases (domain names that are redirected to the primary one).
 
-When creating a site, you can add the name of a TLS certificate stored on the associated Azure Key Vault instance. You can also specify ` + "`" + `selfsigned` + "`" + ` as a value for the TLS certificate to have the node automatically generate a self-signed certificate for your site.
+When creating a site, you must specify the name of a TLS certificate stored on the associated Azure Key Vault instance. You can also specify ` + "`" + `selfsigned` + "`" + ` as a value for the TLS certificate to have the node automatically generate a self-signed certificate for your site. If you omit the ` + "`" + `--certificate` + "`" + ` option, it will default to a self-signed certificate.
 `,
 		DisableAutoGenTag: true,
 
@@ -84,7 +84,7 @@ When creating a site, you can add the name of a TLS certificate stored on the as
 	c.Flags().StringVarP(&domain, "domain", "d", "", "primary domain name")
 	c.MarkFlagRequired("domain")
 	c.Flags().StringArrayVarP(&aliases, "alias", "a", []string{}, "alias domain (can be used multiple times)")
-	c.Flags().StringVarP(&tlsCertificate, "certificate", "c", "", "name of the TLS certificate")
+	c.Flags().StringVarP(&tlsCertificate, "certificate", "c", "", "name of the TLS certificate or `selfsigned` (default)")
 
 	// Add shared flags
 	addSharedFlags(c)
