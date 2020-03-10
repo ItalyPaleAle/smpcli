@@ -1,4 +1,4 @@
-name: Release stkcli
+name: Release
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - 'v*'
 
 env:
-  GO_VERSION: 1.13
+  GO_BUILDER_IMAGE: 'golang:1.14-alpine'
   
 jobs:
 
@@ -16,89 +16,145 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
 
-    - name: Set up Go ${{env.GO_VERSION}}
-      uses: actions/setup-go@v1
-      with:
-        go-version: ${{env.GO_VERSION}}
-      id: go
-
     - name: Check out code
       uses: actions/checkout@v2
-    
-    # Build for all platforms
+
+    # Set variables
     - name: Set variables
       run: |
         # Trim the first 10 characters, which are "refs/tags/"
         BUILD_ID="${GITHUB_REF:10}"
+        # Just like BUILD_ID, but without the "v" at the beginning
+        BUILD_VERSION="${GITHUB_REF:11}"
         BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%S')
         COMMIT_HASH=$(echo $GITHUB_SHA | head -c 7)
         echo ::set-env name=BUILD_ID::$BUILD_ID
+        echo ::set-env name=BUILD_VERSION::$BUILD_VERSION
         echo ::set-env name=BUILD_TIME::$BUILD_TIME
         echo ::set-env name=COMMIT_HASH::$COMMIT_HASH
 
-    - name: Build Linux amd64
+    # Build for all platforms
+    - name: Build for all platforms
       run: |
-        GO111MODULE=on \
-          go build \
-            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
-            -o bin/stkcli_linux_amd64
-        chmod +x bin/stkcli_linux_amd64
-    
-    - name: Build Linux arm64v8
-      run: |
-        GO111MODULE=on \
-        GOOS=linux \
-        GOARCH=arm64 \
-          go build \
-            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
-            -o bin/stkcli_linux_arm64v8
-        chmod +x bin/stkcli_linux_arm64v8
-    
-    - name: Build Linux arm32v7
-      run: |
-        GO111MODULE=on \
-        GOOS=linux \
-        GOARCH=arm \
-        GOARM=7 \
-          go build \
-            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
-            -o bin/stkcli_linux_arm32v7
-        chmod +x bin/stkcli_linux_arm32v7
-    
-    - name: Build macOS
-      run: |
-        GO111MODULE=on \
-        GOOS=darwin \
-        GOARCH=amd64 \
-          go build \
-            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
-            -o bin/stkcli_macos
-        chmod +x bin/stkcli_macos
-    
-    - name: Build Windows 64-bit
-      run: |
-        GO111MODULE=on \
-        GOOS=windows \
-        GOARCH=amd64 \
-          go build \
-            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
-            -o bin/stkcli_win64.exe
-    
-    - name: Build Windows 32-bit
-      run: |
-        GO111MODULE=on \
-        GOOS=windows \
-        GOARCH=386 \
-          go build \
-            -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.ENV=production -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
-            -o bin/stkcli_win32.exe
+        mkdir -p .bin
+        # Build using Docker
+        docker run \
+          --rm \
+          -v "$PWD":/usr/src/myapp \
+          -w /usr/src/myapp \
+          ${{env.GO_BUILDER_IMAGE}} \
+            sh -c '
+              set -e
+
+              echo -e "###\nInstall the zip utility\n"
+              apk add zip
+
+              echo -e "\n###\nFetching modules\n"
+              GO111MODULE=on \
+                go get
+
+              echo -e "\n###\nBuilding linux/amd64\n"
+              # Disable CGO so the binary is fully static
+              mkdir .bin/stkcli-v${{env.BUILD_VERSION}}-linux-amd64
+              CGO_ENABLED=0 \
+              GOOS=linux \
+              GOARCH=amd64 \
+              GO111MODULE=on \
+                go build \
+                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -o .bin/stkcli-v${{env.BUILD_VERSION}}-linux-amd64/stkcli
+              cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-linux-amd64
+              cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-amd64
+              (cd .bin && tar -czvf stkcli-v${{env.BUILD_VERSION}}-linux-amd64.tar.gz stkcli-v${{env.BUILD_VERSION}}-linux-amd64)
+
+              echo -e "\n###\nBuilding linux/386\n"
+              mkdir .bin/stkcli-v${{env.BUILD_VERSION}}-linux-386
+              CGO_ENABLED=0 \
+              GOOS=linux \
+              GOARCH=386 \
+              GO111MODULE=on \
+                go build \
+                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -o .bin/stkcli-v${{env.BUILD_VERSION}}-linux-386/stkcli
+              cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-linux-386
+              cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-386
+              (cd .bin && tar -czvf stkcli-v${{env.BUILD_VERSION}}-linux-386.tar.gz stkcli-v${{env.BUILD_VERSION}}-linux-386)
+
+              echo -e "\n###\nBuilding linux/arm64\n"
+              mkdir .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm64
+              CGO_ENABLED=0 \
+              GOOS=linux \
+              GOARCH=arm64 \
+              GO111MODULE=on \
+                go build \
+                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -o .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm64/stkcli
+              cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm64
+              cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm64
+              (cd .bin && tar -czvf stkcli-v${{env.BUILD_VERSION}}-linux-arm64.tar.gz stkcli-v${{env.BUILD_VERSION}}-linux-arm64)
+
+              echo -e "\n###\nBuilding linux/arm\n"
+              mkdir .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7
+              CGO_ENABLED=0 \
+              GOOS=linux \
+              GOARCH=arm \
+              GOARM=7 \
+              GO111MODULE=on \
+                go build \
+                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -o .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7/stkcli
+              cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7
+              cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7
+              (cd .bin && tar -czvf stkcli-v${{env.BUILD_VERSION}}-linux-armv7.tar.gz stkcli-v${{env.BUILD_VERSION}}-linux-armv7)
+
+              echo -e "\n###\nBuilding darwin/amd64\n"
+              mkdir .bin/stkcli-v${{env.BUILD_VERSION}}-macos
+              CGO_ENABLED=0 \
+              GOOS=darwin \
+              GOARCH=amd64 \
+              GO111MODULE=on \
+                go build \
+                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -o .bin/stkcli-v${{env.BUILD_VERSION}}-macos/stkcli
+              cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-macos
+              cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-macos
+              (cd .bin && tar -czvf stkcli-v${{env.BUILD_VERSION}}-macos.tar.gz stkcli-v${{env.BUILD_VERSION}}-macos)
+
+              echo -e "\n###\nBuilding windows/amd64\n"
+              mkdir .bin/stkcli-v${{env.BUILD_VERSION}}-win64
+              CGO_ENABLED=0 \
+              GOOS=windows \
+              GOARCH=amd64 \
+              GO111MODULE=on \
+                go build \
+                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -o .bin/stkcli-v${{env.BUILD_VERSION}}-win64/stkcli.exe
+              cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-win64
+              cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-win64
+              (cd .bin && zip -r stkcli-v${{env.BUILD_VERSION}}-win64.zip stkcli-v${{env.BUILD_VERSION}}-win64)
+
+              echo -e "\n###\nBuilding windows/386\n"
+              mkdir .bin/stkcli-v${{env.BUILD_VERSION}}-win32
+              CGO_ENABLED=0 \
+              GOOS=windows \
+              GOARCH=386 \
+              GO111MODULE=on \
+                go build \
+                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -o .bin/stkcli-v${{env.BUILD_VERSION}}-win32/stkcli.exe
+              cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-win32
+              cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-win32
+              (cd .bin && zip -r stkcli-v${{env.BUILD_VERSION}}-win32.zip stkcli-v${{env.BUILD_VERSION}}-win32)
+              '
+        echo -e"\n###\nCompilation done\n"
+        ls -al .bin
     
     # Publish artifacts
     - name: Publish binaries as artifacts
       uses: actions/upload-artifact@v1
       with:
         name: bin
-        path: bin
+        path: .bin
     
     # Create release and upload assets
     - name: Create release
@@ -108,66 +164,76 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        release_name: ${{ github.ref }}
         draft: true
         prerelease: false
 
-    - name: Upload release asset Linux amd64
+    - name: Upload release asset stkcli-linux-amd64
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: bin/stkcli_linux_amd64
-        asset_name: stkcli_linux_amd64
-        asset_content_type: application/octet-stream
+        asset_path: .bin/stkcli-v${{env.BUILD_VERSION}}-linux-amd64.tar.gz
+        asset_name: stkcli-v${{env.BUILD_VERSION}}-linux-amd64.tar.gz
+        asset_content_type: application/gzip
 
-    - name: Upload release asset Linux arm64v8
+    - name: Upload release asset stkcli-linux-386
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: bin/stkcli_linux_arm64v8
-        asset_name: stkcli_linux_arm64v8
-        asset_content_type: application/octet-stream
+        asset_path: .bin/stkcli-v${{env.BUILD_VERSION}}-linux-386.tar.gz
+        asset_name: stkcli-v${{env.BUILD_VERSION}}-linux-386.tar.gz
+        asset_content_type: application/gzip
 
-    - name: Upload release asset Linux arm32v7
+    - name: Upload release asset stkcli-linux-arm64
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: bin/stkcli_linux_arm32v7
-        asset_name: stkcli_linux_arm32v7
-        asset_content_type: application/octet-stream
+        asset_path: .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm64.tar.gz
+        asset_name: stkcli-v${{env.BUILD_VERSION}}-linux-arm64.tar.gz
+        asset_content_type: application/gzip
 
-    - name: Upload release asset macOS
+    - name: Upload release asset stkcli-linux-armv7
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: bin/stkcli_macos
-        asset_name: stkcli_macos
-        asset_content_type: application/octet-stream
+        asset_path: .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7.tar.gz
+        asset_name: stkcli-v${{env.BUILD_VERSION}}-linux-armv7.tar.gz
+        asset_content_type: application/gzip
 
-    - name: Upload release asset Windows 64-bit
+    - name: Upload release asset stkcli-macos
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: bin/stkcli_win64.exe
-        asset_name: stkcli_win64.exe
-        asset_content_type: application/octet-stream
+        asset_path: .bin/stkcli-v${{env.BUILD_VERSION}}-macos.tar.gz
+        asset_name: stkcli-v${{env.BUILD_VERSION}}-macos.tar.gz
+        asset_content_type: application/gzip
 
-    - name: Upload release asset Windows 32-bit
+    - name: Upload release asset stkcli-win64
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: bin/stkcli_win32.exe
-        asset_name: stkcli_win32.exe
-        asset_content_type: application/octet-stream
+        asset_path: .bin/stkcli-v${{env.BUILD_VERSION}}-win64.zip
+        asset_name: stkcli-v${{env.BUILD_VERSION}}-win64.zip
+        asset_content_type: application/zip
+
+    - name: Upload release asset stkcli-win32
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: .bin/stkcli-v${{env.BUILD_VERSION}}-win32.zip
+        asset_name: stkcli-v${{env.BUILD_VERSION}}-win32.zip
+        asset_content_type: application/zip
