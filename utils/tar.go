@@ -18,12 +18,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package utils
 
 import (
+	"archive/tar"
+	"fmt"
 	"io"
 	"os"
-	"fmt"
-	"archive/tar"
-	"strings"
 	"path/filepath"
+	"strings"
 
 	"github.com/dsnet/compress/bzip2"
 )
@@ -54,38 +54,38 @@ func TarBZ2(src string, writers ...io.Writer) error {
 			return err
 		}
 
-		// create a new dir/file header
+		// Create a new dir/file header
 		header, err := tar.FileInfoHeader(fi, fi.Name())
 		if err != nil {
 			return err
 		}
 
-		// update the name to correctly reflect the desired destination when untaring
+		// Update the name to correctly reflect the desired destination when untaring
 		header.Name = strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
+		fmt.Println("Adding", "/"+header.Name)
 
-		// write the header
+		// Write the header
 		if err := tw.WriteHeader(header); err != nil {
 			return err
 		}
-		
-		// return on non-regular files (thanks to [kumo](https://medium.com/@komuw/just-like-you-did-fbdd7df829d3) for this suggested update)
+
+		// Return on non-regular files (thanks to [kumo](https://medium.com/@komuw/just-like-you-did-fbdd7df829d3) for this suggested update)
 		if !fi.Mode().IsRegular() {
 			return nil
 		}
 
-		// open files for taring
+		// Open files for taring
 		f, err := os.Open(file)
 		if err != nil {
 			return err
 		}
 
-		// copy file data into tar writer
+		// Copy file data into tar writer
 		if _, err := io.Copy(tw, f); err != nil {
 			return err
 		}
-		
-		// manually close here after each file operation; defering would cause each file close
-		// to wait until all operations have completed.
+
+		// Manually close here after each file operation; defering would cause each file close to wait until all operations have completed.
 		f.Close()
 
 		return nil

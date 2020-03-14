@@ -101,7 +101,7 @@ Sync error:       %s
 	for i := 0; i < l; i++ {
 		el := m.Health[i]
 
-		if el.App != nil {
+		if el.StatusCode != nil {
 			err := "\033[2m<nil>\033[0m"
 			if el.Error != nil {
 				err = *el.Error
@@ -131,12 +131,16 @@ Time:         %s
 			if el.Error != nil {
 				err = *el.Error
 			}
+			app := "\033[2m<nil>\033[0m"
+			if el.App != nil {
+				app = *el.App
+			}
 
 			result += fmt.Sprintf(`Domain:       %s
 App:          %s
 Error:        %s
 
-`, el.Domain, "\033[2m<nil>\033[0m", err)
+`, el.Domain, app, err)
 		}
 	}
 
