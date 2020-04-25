@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -101,47 +100,33 @@ Sync error:       %s
 	for i := 0; i < l; i++ {
 		el := m.Health[i]
 
-		if el.StatusCode != nil {
-			err := "\033[2m<nil>\033[0m"
-			if el.Error != nil {
-				err = *el.Error
-			}
-
-			statusCode := "\033[2m<nil>\033[0m"
-			if el.StatusCode != nil {
-				statusCode = strconv.Itoa(*el.StatusCode)
-			}
-
-			responseSize := "\033[2m<nil>\033[0m"
-			if el.ResponseSize != nil {
-				responseSize = strconv.Itoa(*el.ResponseSize)
-			}
-
-			result += fmt.Sprintf(`Domain:       %s
-App:          %s
-StatusCode:   %s
-ResponseSize: %s
-Error:        %s
-Time:         %s
-
-`, el.Domain, *el.App, statusCode, responseSize, err, el.Time.Format(time.RFC3339))
-		} else {
-			// If there's no app deployed there's less data
-			err := "\033[2m<nil>\033[0m"
-			if el.Error != nil {
-				err = *el.Error
-			}
-			app := "\033[2m<nil>\033[0m"
-			if el.App != nil {
-				app = *el.App
-			}
-
-			result += fmt.Sprintf(`Domain:       %s
-App:          %s
-Error:        %s
-
-`, el.Domain, app, err)
+		healthy := "no"
+		if el.Healthy {
+			healthy = "yes"
 		}
+
+		app := "\033[2m<nil>\033[0m"
+		if el.App != nil {
+			app = *el.App
+		}
+
+		ts := "\033[2m<nil>\033[0m"
+		if el.Time != nil {
+			ts = el.Time.Format(time.RFC3339)
+		}
+
+		err := "\033[2m<nil>\033[0m"
+		if el.Error != nil {
+			err = *el.Error
+		}
+
+		result += fmt.Sprintf(`Domain:       %s
+Healthy:      %s
+App:          %s
+Last check:   %s
+Error:        %s
+
+`, el.Domain, healthy, app, ts, err)
 	}
 
 	return

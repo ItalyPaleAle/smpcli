@@ -28,12 +28,11 @@ type statusResponseModelSync struct {
 	SyncError string     `json:"syncError"`
 }
 type statusResponseModelHealth struct {
-	Domain       string     `json:"domain"`
-	App          *string    `json:"app"`
-	StatusCode   *int       `json:"status"`
-	ResponseSize *int       `json:"size"`
-	Error        *string    `json:"error"`
-	Time         *time.Time `json:"time"`
+	Domain  string     `json:"domain"`
+	App     *string    `json:"app"`
+	Healthy bool       `json:"healthy"`
+	Error   *string    `json:"error"`
+	Time    *time.Time `json:"time"`
 }
 type statusResponseModelNginx struct {
 	Running bool `json:"running"`
