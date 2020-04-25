@@ -43,6 +43,7 @@ The ` + "`" + `--domain` + "`" + ` flag allows selecting a specific site only.
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
+			auth := nodeStore.GetAuthToken(optAddress)
 
 			// Invoke the /status endpoint to get the status of the node
 			// We're not using utils.RequestJSON here because we need to get the status code and parse the response regardless
@@ -53,7 +54,17 @@ The ` + "`" + `--domain` + "`" + ` flag allows selecting a specific site only.
 			if force {
 				url += "?force=1"
 			}
-			resp, err := client.Get(url)
+			// Build the request
+			req, err := http.NewRequest("GET", url, nil)
+			if err != nil {
+				utils.ExitWithError(utils.ErrorNode, "Error building request", err)
+				return
+			}
+			// Authorization, if any
+			if auth != "" {
+				req.Header.Set("Authorization", auth)
+			}
+			resp, err := client.Do(req)
 			if err != nil {
 				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
