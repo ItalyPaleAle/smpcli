@@ -30,7 +30,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
 	"github.com/spf13/cobra"
 
-	"github.com/ItalyPaleAle/stkcli/utils"
+	"github.com/statiko-dev/stkcli/utils"
 )
 
 var (

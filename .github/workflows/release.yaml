@@ -61,7 +61,7 @@ jobs:
               GOARCH=amd64 \
               GO111MODULE=on \
                 go build \
-                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
                   -o .bin/stkcli-v${{env.BUILD_VERSION}}-linux-amd64/stkcli
               cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-linux-amd64
               cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-amd64
@@ -74,7 +74,7 @@ jobs:
               GOARCH=386 \
               GO111MODULE=on \
                 go build \
-                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
                   -o .bin/stkcli-v${{env.BUILD_VERSION}}-linux-386/stkcli
               cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-linux-386
               cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-386
@@ -87,7 +87,7 @@ jobs:
               GOARCH=arm64 \
               GO111MODULE=on \
                 go build \
-                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
                   -o .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm64/stkcli
               cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm64
               cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm64
@@ -101,7 +101,7 @@ jobs:
               GOARM=7 \
               GO111MODULE=on \
                 go build \
-                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
                   -o .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7/stkcli
               cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7
               cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7
@@ -114,7 +114,7 @@ jobs:
               GOARCH=amd64 \
               GO111MODULE=on \
                 go build \
-                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
                   -o .bin/stkcli-v${{env.BUILD_VERSION}}-macos/stkcli
               cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-macos
               cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-macos
@@ -127,7 +127,7 @@ jobs:
               GOARCH=amd64 \
               GO111MODULE=on \
                 go build \
-                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
                   -o .bin/stkcli-v${{env.BUILD_VERSION}}-win64/stkcli.exe
               cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-win64
               cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-win64
@@ -140,7 +140,7 @@ jobs:
               GOARCH=386 \
               GO111MODULE=on \
                 go build \
-                  -ldflags "-X github.com/ItalyPaleAle/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/ItalyPaleAle/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/ItalyPaleAle/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
+                  -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
                   -o .bin/stkcli-v${{env.BUILD_VERSION}}-win32/stkcli.exe
               cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-win32
               cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-win32

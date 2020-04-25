@@ -1,4 +1,4 @@
-module github.com/ItalyPaleAle/stkcli
+module github.com/statiko-dev/stkcli
 
 go 1.13
 

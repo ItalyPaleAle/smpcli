@@ -25,7 +25,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 
-	"github.com/ItalyPaleAle/stkcli/utils"
+	"github.com/statiko-dev/stkcli/utils"
 )
 
 // This is the first init that is executed

@@ -23,7 +23,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ItalyPaleAle/stkcli/buildinfo"
+	"github.com/statiko-dev/stkcli/buildinfo"
 )
 
 func init() {

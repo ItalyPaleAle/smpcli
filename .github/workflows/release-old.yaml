@@ -1,0 +1,173 @@
+name: Release stkcli
+
+on:
+  push:
+    tags:
+      # Push to tags matching v*
+      - 'v*'
+
+env:
+  GO_VERSION: 1.13
+  
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    steps:
+
+    - name: Set up Go ${{env.GO_VERSION}}
+      uses: actions/setup-go@v1
+      with:
+        go-version: ${{env.GO_VERSION}}
+      id: go
+
+    - name: Check out code
+      uses: actions/checkout@v2
+    
+    # Build for all platforms
+    - name: Set variables
+      run: |
+        # Trim the first 10 characters, which are "refs/tags/"
+        BUILD_ID="${GITHUB_REF:10}"
+        BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%S')
+        COMMIT_HASH=$(echo $GITHUB_SHA | head -c 7)
+        echo ::set-env name=BUILD_ID::$BUILD_ID
+        echo ::set-env name=BUILD_TIME::$BUILD_TIME
+        echo ::set-env name=COMMIT_HASH::$COMMIT_HASH
+
+    - name: Build Linux amd64
+      run: |
+        GO111MODULE=on \
+          go build \
+            -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.ENV=production -X github.com/statiko-dev/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_linux_amd64
+        chmod +x bin/stkcli_linux_amd64
+    
+    - name: Build Linux arm64v8
+      run: |
+        GO111MODULE=on \
+        GOOS=linux \
+        GOARCH=arm64 \
+          go build \
+            -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.ENV=production -X github.com/statiko-dev/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_linux_arm64v8
+        chmod +x bin/stkcli_linux_arm64v8
+    
+    - name: Build Linux arm32v7
+      run: |
+        GO111MODULE=on \
+        GOOS=linux \
+        GOARCH=arm \
+        GOARM=7 \
+          go build \
+            -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.ENV=production -X github.com/statiko-dev/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_linux_arm32v7
+        chmod +x bin/stkcli_linux_arm32v7
+    
+    - name: Build macOS
+      run: |
+        GO111MODULE=on \
+        GOOS=darwin \
+        GOARCH=amd64 \
+          go build \
+            -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.ENV=production -X github.com/statiko-dev/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_macos
+        chmod +x bin/stkcli_macos
+    
+    - name: Build Windows 64-bit
+      run: |
+        GO111MODULE=on \
+        GOOS=windows \
+        GOARCH=amd64 \
+          go build \
+            -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.ENV=production -X github.com/statiko-dev/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_win64.exe
+    
+    - name: Build Windows 32-bit
+      run: |
+        GO111MODULE=on \
+        GOOS=windows \
+        GOARCH=386 \
+          go build \
+            -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.ENV=production -X github.com/statiko-dev/stkcli/buildinfo.BuildID=$BUILD_ID -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=$BUILD_TIME -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=$COMMIT_HASH" \
+            -o bin/stkcli_win32.exe
+    
+    # Publish artifacts
+    - name: Publish binaries as artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: bin
+        path: bin
+    
+    # Create release and upload assets
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        draft: true
+        prerelease: false
+
+    - name: Upload release asset Linux amd64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: bin/stkcli_linux_amd64
+        asset_name: stkcli_linux_amd64
+        asset_content_type: application/octet-stream
+
+    - name: Upload release asset Linux arm64v8
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: bin/stkcli_linux_arm64v8
+        asset_name: stkcli_linux_arm64v8
+        asset_content_type: application/octet-stream
+
+    - name: Upload release asset Linux arm32v7
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: bin/stkcli_linux_arm32v7
+        asset_name: stkcli_linux_arm32v7
+        asset_content_type: application/octet-stream
+
+    - name: Upload release asset macOS
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: bin/stkcli_macos
+        asset_name: stkcli_macos
+        asset_content_type: application/octet-stream
+
+    - name: Upload release asset Windows 64-bit
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: bin/stkcli_win64.exe
+        asset_name: stkcli_win64.exe
+        asset_content_type: application/octet-stream
+
+    - name: Upload release asset Windows 32-bit
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: bin/stkcli_win32.exe
+        asset_name: stkcli_win32.exe
+        asset_content_type: application/octet-stream

@@ -33,7 +33,7 @@ import (
 	"github.com/spf13/cobra"
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 
-	"github.com/ItalyPaleAle/stkcli/utils"
+	"github.com/statiko-dev/stkcli/utils"
 )
 
 func init() {

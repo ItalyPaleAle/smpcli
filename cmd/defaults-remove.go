@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"github.com/ItalyPaleAle/stkcli/utils"
+	"github.com/statiko-dev/stkcli/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

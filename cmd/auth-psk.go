@@ -24,7 +24,7 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
-	"github.com/ItalyPaleAle/stkcli/utils"
+	"github.com/statiko-dev/stkcli/utils"
 )
 
 func init() {

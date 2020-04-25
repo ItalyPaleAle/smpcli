@@ -34,7 +34,7 @@ import (
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/spf13/cobra"
 
-	"github.com/ItalyPaleAle/stkcli/utils"
+	"github.com/statiko-dev/stkcli/utils"
 )
 
 func init() {

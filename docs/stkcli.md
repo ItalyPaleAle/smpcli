@@ -9,7 +9,7 @@ This CLI is part of the Statiko project: https://statiko.dev
 stkcli allows managing Statiko nodes conveniently, by offering a command-line experience that interacts with nodes' REST APIs.
 Additionally, stkcli offers commands that simplify uploading and signing app bundles, and uploading TLS certificates.
 
-stkcli is released under a GNU General Public License v3.0 license. Source code is available on GitHub: https://github.com/ItalyPaleAle/stkcli
+stkcli is released under a GNU General Public License v3.0 license. Source code is available on GitHub: https://github.com/statiko-dev/stkcli
 
 
 ### Options
