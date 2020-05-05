@@ -58,15 +58,15 @@ type infoResponseModel struct {
 
 // POST /site (site add)
 type siteAddRequestModel struct {
-	Domain         string   `json:"domain"`
-	Aliases        []string `json:"aliases"`
-	TLSCertificate string   `json:"tlsCertificate"`
+	Domain  string                `json:"domain"`
+	Aliases []string              `json:"aliases"`
+	TLS     *siteTLSConfiguration `json:"tls"`
 }
 
 // PATCH /site/<domain> (site set)
 type siteSetRequestModel struct {
-	Aliases        []string `json:"aliases"`
-	TLSCertificate string   `json:"tlsCertificate"`
+	Aliases []string              `json:"aliases"`
+	TLS     *siteTLSConfiguration `json:"tls"`
 }
 
 // GET /site/<domain> (site get)
@@ -76,12 +76,11 @@ type siteGetResponseModelApp struct {
 	Version string `json:"version" binding:"required"`
 }
 type siteGetResponseModel struct {
-	Domain                   string                   `json:"domain"`
-	Aliases                  []string                 `json:"aliases"`
-	TLSCertificateSelfSigned bool                     `json:"tlsCertificateSelfSigned"`
-	TLSCertificate           string                   `json:"tlsCertificate"`
-	Error                    *string                  `json:"error"`
-	App                      *siteGetResponseModelApp `json:"app"`
+	Domain  string                   `json:"domain"`
+	Aliases []string                 `json:"aliases"`
+	TLS     *siteTLSConfiguration    `json:"tls"`
+	Error   *string                  `json:"error"`
+	App     *siteGetResponseModelApp `json:"app"`
 }
 
 // GET /site (site list)
@@ -111,3 +110,16 @@ type uploadAuthResponseModel struct {
 	ArchiveURL   string `json:"archiveUrl"`
 	SignatureURL string `json:"signatureUrl"`
 }
+
+// Common
+type siteTLSConfiguration struct {
+	Type        string `json:"type"`
+	Certificate string `json:"cert"`
+	Version     string `json:"ver"`
+}
+
+const (
+	TLSCertificateImported    = "imported"
+	TLSCertificateSelfSigned  = "selfsigned"
+	TLSCertificateLetsEncrypt = "letsencrypt"
+)

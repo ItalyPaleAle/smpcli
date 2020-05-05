@@ -50,9 +50,16 @@ The ` + "`" + `--alias` + "`" + ` parameter is used to replace the list of alias
 			auth := nodeStore.GetAuthToken(optAddress)
 
 			// Request body
+			tlsConfig := &siteTLSConfiguration{}
+			if tlsCertificate == "" || tlsCertificate == "selfsigned" {
+				tlsConfig.Type = TLSCertificateSelfSigned
+			} else {
+				tlsConfig.Type = TLSCertificateImported
+				tlsConfig.Certificate = tlsCertificate
+			}
 			reqBody := &siteSetRequestModel{
-				Aliases:        aliases,
-				TLSCertificate: tlsCertificate,
+				Aliases: aliases,
+				TLS:     tlsConfig,
 			}
 			buf := new(bytes.Buffer)
 			err := json.NewEncoder(buf).Encode(reqBody)

@@ -50,10 +50,17 @@ When creating a site, you must specify the name of a TLS certificate stored on t
 			auth := nodeStore.GetAuthToken(optAddress)
 
 			// Request body
+			tlsConfig := &siteTLSConfiguration{}
+			if tlsCertificate == "" || tlsCertificate == "selfsigned" {
+				tlsConfig.Type = TLSCertificateSelfSigned
+			} else {
+				tlsConfig.Type = TLSCertificateImported
+				tlsConfig.Certificate = tlsCertificate
+			}
 			reqBody := &siteAddRequestModel{
-				Domain:         domain,
-				Aliases:        aliases,
-				TLSCertificate: tlsCertificate,
+				Domain:  domain,
+				Aliases: aliases,
+				TLS:     tlsConfig,
 			}
 			buf := new(bytes.Buffer)
 			err := json.NewEncoder(buf).Encode(reqBody)

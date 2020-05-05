@@ -25,7 +25,10 @@ import (
 
 // Fromat siteGetResponseModel
 func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
-	aliases := strings.Join(m.Aliases, ", ")
+	aliases := "\033[2m<nil>\033[0m"
+	if len(m.Aliases) > 0 {
+		aliases = strings.Join(m.Aliases, ", ")
+	}
 
 	err := "\033[2m<nil>\033[0m"
 	if m.Error != nil {
@@ -37,9 +40,16 @@ func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
 		app = fmt.Sprintf("%s-%s", m.App.Name, m.App.Version)
 	}
 
-	tlsCert := m.TLSCertificate
-	if m.TLSCertificateSelfSigned {
-		tlsCert = "selfsigned"
+	tlsCert := "\033[2m<nil>\033[0m"
+	if m.TLS != nil {
+		if m.TLS.Type == TLSCertificateSelfSigned || m.TLS.Type == TLSCertificateLetsEncrypt {
+			tlsCert = m.TLS.Type
+		} else if m.TLS.Certificate != "" {
+			tlsCert = m.TLS.Certificate
+			if m.TLS.Version != "" {
+				tlsCert += " (" + m.TLS.Version + ")"
+			}
+		}
 	}
 
 	result = fmt.Sprintf(`Domain:        %s
