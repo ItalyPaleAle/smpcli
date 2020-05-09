@@ -85,6 +85,12 @@ The ` + "`" + `--domain` + "`" + ` flag allows selecting a specific site only.
 				}
 
 				fmt.Println(statusResponseModelFormat(&r))
+			} else if domain != "" && resp.StatusCode == 404 {
+				// While requesting a single domain, the status code was 404, meaning that the domain doesn't exist
+				if resp.StatusCode != http.StatusOK {
+					fmt.Printf("\033[31mStatus endpoint returned a %d status code\033[0m\n", resp.StatusCode)
+					fmt.Println("The requested domain does not exist")
+				}
 			} else {
 				b, _ := ioutil.ReadAll(resp.Body)
 				err := fmt.Errorf("invalid response status code: %d; content: %s", resp.StatusCode, string(b))

@@ -30,11 +30,6 @@ func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
 		aliases = strings.Join(m.Aliases, ", ")
 	}
 
-	err := "\033[2m<nil>\033[0m"
-	if m.Error != nil {
-		err = *m.Error
-	}
-
 	app := "\033[2m<nil>\033[0m"
 	if m.App != nil {
 		app = fmt.Sprintf("%s-%s", m.App.Name, m.App.Version)
@@ -55,8 +50,7 @@ func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
 	result = fmt.Sprintf(`Domain:        %s
 Aliases:       %s
 TLSCert:       %s
-App:           %s
-Error:         %s`, m.Domain, aliases, tlsCert, app, err)
+App:           %s`, m.Domain, aliases, tlsCert, app)
 	return
 }
 
@@ -91,14 +85,20 @@ func statusResponseModelFormat(m *statusResponseModel) (result string) {
 	if m.Sync.SyncError != "" {
 		syncError = m.Sync.SyncError
 	}
+	storeHealthy := "no"
+	if m.Store.Healthy {
+		storeHealthy = "yes"
+	}
 
 	result = fmt.Sprintf("Info\n----\n"+`
+Node name:        %s
 Nginx is running: %s
 Sync is running:  %s
 Last sync time:   %s
 Sync error:       %s
+Store is healthy: %s
 
-`, nginxRunning, syncRunning, m.Sync.LastSync.Format(time.RFC3339), syncError)
+`, m.NodeName, nginxRunning, syncRunning, m.Sync.LastSync.Format(time.RFC3339), syncError, storeHealthy)
 
 	// Sites
 	result += "Sites\n-----\n\n"
@@ -139,27 +139,5 @@ Error:        %s
 `, el.Domain, healthy, app, ts, err)
 	}
 
-	return
-}
-
-// Fromat deployResponseModel
-func deployResponseModelFormat(m *deployResponseModel) (result string) {
-	err := "\033[2m<nil>\033[0m"
-	if m.Error != nil {
-		err = *m.Error
-	}
-
-	t := "\033[2m<nil>\033[0m"
-	if m.Time != nil {
-		t = m.Time.Format(time.RFC3339)
-	}
-
-	result = fmt.Sprintf(`DeploymentID: %s
-SiteID:       %s
-AppName:      %s
-AppVersion:   %s
-Status:       %s
-Error:        %s
-Time:         %s`, m.DeploymentID, m.SiteID, m.AppName, m.AppVersion, m.Status, err, t)
 	return
 }

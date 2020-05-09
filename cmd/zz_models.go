@@ -37,10 +37,15 @@ type statusResponseModelHealth struct {
 type statusResponseModelNginx struct {
 	Running bool `json:"running"`
 }
+type statusResponseModelStore struct {
+	Healthy bool `json:"healthy"`
+}
 type statusResponseModel struct {
-	Nginx  statusResponseModelNginx    `json:"nginx"`
-	Sync   statusResponseModelSync     `json:"sync"`
-	Health []statusResponseModelHealth `json:"health"`
+	NodeName string                      `json:"name"`
+	Nginx    statusResponseModelNginx    `json:"nginx"`
+	Sync     statusResponseModelSync     `json:"sync"`
+	Store    statusResponseModelStore    `json:"store"`
+	Health   []statusResponseModelHealth `json:"health"`
 }
 
 // GET /info (auth)
@@ -79,7 +84,6 @@ type siteGetResponseModel struct {
 	Domain  string                   `json:"domain"`
 	Aliases []string                 `json:"aliases"`
 	TLS     *siteTLSConfiguration    `json:"tls"`
-	Error   *string                  `json:"error"`
 	App     *siteGetResponseModelApp `json:"app"`
 }
 
@@ -90,15 +94,6 @@ type siteListResponseModel []siteGetResponseModel
 type deployRequestModel struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
-}
-type deployResponseModel struct {
-	DeploymentID string     `json:"id"`
-	SiteID       string     `json:"site"`
-	AppName      string     `json:"app"`
-	AppVersion   string     `json:"version"`
-	Status       string     `json:"status"`
-	Error        *string    `json:"deploymentError"`
-	Time         *time.Time `json:"time"`
 }
 
 // POST /uploadauth (request Azure Storage SAS token)
