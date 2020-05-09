@@ -55,6 +55,10 @@ func loadConfig() error {
 	viper.SetConfigType("yaml")
 	viper.SetConfigFile(file)
 
+	// Parse env vars
+	viper.AutomaticEnv()
+	viper.SetEnvPrefix("stkcli")
+
 	// Set defaults
 	viper.SetDefault("node", "")
 	viper.SetDefault("port", 2265)

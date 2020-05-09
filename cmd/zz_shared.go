@@ -37,7 +37,7 @@ var (
 	optAddress  string
 	optPort     string
 	optInsecure bool
-	optNoTLS    bool
+	optHTTP     bool
 )
 
 func addSharedFlags(cmd *cobra.Command) {
@@ -48,8 +48,10 @@ func addSharedFlags(cmd *cobra.Command) {
 	if defaultPort > 0 {
 		defaultPortString = strconv.Itoa(defaultPort)
 	}
-	defaultInsecure := viper.GetBool("insecure")
-	defaultHTTP := viper.GetBool("http")
+
+	// Insecure and HTTP are read from the config only
+	optInsecure = viper.GetBool("insecure")
+	optHTTP = viper.GetBool("http")
 
 	// Node address
 	// Mark as required if we don't have a default value
@@ -63,16 +65,11 @@ func addSharedFlags(cmd *cobra.Command) {
 	// Port the server is listening on
 	// Default is 2265
 	cmd.Flags().StringVarP(&optPort, "port", "P", defaultPortString, "port the node listens on")
-
-	// Flags to control communication with the node
-	// By default, we use TLS and validate the certificate
-	cmd.Flags().BoolVarP(&optInsecure, "insecure", "k", defaultInsecure, "disable TLS certificate validation for node connections")
-	cmd.Flags().BoolVarP(&optNoTLS, "http", "S", defaultHTTP, "use HTTP protocol, without TLS, for node connections")
 }
 
 func getURLClient() (baseURL string, client *http.Client) {
 	// Output some warnings
-	if optNoTLS {
+	if optHTTP {
 		fmt.Fprintln(os.Stderr, "\033[33mWARN: You are connecting to your node without using TLS. The connection (including the authorization token) is not encrypted.\033[0m")
 	} else if optInsecure {
 		fmt.Fprintln(os.Stderr, "\033[33mWARN: TLS certificate validation is disabled. Your connection might not be secure.\033[0m")
@@ -80,7 +77,7 @@ func getURLClient() (baseURL string, client *http.Client) {
 
 	// Get the URL
 	protocol := "https"
-	if optNoTLS {
+	if optHTTP {
 		protocol = "http"
 	}
 
