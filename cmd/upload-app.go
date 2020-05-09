@@ -183,7 +183,7 @@ Paths can be folders containing your app's files; stkcli will automatically crea
 
 Versions are unique for each app. For example, if you upload the app ` + "`" + `myapp` + "`" + ` and version ` + "`" + `1.0` + "`" + `, you cannot re-upload that; the version must be different. Statiko does not parse the version and does not enforce any specific versioning convention, as long as the versions are different.
 
-When using ` + "`" + `--no-signature` + "`" + `, stkcli will not calculate the checksum of the app's bundle, and it will not cryptographically sign it with the codesigning key. Statiko nodes do not accept unsigned app bundles by default for security reasons, and the admin must manually enable this option in the node's configuration file. However, when uploading unsigned bundles, you do not need to be signed into an Azure account in the local system.
+When using ` + "`" + `--no-signature` + "`" + `, stkcli will not calculate the checksum of the app's bundle, and it will not cryptographically sign it with the codesigning key. Statiko nodes might be configured to not accept unsigned app bundles for security reasons. However, when uploading unsigned bundles, you do not need to be signed into an Azure account in the local system.
 `,
 		DisableAutoGenTag: true,
 
