@@ -84,7 +84,7 @@ The ` + "`" + `--domain` + "`" + ` flag allows selecting a specific site only.
 					return
 				}
 
-				fmt.Println(statusResponseModelFormat(&r))
+				fmt.Println(statusResponseModelFormat(&r, false))
 			} else if domain != "" && resp.StatusCode == 404 {
 				// While requesting a single domain, the status code was 404, meaning that the domain doesn't exist
 				if resp.StatusCode != http.StatusOK {

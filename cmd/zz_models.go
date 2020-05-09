@@ -48,6 +48,9 @@ type statusResponseModel struct {
 	Health   []statusResponseModelHealth `json:"health"`
 }
 
+// GET /clusterstatus (cluster status)
+type clusterStatusResponseModel map[string]*statusResponseModel
+
 // GET /info (auth)
 type infoResponseModelAzureAD struct {
 	AuthorizeURL string `json:"authorizeUrl"`

@@ -21,14 +21,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// siteCmd represents the site command
-var siteCmd = &cobra.Command{
-	Use:               "site",
-	Short:             "Manage sites",
-	Long:              `The site namespace contains commands to add, show, list, remove, and edit sites that are currently configured in the node.`,
+// clusterCmd represents the cluster command
+var clusterCmd = &cobra.Command{
+	Use:               "cluster",
+	Short:             "Cluster information",
+	Long:              `The cluster namespace contains commands to get information on the cluster.`,
 	DisableAutoGenTag: true,
 }
 
 func init() {
-	rootCmd.AddCommand(siteCmd)
+	rootCmd.AddCommand(clusterCmd)
 }

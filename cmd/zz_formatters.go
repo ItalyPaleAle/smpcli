@@ -37,8 +37,10 @@ func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
 
 	tlsCert := "\033[2m<nil>\033[0m"
 	if m.TLS != nil {
-		if m.TLS.Type == TLSCertificateSelfSigned || m.TLS.Type == TLSCertificateLetsEncrypt {
-			tlsCert = m.TLS.Type
+		if m.TLS.Type == TLSCertificateSelfSigned {
+			tlsCert = "self-signed"
+		} else if m.TLS.Type == TLSCertificateLetsEncrypt {
+			tlsCert = "Let's Encrypt"
 		} else if m.TLS.Certificate != "" {
 			tlsCert = m.TLS.Certificate
 			if m.TLS.Version != "" {
@@ -71,7 +73,13 @@ func siteListResponseModelFormat(m siteListResponseModel) (result string) {
 }
 
 // Format statusResponseModel
-func statusResponseModelFormat(m *statusResponseModel) (result string) {
+func statusResponseModelFormat(m *statusResponseModel, indent bool) (result string) {
+	// Indentation
+	prefix := ""
+	if indent {
+		prefix = "    "
+	}
+
 	// Info (Nginx and sync status)
 	nginxRunning := "no"
 	if m.Nginx.Running {
@@ -90,18 +98,18 @@ func statusResponseModelFormat(m *statusResponseModel) (result string) {
 		storeHealthy = "yes"
 	}
 
-	result = fmt.Sprintf("Info\n----\n"+`
-Node name:        %s
-Nginx is running: %s
-Sync is running:  %s
-Last sync time:   %s
-Sync error:       %s
-Store is healthy: %s
+	result = fmt.Sprintf("%[1]sInfo\n%[1]s----\n"+`
+%[1]sNode name:        %[2]s
+%[1]sNginx is running: %[3]s
+%[1]sSync is running:  %[4]s
+%[1]sLast sync time:   %[5]s
+%[1]sSync error:       %[6]s
+%[1]sStore is healthy: %[7]s
 
-`, m.NodeName, nginxRunning, syncRunning, m.Sync.LastSync.Format(time.RFC3339), syncError, storeHealthy)
+`, prefix, m.NodeName, nginxRunning, syncRunning, m.Sync.LastSync.Format(time.RFC3339), syncError, storeHealthy)
 
 	// Sites
-	result += "Sites\n-----\n\n"
+	result += prefix + "Sites\n" + prefix + "-----\n\n"
 
 	l := len(m.Health)
 	if l == 0 {
@@ -130,14 +138,26 @@ Store is healthy: %s
 			err = *el.Error
 		}
 
-		result += fmt.Sprintf(`Domain:       %s
-Healthy:      %s
-App:          %s
-Last check:   %s
-Error:        %s
+		result += fmt.Sprintf(`%[1]sDomain:       %[2]s
+%[1]sHealthy:      %[3]s
+%[1]sApp:          %[4]s
+%[1]sLast check:   %[5]s
+%[1]sError:        %[6]s
 
-`, el.Domain, healthy, app, ts, err)
+`, prefix, el.Domain, healthy, app, ts, err)
 	}
 
+	return
+}
+
+// Format clusterStatusResponseModel
+func clusterStatusResponseModelFormat(m clusterStatusResponseModel) (result string) {
+	// Return all nodes' status
+	if m == nil || len(m) == 0 {
+		return "Empty response"
+	}
+	for name, status := range m {
+		result += fmt.Sprintf("Node %s:\n\n%s\n", name, statusResponseModelFormat(status, true))
+	}
 	return
 }
