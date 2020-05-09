@@ -1,0 +1,12 @@
+name: stkcli cluster
+synopsis: Cluster information
+description: |
+  The cluster namespace contains commands to get information on the cluster.
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for cluster
+see_also:
+- stkcli - Manage a Statiko node
+- status - Get cluster status

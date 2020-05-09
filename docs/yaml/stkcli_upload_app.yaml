@@ -16,7 +16,7 @@ description: |
 
   Versions are unique for each app. For example, if you upload the app `myapp` and version `1.0`, you cannot re-upload that; the version must be different. Statiko does not parse the version and does not enforce any specific versioning convention, as long as the versions are different.
 
-  When using `--no-signature`, stkcli will not calculate the checksum of the app's bundle, and it will not cryptographically sign it with the codesigning key. Statiko nodes do not accept unsigned app bundles by default for security reasons, and the admin must manually enable this option in the node's configuration file. However, when uploading unsigned bundles, you do not need to be signed into an Azure account in the local system.
+  When using `--no-signature`, stkcli will not calculate the checksum of the app's bundle, and it will not cryptographically sign it with the codesigning key. Statiko nodes might be configured to not accept unsigned app bundles for security reasons. However, when uploading unsigned bundles, you do not need to be signed into an Azure account in the local system.
 usage: stkcli upload app [flags]
 options:
 - name: app
@@ -26,14 +26,6 @@ options:
   shorthand: h
   default_value: "false"
   usage: help for app
-- name: http
-  shorthand: S
-  default_value: "false"
-  usage: use HTTP protocol, without TLS, for node connections
-- name: insecure
-  shorthand: k
-  default_value: "false"
-  usage: disable TLS certificate validation for node connections
 - name: no-signature
   default_value: "false"
   usage: do not cryptographically sign the app's bundle

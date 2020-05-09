@@ -4,7 +4,7 @@ Manage sites
 
 ### Synopsis
 
-The sites namespace contains commands to add, show, list, remove, and edit sites that are currently configured in the node.
+The site namespace contains commands to add, show, list, remove, and edit sites that are currently configured in the node.
 
 ### Options
 

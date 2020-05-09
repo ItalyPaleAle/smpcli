@@ -14,7 +14,7 @@ options:
   usage: help for stkcli
 see_also:
 - auth - Authenticate with a node
-- defaults - View or set defaults for stkcli
+- cluster - Cluster information
 - deploy - Deploy an app
 - site - Manage sites
 - state - Get or restore state

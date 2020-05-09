@@ -27,8 +27,6 @@ stkcli upload certificate [flags]
   -f, --certificate string       certificate file (required)
   -p, --certificate-key string   private key (required)
   -h, --help                     help for certificate
-  -S, --http                     use HTTP protocol, without TLS, for node connections
-  -k, --insecure                 disable TLS certificate validation for node connections
   -c, --name string              certificate name (required)
   -n, --node string              node address or IP (required)
   -P, --port string              port the node listens on

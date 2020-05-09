@@ -20,6 +20,7 @@ package utils
 import (
 	"errors"
 	"os"
+	"path/filepath"
 )
 
 // PathExists returns true if the path exists on disk
@@ -76,5 +77,26 @@ func EnsureFolder(path string) error {
 		}
 	}
 
+	return nil
+}
+
+// RemoveContents remove all contents within a directory
+// Source: https://stackoverflow.com/a/33451503/192024
+func RemoveContents(dir string) error {
+	d, err := os.Open(dir)
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		err = os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

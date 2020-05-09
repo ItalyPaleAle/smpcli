@@ -24,11 +24,23 @@ package cmd
 
 import (
 	"github.com/spf13/cobra/doc"
+
+	"github.com/statiko-dev/stkcli/utils"
 )
 
 func init() {
+	// Clean the folder
+	err := utils.RemoveContents("./docs")
+	if err != nil {
+		panic(err)
+	}
+	err = utils.EnsureFolder("./docs/yaml")
+	if err != nil {
+		panic(err)
+	}
+
 	// Generate Markdown docs
-	err := doc.GenMarkdownTree(rootCmd, "./docs")
+	err = doc.GenMarkdownTree(rootCmd, "./docs")
 	if err != nil {
 		panic(err)
 	}

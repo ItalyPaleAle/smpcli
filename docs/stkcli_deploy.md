@@ -19,8 +19,6 @@ stkcli deploy [flags]
   -a, --app string       app's bundle name (required)
   -d, --domain string    primary domain name (required)
   -h, --help             help for deploy
-  -S, --http             use HTTP protocol, without TLS, for node connections
-  -k, --insecure         disable TLS certificate validation for node connections
   -n, --node string      node address or IP (required)
   -P, --port string      port the node listens on
   -v, --version string   app's bundle version (required)

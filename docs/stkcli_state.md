@@ -22,4 +22,5 @@ The state file can contains secrets (e.g self-signed TLS certificates) which are
 * [stkcli](stkcli.md)	 - Manage a Statiko node
 * [stkcli state get](stkcli_state_get.md)	 - Retrieve state and save to file
 * [stkcli state set](stkcli_state_set.md)	 - Restores the state of a node
+* [stkcli state sync](stkcli_state_sync.md)	 - Triggers a sync of the node
 

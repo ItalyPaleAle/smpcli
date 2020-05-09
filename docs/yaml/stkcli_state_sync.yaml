@@ -1,0 +1,18 @@
+name: stkcli state sync
+synopsis: Triggers a sync of the node
+description: |
+  Triggers a sync operation in the node, to ensure that the node's state matches the desired one.
+usage: stkcli state sync [flags]
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for sync
+- name: node
+  shorthand: "n"
+  usage: node address or IP (required)
+- name: port
+  shorthand: P
+  usage: port the node listens on
+see_also:
+- stkcli state - Get or restore state

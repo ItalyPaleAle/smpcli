@@ -21,7 +21,7 @@ stkcli is released under a GNU General Public License v3.0 license. Source code 
 ### SEE ALSO
 
 * [stkcli auth](stkcli_auth.md)	 - Authenticate with a node
-* [stkcli defaults](stkcli_defaults.md)	 - View or set defaults for stkcli
+* [stkcli cluster](stkcli_cluster.md)	 - Cluster information
 * [stkcli deploy](stkcli_deploy.md)	 - Deploy an app
 * [stkcli site](stkcli_site.md)	 - Manage sites
 * [stkcli state](stkcli_state.md)	 - Get or restore state
