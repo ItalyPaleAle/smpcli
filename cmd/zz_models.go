@@ -117,7 +117,7 @@ type siteTLSConfiguration struct {
 }
 
 const (
-	TLSCertificateImported    = "imported"
-	TLSCertificateSelfSigned  = "selfsigned"
-	TLSCertificateLetsEncrypt = "letsencrypt"
+	TLSCertificateImported   = "imported"
+	TLSCertificateSelfSigned = "selfsigned"
+	TLSCertificateACME       = "acme"
 )

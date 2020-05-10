@@ -39,8 +39,8 @@ func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
 	if m.TLS != nil {
 		if m.TLS.Type == TLSCertificateSelfSigned {
 			tlsCert = "self-signed"
-		} else if m.TLS.Type == TLSCertificateLetsEncrypt {
-			tlsCert = "Let's Encrypt"
+		} else if m.TLS.Type == TLSCertificateACME {
+			tlsCert = "acme"
 		} else if m.TLS.Certificate != "" {
 			tlsCert = m.TLS.Certificate
 			if m.TLS.Version != "" {

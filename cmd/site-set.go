@@ -53,6 +53,8 @@ The ` + "`" + `--alias` + "`" + ` parameter is used to replace the list of alias
 			tlsConfig := &siteTLSConfiguration{}
 			if tlsCertificate == "" || tlsCertificate == "selfsigned" {
 				tlsConfig.Type = TLSCertificateSelfSigned
+			} else if tlsCertificate == "acme" || tlsCertificate == "letsencrypt" {
+				tlsConfig.Type = TLSCertificateACME
 			} else {
 				tlsConfig.Type = TLSCertificateImported
 				tlsConfig.Certificate = tlsCertificate
