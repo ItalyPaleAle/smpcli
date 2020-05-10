@@ -19,7 +19,7 @@ stkcli status [flags]
   -d, --domain string   domain name
   -f, --force           force a recheck of all sites, ignoring status cache
   -h, --help            help for status
-  -n, --node string     node address or IP (required)
+  -n, --node string     node address or IP
   -P, --port string     port the node listens on
 ```
 

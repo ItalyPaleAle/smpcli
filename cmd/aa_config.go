@@ -60,7 +60,7 @@ func loadConfig() error {
 	viper.SetEnvPrefix("stkcli")
 
 	// Set defaults
-	viper.SetDefault("node", "")
+	viper.SetDefault("node", "localhost")
 	viper.SetDefault("port", 2265)
 	viper.SetDefault("insecure", false)
 	viper.SetDefault("http", false)

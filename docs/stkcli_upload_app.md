@@ -32,7 +32,7 @@ stkcli upload app [flags]
   -a, --app string       app's bundle name (required)
   -h, --help             help for app
       --no-signature     do not cryptographically sign the app's bundle
-  -n, --node string      node address or IP (required)
+  -n, --node string      node address or IP
   -f, --path string      path to local file or folder to bundle
   -P, --port string      port the node listens on
   -v, --version string   app's bundle version (required)

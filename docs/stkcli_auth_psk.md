@@ -18,7 +18,7 @@ stkcli auth psk [flags]
 
 ```
   -h, --help          help for psk
-  -n, --node string   node address or IP (required)
+  -n, --node string   node address or IP
   -P, --port string   port the node listens on
 ```
 

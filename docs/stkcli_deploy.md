@@ -19,7 +19,7 @@ stkcli deploy [flags]
   -a, --app string       app's bundle name (required)
   -d, --domain string    primary domain name (required)
   -h, --help             help for deploy
-  -n, --node string      node address or IP (required)
+  -n, --node string      node address or IP
   -P, --port string      port the node listens on
   -v, --version string   app's bundle version (required)
 ```

@@ -15,7 +15,7 @@ options:
   usage: help for get
 - name: node
   shorthand: "n"
-  usage: node address or IP (required)
+  usage: node address or IP
 - name: port
   shorthand: P
   usage: port the node listens on

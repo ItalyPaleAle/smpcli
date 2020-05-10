@@ -17,7 +17,7 @@ stkcli state get [flags]
 
 ```
   -h, --help          help for get
-  -n, --node string   node address or IP (required)
+  -n, --node string   node address or IP
   -o, --out string    output file where to store state; if not set, print to stdout
   -P, --port string   port the node listens on
 ```

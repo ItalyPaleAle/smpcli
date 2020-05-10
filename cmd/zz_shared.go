@@ -54,13 +54,7 @@ func addSharedFlags(cmd *cobra.Command) {
 	optHTTP = viper.GetBool("http")
 
 	// Node address
-	// Mark as required if we don't have a default value
-	if defaultNode == "" {
-		cmd.Flags().StringVarP(&optAddress, "node", "n", defaultNode, "node address or IP (required)")
-		cmd.MarkFlagRequired("node")
-	} else {
-		cmd.Flags().StringVarP(&optAddress, "node", "n", defaultNode, "node address or IP")
-	}
+	cmd.Flags().StringVarP(&optAddress, "node", "n", defaultNode, "node address or IP")
 
 	// Port the server is listening on
 	// Default is 2265

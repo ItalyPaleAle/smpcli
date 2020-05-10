@@ -31,7 +31,7 @@ options:
   usage: do not cryptographically sign the app's bundle
 - name: node
   shorthand: "n"
-  usage: node address or IP (required)
+  usage: node address or IP
 - name: path
   shorthand: f
   usage: path to local file or folder to bundle

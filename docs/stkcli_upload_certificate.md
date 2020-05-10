@@ -28,7 +28,7 @@ stkcli upload certificate [flags]
   -p, --certificate-key string   private key (required)
   -h, --help                     help for certificate
   -c, --name string              certificate name (required)
-  -n, --node string              node address or IP (required)
+  -n, --node string              node address or IP
   -P, --port string              port the node listens on
 ```
 

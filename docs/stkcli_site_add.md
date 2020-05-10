@@ -22,7 +22,7 @@ stkcli site add [flags]
   -c, --certificate selfsigned   name of the TLS certificate or selfsigned (default)
   -d, --domain string            primary domain name
   -h, --help                     help for add
-  -n, --node string              node address or IP (required)
+  -n, --node string              node address or IP
   -P, --port string              port the node listens on
 ```
 
