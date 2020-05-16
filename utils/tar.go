@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -31,27 +32,38 @@ import (
 // TarBZ2 creates a tar.bz2 archive from a folder
 // Adapted from: https://gist.github.com/sdomino/e6bc0c98f87843bc26bb
 func TarBZ2(src string, writers ...io.Writer) error {
-	// Ensure the src actually exists before trying to tar it
-	if _, err := os.Stat(src); err != nil {
-		return fmt.Errorf("Unable to tar files - %v", err.Error())
+	// Clean the source folder
+	src = path.Clean(src)
+
+	// Ensure the src actually exists before trying to tar it, and that it's a directory
+	exists, err := FolderExists(src)
+	if err != nil {
+		return err
+	} else if !exists {
+		return fmt.Errorf("path does not exist or is not a folder: %s", src)
 	}
 
+	// Create a bzip2 stream compressor
 	mw := io.MultiWriter(writers...)
-
 	bzw, err := bzip2.NewWriter(mw, &bzip2.WriterConfig{Level: 9})
 	defer bzw.Close()
 	if err != nil {
 		return err
 	}
 
+	// Tar writer
 	tw := tar.NewWriter(bzw)
 	defer tw.Close()
 
-	// walk path
+	// Walk path
 	return filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
-		// return on any error
 		if err != nil {
 			return err
+		}
+
+		// Exclude the root folder
+		if file == src || file == src+string(os.PathSeparator) {
+			return nil
 		}
 
 		// Create a new dir/file header
@@ -60,17 +72,17 @@ func TarBZ2(src string, writers ...io.Writer) error {
 			return err
 		}
 
-		// Update the name to correctly reflect the desired destination when untaring
-		header.Name = strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
-		fmt.Println("Adding", "/"+header.Name)
+		// Update the name to correctly reflect the desired destination when un-taring
+		header.Name = strings.TrimPrefix(file, src+string(os.PathSeparator))
+		fmt.Println("Adding", header.Name)
 
 		// Write the header
 		if err := tw.WriteHeader(header); err != nil {
 			return err
 		}
 
-		// Return on non-regular files (thanks to [kumo](https://medium.com/@komuw/just-like-you-did-fbdd7df829d3) for this suggested update)
-		if !fi.Mode().IsRegular() {
+		// If this is a directory, go to the next segment
+		if fi.Mode().IsDir() {
 			return nil
 		}
 
@@ -79,14 +91,12 @@ func TarBZ2(src string, writers ...io.Writer) error {
 		if err != nil {
 			return err
 		}
+		defer f.Close()
 
 		// Copy file data into tar writer
 		if _, err := io.Copy(tw, f); err != nil {
 			return err
 		}
-
-		// Manually close here after each file operation; defering would cause each file close to wait until all operations have completed.
-		f.Close()
 
 		return nil
 	})

@@ -300,6 +300,8 @@ When using ` + "`" + `--no-signature` + "`" + `, stkcli will not calculate the c
 					return
 				}
 			}
+
+			fmt.Println("Done:", bundleName)
 		},
 	}
 	uploadCmd.AddCommand(c)
