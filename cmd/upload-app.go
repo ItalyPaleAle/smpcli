@@ -40,7 +40,6 @@ import (
 func init() {
 	var (
 		app         string
-		version     string
 		path        string
 		noSignature bool
 	)
@@ -90,7 +89,7 @@ func init() {
 		return
 	}
 
-	// This function uploads the tar.bz2 archive to Azure Blob Storage
+	// This function uploads the app's bundle to Azure Blob Storage
 	// Returns true in case of success, and false if there's an error
 	var uploadArchive = func(file io.Reader, sasURLs *uploadAuthResponseModel) bool {
 		// URL to upload the archive to
@@ -174,14 +173,13 @@ IMPORTANT: In order to use this command, you must have the Azure CLI installed a
 
 This command accepts four parameters:
 
-- ` + "`" + `--path` + "`" + ` or ` + "`" + `-f` + "`" + ` is the path of the app to upload
-- ` + "`" + `--app` + "`" + ` or ` + "`" + `-a` + "`" + ` is the name of the app's bundle, which can be used to identify the app when you want to deploy it in a node
-- ` + "`" + `--version` + "`" + ` or ` + "`" + `-v` + "`" + ` is the version of the app, as an arbitrary string
+- ` + "`" + `--path` + "`" + ` or ` + "`" + `-f` + "`" + ` is the path to a file or folder to upload
+- ` + "`" + `--app` + "`" + ` or ` + "`" + `-a` + "`" + ` is the name of the name of the bundle, which can be used to identify the app when you want to deploy it in a node (do not include an extension)
 - ` + "`" + `--no-signature` + "`" + ` is a boolean that when present will skip calculating the checksum of the app's bundle and signing it with the codesign key
 
-Paths can be folders containing your app's files; stkcli will automatically create a tar.bz2 archive for you. Alternatively, you can point the ` + "`" + `--path` + "`" + ` parameter to an existing tar.bz2 archive, and it will uploaded as-is.
+Paths can be folders containing your app's files; stkcli will automatically create a tar.bz2 archive for you. Alternatively, you can point the ` + "`" + `--path` + "`" + ` parameter to an existing archive (various formats are supported, including zip, tar.gz, tar.bz2, and more), and it will uploaded as-is.
 
-Versions are unique for each app. For example, if you upload the app ` + "`" + `myapp` + "`" + ` and version ` + "`" + `1.0` + "`" + `, you cannot re-upload that; the version must be different. Statiko does not parse the version and does not enforce any specific versioning convention, as long as the versions are different.
+App names must be unique. You cannot re-upload an app using the same file name.
 
 When using ` + "`" + `--no-signature` + "`" + `, stkcli will not calculate the checksum of the app's bundle, and it will not cryptographically sign it with the codesigning key. Statiko nodes might be configured to not accept unsigned app bundles for security reasons. However, when uploading unsigned bundles, you do not need to be signed into an Azure account in the local system.
 `,
@@ -202,10 +200,49 @@ When using ` + "`" + `--no-signature` + "`" + `, stkcli will not calculate the c
 				return
 			}
 
+			// App name and bundle name
+			app = strings.ToLower(app)
+			bundleName := ""
+
+			// Check if the path is a folder
+			folder, err := utils.FolderExists(path)
+			if err != nil {
+				utils.ExitWithError(utils.ErrorApp, "Filesystem error", err)
+				return
+			}
+			if folder {
+				// Bundle is the app's name and ".tar.bz2" extension
+				bundleName = app + ".tar.bz2"
+			} else {
+				// It's a file, so check the file type
+				pathLc := strings.ToLower(path)
+				switch {
+				case strings.HasSuffix(pathLc, ".zip"),
+					strings.HasSuffix(pathLc, ".tar"),
+					strings.HasSuffix(pathLc, ".tgz"),
+					strings.HasSuffix(pathLc, ".tsz"),
+					strings.HasSuffix(pathLc, ".txz"),
+					strings.HasSuffix(pathLc, ".rar"):
+					bundleName = app + pathLc[(len(pathLc)-4):]
+				case strings.HasSuffix(pathLc, ".tar.bz2"),
+					strings.HasSuffix(pathLc, ".tar.lz4"):
+					bundleName = app + pathLc[(len(pathLc)-8):]
+				case strings.HasSuffix(pathLc, ".tar.gz"),
+					strings.HasSuffix(pathLc, ".tar.sz"),
+					strings.HasSuffix(pathLc, ".tar.xz"):
+					bundleName = app + pathLc[(len(pathLc)-7):]
+				case strings.HasSuffix(pathLc, ".tbz2"),
+					strings.HasSuffix(pathLc, ".tlz4"):
+					bundleName = app + pathLc[(len(pathLc)-5):]
+				default:
+					utils.ExitWithError(utils.ErrorUser, "Invalid file type", nil)
+					return
+				}
+			}
+
 			// Request body for getting the SAS token for Azure Storage from the node
 			reqBody := &uploadAuthRequestModel{
-				Name:    app,
-				Version: version,
+				Name: bundleName,
 			}
 			buf := new(bytes.Buffer)
 			err = json.NewEncoder(buf).Encode(reqBody)
@@ -214,7 +251,7 @@ When using ` + "`" + `--no-signature` + "`" + `, stkcli will not calculate the c
 				return
 			}
 
-			// Invoke the /uploadauth endpoing and request the SAS token from the node
+			// Invoke the /uploadauth endpoint and request the SAS token from the node
 			var sasURLs uploadAuthResponseModel
 			err = utils.RequestJSON(utils.RequestOpts{
 				Authorization:   auth,
@@ -230,23 +267,8 @@ When using ` + "`" + `--no-signature` + "`" + `, stkcli will not calculate the c
 				return
 			}
 
-			// Check if the path is already a tar.bz2 archive
-			pathLc := strings.ToLower(path)
-			if strings.HasSuffix(pathLc, ".tar.bz2") {
-				// Get a buffer reader
-				file, err := os.Open(path)
-				if err != nil {
-					utils.ExitWithError(utils.ErrorApp, "Error while reading file", err)
-					return
-				}
-
-				// Upload the archive
-				result := uploadArchive(file, &sasURLs)
-				if !result {
-					// The command has already printed the error
-					return
-				}
-			} else {
+			// If it's a folder, create an archive; upload bundles as-is
+			if folder {
 				// Create a tar.bz2 archive
 				r, w := io.Pipe()
 				go func() {
@@ -263,17 +285,30 @@ When using ` + "`" + `--no-signature` + "`" + `, stkcli will not calculate the c
 					// The command has already printed the error
 					return
 				}
+			} else {
+				// Get a buffer reader
+				file, err := os.Open(path)
+				if err != nil {
+					utils.ExitWithError(utils.ErrorApp, "Error while reading file", err)
+					return
+				}
+
+				// Upload the archive
+				result := uploadArchive(file, &sasURLs)
+				if !result {
+					// The command has already printed the error
+					return
+				}
 			}
 		},
 	}
 	uploadCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&app, "app", "a", "", "app's bundle name (required)")
+	c.Flags().StringVarP(&app, "app", "a", "", "app bundle name, with no extension (required)")
 	c.MarkFlagRequired("app")
-	c.Flags().StringVarP(&version, "version", "v", "", "app's bundle version (required)")
-	c.MarkFlagRequired("version")
-	c.Flags().StringVarP(&path, "path", "f", "", "path to local file or folder to bundle")
+	c.Flags().StringVarP(&path, "path", "f", "", "path to local file or folder to bundle (required)")
+	c.MarkFlagRequired("path")
 	c.Flags().BoolVarP(&noSignature, "no-signature", "", false, "do not cryptographically sign the app's bundle")
 
 	// Add shared flags

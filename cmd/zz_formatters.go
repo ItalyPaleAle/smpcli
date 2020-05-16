@@ -31,8 +31,8 @@ func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
 	}
 
 	app := "\033[2m<nil>\033[0m"
-	if m.App != nil {
-		app = fmt.Sprintf("%s-%s", m.App.Name, m.App.Version)
+	if m.App != nil && m.App.Name != "" {
+		app = m.App.Name
 	}
 
 	tlsCert := "\033[2m<nil>\033[0m"

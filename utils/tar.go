@@ -29,7 +29,7 @@ import (
 )
 
 // TarBZ2 creates a tar.bz2 archive from a folder
-// Source: https://medium.com/@skdomino/taring-untaring-files-in-go-6b07cf56bc07
+// Adapted from: https://gist.github.com/sdomino/e6bc0c98f87843bc26bb
 func TarBZ2(src string, writers ...io.Writer) error {
 	// Ensure the src actually exists before trying to tar it
 	if _, err := os.Stat(src); err != nil {

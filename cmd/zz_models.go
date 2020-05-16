@@ -80,8 +80,7 @@ type siteSetRequestModel struct {
 // GET /site/<domain> (site get)
 type siteGetResponseModelApp struct {
 	// App details
-	Name    string `json:"name" binding:"required"`
-	Version string `json:"version" binding:"required"`
+	Name string `json:"name"`
 }
 type siteGetResponseModel struct {
 	Domain  string                   `json:"domain"`
@@ -95,14 +94,12 @@ type siteListResponseModel []siteGetResponseModel
 
 // POST /site/<domain>/deploy (deploy app)
 type deployRequestModel struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Name string `json:"name"`
 }
 
 // POST /uploadauth (request Azure Storage SAS token)
 type uploadAuthRequestModel struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Name string `json:"name"`
 }
 type uploadAuthResponseModel struct {
 	ArchiveURL   string `json:"archiveUrl"`
