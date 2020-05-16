@@ -29,9 +29,8 @@ import (
 
 func init() {
 	var (
-		domain  string
-		app     string
-		version string
+		domain string
+		app    string
 	)
 
 	c := &cobra.Command{
@@ -39,7 +38,7 @@ func init() {
 		Short: "Deploy an app",
 		Long: `Deploys an app to a site.
 
-This command tells the node to deploy the app (already uploaded beforehand) with the specific name and version to a site identified by the domain option.
+This command tells the node to deploy the app (already uploaded beforehand) with the specific bundle name to a site identified by the domain option.
 `,
 		DisableAutoGenTag: true,
 
@@ -49,8 +48,7 @@ This command tells the node to deploy the app (already uploaded beforehand) with
 
 			// Request body
 			reqBody := &deployRequestModel{
-				Name:    app,
-				Version: version,
+				Name: app,
 			}
 			buf := new(bytes.Buffer)
 			err := json.NewEncoder(buf).Encode(reqBody)
@@ -80,10 +78,8 @@ This command tells the node to deploy the app (already uploaded beforehand) with
 	// Flags
 	c.Flags().StringVarP(&domain, "domain", "d", "", "primary domain name (required)")
 	c.MarkFlagRequired("domain")
-	c.Flags().StringVarP(&app, "app", "a", "", "app's bundle name (required)")
+	c.Flags().StringVarP(&app, "app", "a", "", "app bundle (required)")
 	c.MarkFlagRequired("app")
-	c.Flags().StringVarP(&version, "version", "v", "", "app's bundle version (required)")
-	c.MarkFlagRequired("version")
 
 	// Add shared flags
 	addSharedFlags(c)
