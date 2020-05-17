@@ -114,7 +114,8 @@ type siteTLSConfiguration struct {
 }
 
 const (
-	TLSCertificateImported   = "imported"
-	TLSCertificateSelfSigned = "selfsigned"
-	TLSCertificateACME       = "acme"
+	TLSCertificateImported      = "imported"
+	TLSCertificateAzureKeyVault = "akv"
+	TLSCertificateSelfSigned    = "selfsigned"
+	TLSCertificateACME          = "acme"
 )

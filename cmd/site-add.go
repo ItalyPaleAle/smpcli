@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -37,6 +38,7 @@ func init() {
 	c := &cobra.Command{
 		Use:   "add",
 		Short: "Add a new site",
+		// TODO: UPDATE THIS: add akv prefix and version
 		Long: `Configures a new site in the node.
 
 Each site is identified by a primary domain, and it can have multiple aliases (domain names that are redirected to the primary one).
@@ -55,6 +57,16 @@ When creating a site, you must specify the name of a TLS certificate stored on t
 				tlsConfig.Type = TLSCertificateSelfSigned
 			} else if tlsCertificate == "acme" || tlsCertificate == "letsencrypt" {
 				tlsConfig.Type = TLSCertificateACME
+			} else if strings.HasPrefix(tlsCertificate, "akv:") {
+				tlsConfig.Type = TLSCertificateAzureKeyVault
+				tlsConfig.Certificate = tlsCertificate[4:]
+				// Check if there's a version
+				i := strings.Index(tlsConfig.Certificate, ":")
+				// Start from 1 because the certificate name must be 1 character at least
+				if i > 0 {
+					tlsConfig.Version = tlsConfig.Certificate[(i + 1):]
+					tlsConfig.Certificate = tlsConfig.Certificate[0:i]
+				}
 			} else {
 				tlsConfig.Type = TLSCertificateImported
 				tlsConfig.Certificate = tlsCertificate

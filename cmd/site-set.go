@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -37,6 +38,7 @@ func init() {
 	c := &cobra.Command{
 		Use:   "set",
 		Short: "Updates the configuration for a site",
+		// TODO: UPDATE THIS: add akv prefix and version
 		Long: `Updates a site configured in the node.
 
 Use the ` + "`" + `--certificate` + "`" + ` parameter to set a new TLS certificate. This should be the name of a certificate stored in the associated Azure Key Vault. You can also use the value ` + "`" + `selfsigned` + "`" + ` to have the node automatically generate a self-signed certificate for your site.
@@ -55,6 +57,16 @@ The ` + "`" + `--alias` + "`" + ` parameter is used to replace the list of alias
 				tlsConfig.Type = TLSCertificateSelfSigned
 			} else if tlsCertificate == "acme" || tlsCertificate == "letsencrypt" {
 				tlsConfig.Type = TLSCertificateACME
+			} else if strings.HasPrefix(tlsCertificate, "akv:") {
+				tlsConfig.Type = TLSCertificateAzureKeyVault
+				tlsConfig.Certificate = tlsCertificate[4:]
+				// Check if there's a version
+				i := strings.Index(tlsConfig.Certificate, ":")
+				// Start from 1 because the certificate name must be 1 character at least
+				if i > 0 {
+					tlsConfig.Version = tlsConfig.Certificate[(i + 1):]
+					tlsConfig.Certificate = tlsConfig.Certificate[0:i]
+				}
 			} else {
 				tlsConfig.Type = TLSCertificateImported
 				tlsConfig.Certificate = tlsCertificate
