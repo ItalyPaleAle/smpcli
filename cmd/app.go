@@ -21,17 +21,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// uploadCmd represents the upload command
-var uploadCmd = &cobra.Command{
-	Use:   "upload",
-	Short: "Upload apps and certificates",
-	Long: `The upload namespace contains commands to conveniently upload app bundles and TLS certificates.
-
-IMPORTANT: In order to use these commands, you must have the Azure CLI installed and you must be authenticated to the Azure subscription where the Key Vault resides (with ` + "`" + `az login` + "`" + `). Additionally, your Azure account must have the following permissions in the Key Vault's data plane: keys (create, update, import, sign), certificate (create, update, import).
+// appCmd represents the app command
+var appCmd = &cobra.Command{
+	Use:   "app",
+	Short: "Upload and manage app bundles",
+	Long: `The app namespace contains command to upload app bundles and manage the ones stored in the node's app repository.
 `,
 	DisableAutoGenTag: true,
 }
 
 func init() {
-	rootCmd.AddCommand(uploadCmd)
+	rootCmd.AddCommand(appCmd)
 }

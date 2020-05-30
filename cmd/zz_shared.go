@@ -18,19 +18,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"errors"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/viper"
 
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.0/keyvault"
 	"github.com/spf13/cobra"
-
-	"github.com/statiko-dev/stkcli/utils"
 )
 
 var (
@@ -87,56 +87,49 @@ func getURLClient() (baseURL string, client *http.Client) {
 	return
 }
 
-// This function gets a client authenticated with Azure Key Vault
-func getKeyVault() *keyvault.BaseClient {
-	// Create a new client
-	akvClient := keyvault.New()
-
-	// Authorize from the Azure CLI
-	authorizer, err := auth.NewAuthorizerFromCLI()
-	if err != nil {
-		utils.ExitWithError(utils.ErrorApp, "Error while authorizing the Azure Key Vault client", err)
+// Accepts a PEM-encoded key or the path to a key
+func loadRSAPrivateKey(key string) *rsa.PrivateKey {
+	// Check if we have a key, then parse it
+	if key == "" {
 		return nil
 	}
-	akvClient.Authorizer = authorizer
 
-	return &akvClient
-}
-
-// This function requests the name of the Azure Key Vault from the node
-func getKeyVaultInfo() (keyVaultURL string, codesignKeyName string, codesignKeyVersion string, err error) {
-	baseURL, client := getURLClient()
-	auth := nodeStore.GetAuthToken(optAddress)
-
-	// Invoke the /keyvaultinfo endpoint to get the name and URL of the key vault
-	var r map[string]string
-	err = utils.RequestJSON(utils.RequestOpts{
-		Authorization: auth,
-		Client:        client,
-		Target:        &r,
-		URL:           baseURL + "/keyvaultinfo",
-	})
-	if err != nil {
-		return
+	// Check if we have a key or the path to a file
+	if !strings.HasPrefix(key, "-----BEGIN") {
+		read, err := ioutil.ReadFile(key)
+		if err == nil && len(read) > 0 {
+			key = string(read)
+		} else {
+			return nil
+		}
 	}
 
-	// Check the response
-	var ok bool
-	keyVaultURL, ok = r["url"]
-	if !ok || keyVaultURL == "" {
-		err = errors.New("invalid response: empty url")
-		return
-	}
-	codesignKeyName, ok = r["codesignKeyName"]
-	if !ok || codesignKeyName == "" {
-		err = errors.New("invalid response: empty codesignKeyName")
-		return
-	}
-	codesignKeyVersion, ok = r["codesignKeyVersion"]
-	if !ok || codesignKeyVersion == "" {
-		err = errors.New("invalid response: empty codesignKeyVersion")
-		return
+	// Parse the pem file
+	block, _ := pem.Decode([]byte(key))
+	if block == nil || len(block.Bytes) == 0 {
+		return nil
 	}
 
-	return
+	switch block.Type {
+	case "RSA PRIVATE KEY":
+		// PKCS#1
+		key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil || key == nil {
+			return nil
+		}
+		return key
+	case "PRIVATE KEY":
+		// PKCS#8 (un-encrypted)
+		pk, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil || pk == nil {
+			return nil
+		}
+		key, ok := pk.(*rsa.PrivateKey)
+		if !ok {
+			return nil
+		}
+		return key
+	default:
+		return nil
+	}
 }

@@ -53,7 +53,7 @@ This command tells the node to deploy the app (already uploaded beforehand) with
 			buf := new(bytes.Buffer)
 			err := json.NewEncoder(buf).Encode(reqBody)
 			if err != nil {
-				utils.ExitWithError(utils.ErrorNode, "Error while encoding to JSON", err)
+				utils.ExitWithError(utils.ErrorApp, "Error while encoding to JSON", err)
 				return
 			}
 
