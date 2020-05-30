@@ -38,12 +38,17 @@ func init() {
 	c := &cobra.Command{
 		Use:   "add",
 		Short: "Add a new site",
-		// TODO: UPDATE THIS: add akv prefix and version
 		Long: `Configures a new site in the node.
 
 Each site is identified by a primary domain, and it can have multiple aliases (domain names that are redirected to the primary one).
 
-When creating a site, you must specify the name of a TLS certificate stored on the associated Azure Key Vault instance. You can also specify ` + "`" + `selfsigned` + "`" + ` as a value for the TLS certificate to have the node automatically generate a self-signed certificate for your site. If you omit the ` + "`" + `--certificate` + "`" + ` option, it will default to a self-signed certificate.
+When creating a site, you must specify the name of a TLS certificate stored in the node or cluster. Alternatively, you can pass one of the following values:
+
+  - ` + "`" + `selfsigned` + "`" + ` for generating a self-signed certificate for your site
+  - ` + "`" + `acme` + "`" + ` for requesting a certificate from an ACME provider, such as Let's Encrypt
+  - ` + "`" + `akv:[name]:[version]` + "`" + ` for requesting a certificate stored in the Azure Key Vault instance associated with the cluster; the version is optional.
+
+If you omit the ` + "`" + `--certificate` + "`" + ` option, it will default to a self-signed certificate.
 `,
 		DisableAutoGenTag: true,
 

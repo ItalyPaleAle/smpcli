@@ -38,10 +38,15 @@ func init() {
 	c := &cobra.Command{
 		Use:   "set",
 		Short: "Updates the configuration for a site",
-		// TODO: UPDATE THIS: add akv prefix and version
 		Long: `Updates a site configured in the node.
 
-Use the ` + "`" + `--certificate` + "`" + ` parameter to set a new TLS certificate. This should be the name of a certificate stored in the associated Azure Key Vault. You can also use the value ` + "`" + `selfsigned` + "`" + ` to have the node automatically generate a self-signed certificate for your site.
+When creating a site, you must specify the name of a TLS certificate stored in the node or cluster. Alternatively, you can pass one of the following values:
+
+  - ` + "`" + `selfsigned` + "`" + ` for generating a self-signed certificate for your site
+  - ` + "`" + `acme` + "`" + ` for requesting a certificate from an ACME provider, such as Let's Encrypt
+  - ` + "`" + `akv:[name]:[version]` + "`" + ` for requesting a certificate stored in the Azure Key Vault instance associated with the cluster; the version is optional.
+
+If you omit the ` + "`" + `--certificate` + "`" + ` option, it will default to a self-signed certificate.
 
 The ` + "`" + `--alias` + "`" + ` parameter is used to replace the list of aliases configured for the domain. You can use this parameter multiple time to add more than one alias. Note that using the ` + "`" + `--alias` + "`" + ` flag will replace the entire list of aliases with the new one.
 `,
