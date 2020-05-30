@@ -79,7 +79,7 @@ When creating a site, you must specify the name of a TLS certificate stored on t
 			buf := new(bytes.Buffer)
 			err := json.NewEncoder(buf).Encode(reqBody)
 			if err != nil {
-				utils.ExitWithError(utils.ErrorNode, "Error while encoding to JSON", err)
+				utils.ExitWithError(utils.ErrorApp, "Error while encoding to JSON", err)
 				return
 			}
 

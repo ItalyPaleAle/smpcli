@@ -97,13 +97,10 @@ type deployRequestModel struct {
 	Name string `json:"name"`
 }
 
-// POST /uploadauth (request Azure Storage SAS token)
-type uploadAuthRequestModel struct {
-	Name string `json:"name"`
-}
-type uploadAuthResponseModel struct {
-	ArchiveURL   string `json:"archiveUrl"`
-	SignatureURL string `json:"signatureUrl"`
+// POST /app/<app> (set app bundle's metadata)
+type appMetadataRequestModel struct {
+	Signature string `json:"signature"`
+	Hash      string `json:"hash"`
 }
 
 // Common
