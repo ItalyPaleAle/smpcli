@@ -45,7 +45,7 @@ func init() {
 	)
 
 	c := &cobra.Command{
-		Use:   "app",
+		Use:   "upload",
 		Short: "Upload an app or bundle",
 		Long: `Uploads an app or app bundle to the node, to be stored in the node's app repository.
 
@@ -246,7 +246,7 @@ App names must be unique. You cannot re-upload an app using the same file name.
 			fmt.Println("Done:", bundleName)
 		},
 	}
-	uploadCmd.AddCommand(c)
+	appCmd.AddCommand(c)
 
 	// Flags
 	c.Flags().StringVarP(&app, "app", "a", "", "app bundle name, with no extension (required)")
