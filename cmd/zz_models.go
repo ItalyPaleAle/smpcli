@@ -128,6 +128,11 @@ type dhParamsGetResponseModel struct {
 	Generating bool       `json:"generating"`
 }
 
+// POST /dhparams (DH params set)
+type dhParamsSetRequestModel struct {
+	DHParams string `json:"dhparams"`
+}
+
 // Common
 type siteTLSConfiguration struct {
 	Type        string `json:"type"`
