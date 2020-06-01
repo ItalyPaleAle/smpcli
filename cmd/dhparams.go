@@ -21,15 +21,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// appCmd represents the app command
-var appCmd = &cobra.Command{
-	Use:   "app",
-	Short: "Upload and manage app bundles",
-	Long: `The app namespace contains commands to upload app bundles and manage the ones stored in the node's app repository.
+// dhParamsCmd represents the app command
+var dhParamsCmd = &cobra.Command{
+	Use:   "dhparams",
+	Short: "Set DH parameters for the cluster",
+	Long: `The dhparams namespace contains commands to set new Diffie-Hellman parameters for the cluster and check the status of the ones currently in use.
 `,
 	DisableAutoGenTag: true,
 }
 
 func init() {
-	rootCmd.AddCommand(appCmd)
+	rootCmd.AddCommand(dhParamsCmd)
 }

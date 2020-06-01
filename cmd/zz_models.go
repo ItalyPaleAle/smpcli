@@ -121,6 +121,13 @@ type certificateAddRequestModel struct {
 	Force       bool   `json:"force"`
 }
 
+// GET /dhparams (DH params show)
+type dhParamsGetResponseModel struct {
+	Type       string     `json:"type"`
+	Date       *time.Time `json:"date"`
+	Generating bool       `json:"generating"`
+}
+
 // Common
 type siteTLSConfiguration struct {
 	Type        string `json:"type"`
