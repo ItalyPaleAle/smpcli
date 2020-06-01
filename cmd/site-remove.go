@@ -46,7 +46,7 @@ You must specify the primary domain name (no aliases) in the ` + "`" + `--domain
 			baseURL, client := getURLClient()
 			auth := nodeStore.GetAuthToken(optAddress)
 
-			// Ask for confirmatiom (unless we have `--yes`)
+			// Ask for confirmation (unless we have `--yes`)
 			if !yes {
 				prompt := promptui.Prompt{
 					Label:     "Remove the site",

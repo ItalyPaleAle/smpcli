@@ -18,42 +18,64 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"fmt"
+	"net/http"
+	"strings"
 
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
 	"github.com/statiko-dev/stkcli/utils"
 )
 
 func init() {
+	var (
+		app string
+		yes bool
+	)
+
 	c := &cobra.Command{
-		Use:               "list",
-		Short:             "List apps in the node's repository",
-		Long:              `Shows the list of all apps that are currently stored in the node's repository.`,
+		Use:               "remove",
+		Short:             "Remove an app from the node's repository",
+		Long:              `Removes an app that is currently stored in the node's repository.`,
 		DisableAutoGenTag: true,
 
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
 			auth := nodeStore.GetAuthToken(optAddress)
 
-			// Invoke the /app endpoint and list apps
-			var r appListResponseModel
+			// Ask for confirmation (unless we have `--yes`)
+			if !yes {
+				prompt := promptui.Prompt{
+					Label:     "Remove the app",
+					IsConfirm: true,
+				}
+				confirm, err := prompt.Run()
+				if err != nil || strings.ToLower(confirm) != "y" {
+					utils.ExitWithError(utils.ErrorUser, "Aborted", nil)
+					return
+				}
+			}
+
+			// Invoke the /app/:name endpoint to delete the app
 			err := utils.RequestJSON(utils.RequestOpts{
 				Authorization: auth,
 				Client:        client,
-				Target:        &r,
-				URL:           baseURL + "/app",
+				Method:        utils.RequestDELETE,
+				StatusCode:    http.StatusNoContent,
+				URL:           baseURL + "/app/" + app,
 			})
 			if err != nil {
 				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
-
-			// Print the response
-			fmt.Println(appListResponseModelFormat(r))
 		},
 	}
 	appCmd.AddCommand(c)
+
+	// Flags
+	c.Flags().BoolVarP(&yes, "yes", "", false, "do not ask for confirmation")
+	c.Flags().StringVarP(&app, "app", "a", "", "name of the app to remove")
+	c.MarkFlagRequired("app")
 
 	// Add shared flags
 	addSharedFlags(c)
