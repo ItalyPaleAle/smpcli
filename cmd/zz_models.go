@@ -97,6 +97,13 @@ type deployRequestModel struct {
 	Name string `json:"name"`
 }
 
+// GET /app (app list)
+type appListResponseModel []struct {
+	Name         string    `json:"name"`
+	Size         int64     `json:"size"`
+	LastModified time.Time `json:"lastModified"`
+}
+
 // POST /app/<app> (set app bundle's metadata)
 type appMetadataRequestModel struct {
 	Signature string `json:"signature"`

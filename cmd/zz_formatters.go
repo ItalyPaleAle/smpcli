@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/statiko-dev/stkcli/utils"
 )
 
 // Fromat siteGetResponseModel
@@ -65,6 +67,24 @@ func siteListResponseModelFormat(m siteListResponseModel) (result string) {
 	}
 	for i := 0; i < l; i++ {
 		result += siteGetResponseModelFormat(&m[i])
+		if i < l-1 {
+			result += "\n\n"
+		}
+	}
+	return
+}
+
+// Format appListResponseModel
+func appListResponseModelFormat(m appListResponseModel) (result string) {
+	result = ""
+	l := len(m)
+	if l == 0 {
+		result += "No apps stored"
+	}
+	for i := 0; i < l; i++ {
+		result += fmt.Sprintf(`Name:         %s
+Size:         %s
+LastModified: %s`, m[i].Name, utils.FormatBytes(m[i].Size), m[i].LastModified.Format(time.RFC3339))
 		if i < l-1 {
 			result += "\n\n"
 		}

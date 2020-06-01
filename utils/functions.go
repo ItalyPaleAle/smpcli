@@ -100,3 +100,18 @@ func CheckJWTValid(jwt string) bool {
 
 	return true
 }
+
+// FormatBytes formats file sizes in human-readable format
+// Source: https://yourbasic.org/golang/formatting-byte-size-to-human-readable-format/
+func FormatBytes(b int64) string {
+	const unit = 1024
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.2f %cB", float64(b)/float64(div), "KMGTPE"[exp])
+}
