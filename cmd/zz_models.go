@@ -110,6 +110,17 @@ type appMetadataRequestModel struct {
 	Hash      string `json:"hash"`
 }
 
+// GET /certificate (certificate list)
+type certificateListResponseModel []string
+
+// POST /certificate (site add)
+type certificateAddRequestModel struct {
+	Name        string `json:"name"`
+	Certificate string `json:"cert" `
+	Key         string `json:"key"`
+	Force       bool   `json:"force"`
+}
+
 // Common
 type siteTLSConfiguration struct {
 	Type        string `json:"type"`

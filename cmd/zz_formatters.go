@@ -181,3 +181,17 @@ func clusterStatusResponseModelFormat(m clusterStatusResponseModel) (result stri
 	}
 	return
 }
+
+// Format certificateListResponseModel
+func certificateListResponseModelFormat(m certificateListResponseModel) (result string) {
+	if m == nil || len(m) == 0 {
+		return "No certificate stored"
+	}
+	for _, el := range m {
+		if len(result) > 0 {
+			result += "\n"
+		}
+		result += el
+	}
+	return
+}
