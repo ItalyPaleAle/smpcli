@@ -67,15 +67,16 @@ type infoResponseModel struct {
 
 // POST /site (site add)
 type siteAddRequestModel struct {
-	Domain  string                `json:"domain"`
-	Aliases []string              `json:"aliases"`
-	TLS     *siteTLSConfiguration `json:"tls"`
+	Domain    string                `json:"domain,omitempty"`
+	Aliases   []string              `json:"aliases,omitempty"`
+	Temporary bool                  `json:"temporary,omitempty"`
+	TLS       *siteTLSConfiguration `json:"tls,omitempty"`
 }
 
 // PATCH /site/<domain> (site set)
 type siteSetRequestModel struct {
-	Aliases []string              `json:"aliases"`
-	TLS     *siteTLSConfiguration `json:"tls"`
+	Aliases []string              `json:"aliases,omitempty"`
+	TLS     *siteTLSConfiguration `json:"tls,omitempty"`
 }
 
 // GET /site/<domain> (site get)
@@ -137,8 +138,8 @@ type dhParamsSetRequestModel struct {
 // Common
 type siteTLSConfiguration struct {
 	Type        string `json:"type"`
-	Certificate string `json:"cert"`
-	Version     string `json:"ver"`
+	Certificate string `json:"cert,omitempty"`
+	Version     string `json:"ver,omitempty"`
 }
 
 const (

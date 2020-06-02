@@ -33,6 +33,7 @@ func init() {
 		domain         string
 		aliases        []string
 		tlsCertificate string
+		temporary      bool
 	)
 
 	c := &cobra.Command{
@@ -42,10 +43,12 @@ func init() {
 
 Each site is identified by a primary domain, and it can have multiple aliases (domain names that are redirected to the primary one).
 
+Alternatively, you can specify the ` + "`" + `--temporary` + "`" + ` option to create a temporary site, for example for testing an application. When creating temporary sites, a domain name will be generated for you, and you should not provide domain names or aliases.
+
 When creating a site, you must specify the name of a TLS certificate stored in the node or cluster. Alternatively, you can pass one of the following values:
 
   - ` + "`" + `selfsigned` + "`" + ` for generating a self-signed certificate for your site
-  - ` + "`" + `acme` + "`" + ` for requesting a certificate from an ACME provider, such as Let's Encrypt
+  - ` + "`" + `acme` + "`" + ` for requesting a certificate from an ACME provider, such as Let's Encrypt (not available for temporary sites)
   - ` + "`" + `akv:[name]:[version]` + "`" + ` for requesting a certificate stored in the Azure Key Vault instance associated with the cluster; the version is optional.
 
 If you omit the ` + "`" + `--certificate` + "`" + ` option, it will default to a self-signed certificate.
@@ -55,6 +58,12 @@ If you omit the ` + "`" + `--certificate` + "`" + ` option, it will default to a
 		Run: func(cmd *cobra.Command, args []string) {
 			baseURL, client := getURLClient()
 			auth := nodeStore.GetAuthToken(optAddress)
+
+			// Check if domain is set (if it needs to be)
+			if !temporary && domain == "" {
+				utils.ExitWithError(utils.ErrorUser, "Flag `--domain` is required for non-temporary sites", nil)
+				return
+			}
 
 			// Request body
 			tlsConfig := &siteTLSConfiguration{}
@@ -77,9 +86,10 @@ If you omit the ` + "`" + `--certificate` + "`" + ` option, it will default to a
 				tlsConfig.Certificate = tlsCertificate
 			}
 			reqBody := &siteAddRequestModel{
-				Domain:  domain,
-				Aliases: aliases,
-				TLS:     tlsConfig,
+				Domain:    domain,
+				Aliases:   aliases,
+				Temporary: temporary,
+				TLS:       tlsConfig,
 			}
 			buf := new(bytes.Buffer)
 			err := json.NewEncoder(buf).Encode(reqBody)
@@ -107,10 +117,10 @@ If you omit the ` + "`" + `--certificate` + "`" + ` option, it will default to a
 	siteCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&domain, "domain", "d", "", "primary domain name")
-	c.MarkFlagRequired("domain")
+	c.Flags().StringVarP(&domain, "domain", "d", "", "primary domain name (required for non-temporary sites)")
 	c.Flags().StringArrayVarP(&aliases, "alias", "a", []string{}, "alias domain (can be used multiple times)")
 	c.Flags().StringVarP(&tlsCertificate, "certificate", "c", "", "name of the TLS certificate or `selfsigned` (default)")
+	c.Flags().BoolVarP(&temporary, "temporary", "t", false, "create a temporary site with a random name")
 
 	// Add shared flags
 	addSharedFlags(c)

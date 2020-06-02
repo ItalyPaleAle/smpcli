@@ -42,9 +42,9 @@ func init() {
 		Short: "Import a new TLS certificate",
 		Long: `Imports a new TLS certificate and stores it in the cluster's state.
 
-You must provide a path to a PEM-encoded certificate and key using the --` + "`" + `certificate` + "`" + ` and --` + "`" + `key` + "`" + ` flags respectively.
+You must provide a path to a PEM-encoded certificate and key using the ` + "`" + `--certificate` + "`" + ` and ` + "`" + `--key` + "`" + ` flags respectively.
 
-The --` + "`" + `name` + "`" + ` flag is the name of the TLS certificate used as identifier only.
+The ` + "`" + `--name` + "`" + ` flag is the name of the TLS certificate used as identifier only.
 `,
 		DisableAutoGenTag: true,
 
