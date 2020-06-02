@@ -23,18 +23,18 @@ import (
 
 func init() {
 	c := &cobra.Command{
-		Use:   "azuread",
-		Short: "Authenticate using an Azure AD account",
-		Long: `Launches a web browser to authenticate with the Azure AD application connected to the node, then stores the authentication token. This command manages the entire authentication workflow for the user, and it requires a desktop environment running on the client's machine.
+		Use:   "auth0",
+		Short: "Authenticate using Auth0",
+		Long: `Launches a web browser to authenticate with the Auth0 application connected to the node, then stores the authentication token. This command manages the entire authentication workflow for the user, and it requires a desktop environment running on the client's machine.
 
-The Azure AD application is defined in the node's configuration. Users must be part of the Azure AD directory and have permissions to use the app.
+The Auth0 application is defined in the node's configuration. Users must be part of the Auth0 directory and have permissions to use the app.
 
-Once you have authenticated with Azure AD, the client obtains an OAuth token which it uses to authorize API calls with the node. Tokens have a limited lifespan, which is configurable by the admin (stkcli supports automatically refreshing tokens when possible).
+Once you have authenticated with Auth0, the client obtains an OAuth token which it uses to authorize API calls with the node. Tokens have a limited lifespan, which is configurable by the admin (stkcli supports automatically refreshing tokens when possible).
 `,
 		DisableAutoGenTag: true,
 
 		// Get the command for this authentication method
-		Run: openIDAuthCommand("azuread"),
+		Run: openIDAuthCommand("auth0"),
 	}
 
 	authCmd.AddCommand(c)

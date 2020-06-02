@@ -52,16 +52,17 @@ type statusResponseModel struct {
 type clusterStatusResponseModel map[string]*statusResponseModel
 
 // GET /info (auth)
-type infoResponseModelAzureAD struct {
+type infoResponseModelOpenID struct {
 	AuthorizeURL string `json:"authorizeUrl"`
 	TokenURL     string `json:"tokenUrl"`
 	ClientID     string `json:"clientId"`
 }
 type infoResponseModel struct {
-	AuthMethods []string                  `json:"authMethods"`
-	AzureAD     *infoResponseModelAzureAD `json:"azureAD"`
-	Hostname    string                    `json:"hostname"`
-	Version     string                    `json:"version"`
+	AuthMethods []string                 `json:"authMethods"`
+	Auth0       *infoResponseModelOpenID `json:"auth0"`
+	AzureAD     *infoResponseModelOpenID `json:"azureAD"`
+	Hostname    string                   `json:"hostname"`
+	Version     string                   `json:"version"`
 }
 
 // POST /site (site add)
