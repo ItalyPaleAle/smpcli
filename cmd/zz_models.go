@@ -85,10 +85,11 @@ type siteGetResponseModelApp struct {
 	Name string `json:"name"`
 }
 type siteGetResponseModel struct {
-	Domain  string                   `json:"domain"`
-	Aliases []string                 `json:"aliases"`
-	TLS     *siteTLSConfiguration    `json:"tls"`
-	App     *siteGetResponseModelApp `json:"app"`
+	Domain    string                   `json:"domain"`
+	Temporary bool                     `json:"temporary"`
+	Aliases   []string                 `json:"aliases"`
+	TLS       *siteTLSConfiguration    `json:"tls"`
+	App       *siteGetResponseModelApp `json:"app"`
 }
 
 // GET /site (site list)

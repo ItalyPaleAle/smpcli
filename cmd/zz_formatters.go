@@ -39,22 +39,32 @@ func siteGetResponseModelFormat(m *siteGetResponseModel) (result string) {
 
 	tlsCert := "\033[2m<nil>\033[0m"
 	if m.TLS != nil {
-		if m.TLS.Type == TLSCertificateSelfSigned {
+		tlsCert = ""
+		switch m.TLS.Type {
+		case TLSCertificateSelfSigned:
 			tlsCert = "self-signed"
-		} else if m.TLS.Type == TLSCertificateACME {
+		case TLSCertificateACME:
 			tlsCert = "acme"
-		} else if m.TLS.Certificate != "" {
-			tlsCert = m.TLS.Certificate
+		case TLSCertificateAzureKeyVault:
+			tlsCert += "akv:"
+			fallthrough
+		case TLSCertificateImported:
+			tlsCert += m.TLS.Certificate
 			if m.TLS.Version != "" {
 				tlsCert += " (" + m.TLS.Version + ")"
 			}
 		}
 	}
 
-	result = fmt.Sprintf(`Domain:        %s
+	temporary := ""
+	if m.Temporary {
+		temporary = " (temporary)"
+	}
+
+	result = fmt.Sprintf(`Domain:        %s%s
 Aliases:       %s
 TLSCert:       %s
-App:           %s`, m.Domain, aliases, tlsCert, app)
+App:           %s`, m.Domain, temporary, aliases, tlsCert, app)
 	return
 }
 
