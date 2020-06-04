@@ -1,0 +1,14 @@
+name: stkcli app
+synopsis: Upload and manage app bundles
+description: |
+  The app namespace contains commands to upload app bundles and manage the ones stored in the node's app repository.
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for app
+see_also:
+- stkcli - Manage a Statiko node
+- list - List apps in the node's repository
+- remove - Remove an app from the node's repository
+- upload - Upload an app or bundle

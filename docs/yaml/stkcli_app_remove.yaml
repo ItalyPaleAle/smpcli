@@ -1,0 +1,24 @@
+name: stkcli app remove
+synopsis: Remove an app from the node's repository
+description: |
+  Removes an app that is currently stored in the node's repository.
+usage: stkcli app remove [flags]
+options:
+- name: app
+  shorthand: a
+  usage: name of the app to remove
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for remove
+- name: node
+  shorthand: "n"
+  usage: node address or IP
+- name: port
+  shorthand: P
+  usage: port the node listens on
+- name: "yes"
+  default_value: "false"
+  usage: do not ask for confirmation
+see_also:
+- stkcli app - Upload and manage app bundles

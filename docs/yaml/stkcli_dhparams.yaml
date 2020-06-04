@@ -1,0 +1,13 @@
+name: stkcli dhparams
+synopsis: Set DH parameters for the cluster
+description: |
+  The dhparams namespace contains commands to set new Diffie-Hellman parameters for the cluster and check the status of the ones currently in use.
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for dhparams
+see_also:
+- stkcli - Manage a Statiko node
+- get - Get details on DH parameters in use
+- set - Sets new DH parameters

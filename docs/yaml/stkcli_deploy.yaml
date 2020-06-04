@@ -3,12 +3,12 @@ synopsis: Deploy an app
 description: |
   Deploys an app to a site.
 
-  This command tells the node to deploy the app (already uploaded beforehand) with the specific name and version to a site identified by the domain option.
+  This command tells the node to deploy the app (already uploaded beforehand) with the specific bundle name to a site identified by the domain option.
 usage: stkcli deploy [flags]
 options:
 - name: app
   shorthand: a
-  usage: app's bundle name (required)
+  usage: app bundle (required)
 - name: domain
   shorthand: d
   usage: primary domain name (required)
@@ -22,8 +22,5 @@ options:
 - name: port
   shorthand: P
   usage: port the node listens on
-- name: version
-  shorthand: v
-  usage: app's bundle version (required)
 see_also:
 - stkcli - Manage a Statiko node

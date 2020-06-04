@@ -1,0 +1,18 @@
+name: stkcli dhparams get
+synopsis: Get details on DH parameters in use
+description: |
+  Show the details of the Diffie-Hellman parameters currently in use by the cluster.
+usage: stkcli dhparams get [flags]
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for get
+- name: node
+  shorthand: "n"
+  usage: node address or IP
+- name: port
+  shorthand: P
+  usage: port the node listens on
+see_also:
+- stkcli dhparams - Set DH parameters for the cluster

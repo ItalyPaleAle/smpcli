@@ -1,0 +1,18 @@
+name: stkcli certificate list
+synopsis: List TLS certificates
+description: |
+  Shows the list of all TLS certificates stored in the cluster.
+usage: stkcli certificate list [flags]
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for list
+- name: node
+  shorthand: "n"
+  usage: node address or IP
+- name: port
+  shorthand: P
+  usage: port the node listens on
+see_also:
+- stkcli certificate - Manage TLS certificates stored in the cluster

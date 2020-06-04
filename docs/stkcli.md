@@ -20,12 +20,14 @@ stkcli is released under a GNU General Public License v3.0 license. Source code 
 
 ### SEE ALSO
 
+* [stkcli app](stkcli_app.md)	 - Upload and manage app bundles
 * [stkcli auth](stkcli_auth.md)	 - Authenticate with a node
+* [stkcli certificate](stkcli_certificate.md)	 - Manage TLS certificates stored in the cluster
 * [stkcli cluster](stkcli_cluster.md)	 - Cluster information
 * [stkcli deploy](stkcli_deploy.md)	 - Deploy an app
+* [stkcli dhparams](stkcli_dhparams.md)	 - Set DH parameters for the cluster
 * [stkcli site](stkcli_site.md)	 - Manage sites
 * [stkcli state](stkcli_state.md)	 - Get or restore state
 * [stkcli status](stkcli_status.md)	 - Shows the status of a node
-* [stkcli upload](stkcli_upload.md)	 - Upload apps and certificates
 * [stkcli version](stkcli_version.md)	 - Show stkcli version
 

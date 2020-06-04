@@ -1,0 +1,14 @@
+name: stkcli certificate
+synopsis: Manage TLS certificates stored in the cluster
+description: |
+  The certificate namespace contains command to import a new TLS certificate and manage the ones stored in the cluster.
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for certificate
+see_also:
+- stkcli - Manage a Statiko node
+- add - Import a new TLS certificate
+- list - List TLS certificates
+- remove - Remove a TLS certificate

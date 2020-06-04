@@ -1,0 +1,23 @@
+name: stkcli dhparams set
+synopsis: Sets new DH parameters
+description: |
+  Sets new Diffie-Hellman parameters for the cluster. If the cluster is currently re-generating them, this interrupts the operation.
+
+  The --`file` flag is the path to a PEM-encoded file containing DH parameters.
+usage: stkcli dhparams set [flags]
+options:
+- name: file
+  shorthand: f
+  usage: path to DH parameters file
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for set
+- name: node
+  shorthand: "n"
+  usage: node address or IP
+- name: port
+  shorthand: P
+  usage: port the node listens on
+see_also:
+- stkcli dhparams - Set DH parameters for the cluster

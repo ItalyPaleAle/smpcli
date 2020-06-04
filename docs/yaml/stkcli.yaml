@@ -13,11 +13,13 @@ options:
   default_value: "false"
   usage: help for stkcli
 see_also:
+- app - Upload and manage app bundles
 - auth - Authenticate with a node
+- certificate - Manage TLS certificates stored in the cluster
 - cluster - Cluster information
 - deploy - Deploy an app
+- dhparams - Set DH parameters for the cluster
 - site - Manage sites
 - state - Get or restore state
 - status - Shows the status of a node
-- upload - Upload apps and certificates
 - version - Show stkcli version

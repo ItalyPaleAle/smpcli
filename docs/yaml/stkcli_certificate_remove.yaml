@@ -1,0 +1,24 @@
+name: stkcli certificate remove
+synopsis: Remove a TLS certificate
+description: |
+  Removes an imported TLS certificate that is stored in the node's state.
+usage: stkcli certificate remove [flags]
+options:
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for remove
+- name: name
+  shorthand: i
+  usage: name for the certificate
+- name: node
+  shorthand: "n"
+  usage: node address or IP
+- name: port
+  shorthand: P
+  usage: port the node listens on
+- name: "yes"
+  default_value: "false"
+  usage: do not ask for confirmation
+see_also:
+- stkcli certificate - Manage TLS certificates stored in the cluster

@@ -1,0 +1,35 @@
+name: stkcli certificate add
+synopsis: Import a new TLS certificate
+description: |
+  Imports a new TLS certificate and stores it in the cluster's state.
+
+  You must provide a path to a PEM-encoded certificate and key using the `--certificate` and `--key` flags respectively.
+
+  The `--name` flag is the name of the TLS certificate used as identifier only.
+usage: stkcli certificate add [flags]
+options:
+- name: certificate
+  shorthand: c
+  usage: path to TLS certificate file
+- name: force
+  shorthand: f
+  default_value: "false"
+  usage: force adding invalid/expired certificates
+- name: help
+  shorthand: h
+  default_value: "false"
+  usage: help for add
+- name: key
+  shorthand: k
+  usage: path to TLS key file
+- name: name
+  shorthand: i
+  usage: name for the certificate
+- name: node
+  shorthand: "n"
+  usage: node address or IP
+- name: port
+  shorthand: P
+  usage: port the node listens on
+see_also:
+- stkcli certificate - Manage TLS certificates stored in the cluster
