@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"time"
 )
@@ -78,7 +79,16 @@ func RequestRaw(opts RequestOpts) (response io.ReadCloser, err error) {
 	if opts.Client == nil {
 		if defaultHTTPClient == nil {
 			defaultHTTPClient = &http.Client{
-				Timeout: 30 * time.Second,
+				// No Timeout, because we might be uploading a large file
+				//Timeout: 30 * time.Second,
+				Transport: &http.Transport{
+					Dial: (&net.Dialer{
+						Timeout:   15 * time.Second,
+						KeepAlive: 30 * time.Second,
+					}).Dial,
+					TLSHandshakeTimeout:   10 * time.Second,
+					ResponseHeaderTimeout: 15 * time.Second,
+				},
 			}
 		}
 		opts.Client = defaultHTTPClient
