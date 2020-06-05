@@ -104,7 +104,7 @@ The ` + "`" + `--name` + "`" + ` flag is the name of the TLS certificate used as
 	certificateCmd.AddCommand(c)
 
 	// Flags
-	c.Flags().StringVarP(&name, "name", "i", "", "name for the certificate")
+	c.Flags().StringVarP(&name, "name", "n", "", "name for the certificate")
 	c.MarkFlagRequired("name")
 	c.Flags().StringVarP(&certificate, "certificate", "c", "", "path to TLS certificate file")
 	c.MarkFlagRequired("certificate")

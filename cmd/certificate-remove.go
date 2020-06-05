@@ -74,7 +74,7 @@ func init() {
 
 	// Flags
 	c.Flags().BoolVarP(&yes, "yes", "", false, "do not ask for confirmation")
-	c.Flags().StringVarP(&name, "name", "i", "", "name for the certificate")
+	c.Flags().StringVarP(&name, "name", "n", "", "name for the certificate")
 	c.MarkFlagRequired("name")
 
 	// Add shared flags
