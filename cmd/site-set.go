@@ -20,6 +20,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -88,19 +89,24 @@ The ` + "`" + `--alias` + "`" + ` parameter is used to replace the list of alias
 			}
 
 			// Invoke the /site/:domain endpoint and edit the site
+			var r siteGetResponseModel
 			err = utils.RequestJSON(utils.RequestOpts{
 				Authorization:   auth,
 				Body:            buf,
 				BodyContentType: "application/json",
 				Client:          client,
 				Method:          utils.RequestPATCH,
-				StatusCode:      http.StatusNoContent,
+				StatusCode:      http.StatusOK,
+				Target:          &r,
 				URL:             baseURL + "/site/" + domain,
 			})
 			if err != nil {
 				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
+
+			// Print the response
+			fmt.Println(siteGetResponseModelFormat(&r))
 		},
 	}
 	siteCmd.AddCommand(c)

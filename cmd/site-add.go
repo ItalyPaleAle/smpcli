@@ -20,6 +20,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -99,19 +100,24 @@ If you omit the ` + "`" + `--certificate` + "`" + ` option, it will default to a
 			}
 
 			// Invoke the /site endpoint and add the site
+			var r siteGetResponseModel
 			err = utils.RequestJSON(utils.RequestOpts{
 				Authorization:   auth,
 				Body:            buf,
 				BodyContentType: "application/json",
 				Client:          client,
 				Method:          utils.RequestPOST,
-				StatusCode:      http.StatusNoContent,
+				StatusCode:      http.StatusOK,
+				Target:          &r,
 				URL:             baseURL + "/site",
 			})
 			if err != nil {
 				utils.ExitWithError(utils.ErrorNode, "Request failed", err)
 				return
 			}
+
+			// Print the response
+			fmt.Println(siteGetResponseModelFormat(&r))
 		},
 	}
 	siteCmd.AddCommand(c)
