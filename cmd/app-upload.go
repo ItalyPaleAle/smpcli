@@ -24,6 +24,7 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -198,6 +199,8 @@ App names must be unique. You cannot re-upload an app using the same file name.
 				Hash: base64.StdEncoding.EncodeToString(hashed),
 			}
 
+			fmt.Println("Bundle checksum:", hex.EncodeToString(hashed))
+
 			// If we have a key, calculate the digital signature
 			if signingKey != "" {
 				// Load key
@@ -217,6 +220,7 @@ App names must be unique. You cannot re-upload an app using the same file name.
 
 				// Convert the signature to base64
 				metadata.Signature = base64.StdEncoding.EncodeToString(signatureBytes)
+				fmt.Println("Signature calculated")
 			}
 
 			// Body
