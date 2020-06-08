@@ -30,7 +30,7 @@ stkcli site add [flags]
   -c, --certificate selfsigned   name of the TLS certificate or selfsigned (default)
   -d, --domain string            primary domain name (required for non-temporary sites)
   -h, --help                     help for add
-  -n, --node string              node address or IP
+  -N, --node string              node address or IP
   -P, --port string              port the node listens on
   -t, --temporary                create a temporary site with a random name
 ```

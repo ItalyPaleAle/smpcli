@@ -19,7 +19,7 @@ stkcli auth azuread [flags]
 
 ```
   -h, --help          help for azuread
-  -n, --node string   node address or IP
+  -N, --node string   node address or IP
   -P, --port string   port the node listens on
 ```
 

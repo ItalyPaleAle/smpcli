@@ -14,8 +14,8 @@ stkcli certificate remove [flags]
 
 ```
   -h, --help          help for remove
-  -i, --name string   name for the certificate
-  -n, --node string   node address or IP
+  -n, --name string   name for the certificate
+  -N, --node string   node address or IP
   -P, --port string   port the node listens on
       --yes           do not ask for confirmation
 ```

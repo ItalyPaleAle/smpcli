@@ -11,7 +11,7 @@ options:
   default_value: "false"
   usage: help for get
 - name: node
-  shorthand: "n"
+  shorthand: "N"
   usage: node address or IP
 - name: out
   shorthand: o

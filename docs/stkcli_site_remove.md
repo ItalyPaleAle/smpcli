@@ -18,7 +18,7 @@ stkcli site remove [flags]
 ```
   -d, --domain string   primary domain name
   -h, --help            help for remove
-  -n, --node string     node address or IP
+  -N, --node string     node address or IP
   -P, --port string     port the node listens on
       --yes             do not ask for confirmation
 ```

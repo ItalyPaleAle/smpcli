@@ -19,7 +19,7 @@ stkcli auth auth0 [flags]
 
 ```
   -h, --help          help for auth0
-  -n, --node string   node address or IP
+  -N, --node string   node address or IP
   -P, --port string   port the node listens on
 ```
 

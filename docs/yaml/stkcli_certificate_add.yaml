@@ -23,10 +23,10 @@ options:
   shorthand: k
   usage: path to TLS key file
 - name: name
-  shorthand: i
+  shorthand: "n"
   usage: name for the certificate
 - name: node
-  shorthand: "n"
+  shorthand: "N"
   usage: node address or IP
 - name: port
   shorthand: P
