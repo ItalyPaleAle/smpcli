@@ -93,8 +93,8 @@ jobs:
               cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm64
               (cd .bin && tar -czvf stkcli-v${{env.BUILD_VERSION}}-linux-arm64.tar.gz stkcli-v${{env.BUILD_VERSION}}-linux-arm64)
 
-              echo -e "\n###\nBuilding linux/arm\n"
-              mkdir .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7
+              echo -e "\n###\nBuilding linux/arm32v7\n"
+              mkdir .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm32v7
               CGO_ENABLED=0 \
               GOOS=linux \
               GOARCH=arm \
@@ -102,10 +102,10 @@ jobs:
               GO111MODULE=on \
                 go build \
                   -ldflags "-X github.com/statiko-dev/stkcli/buildinfo.BuildID=${{env.BUILD_ID}} -X github.com/statiko-dev/stkcli/buildinfo.BuildTime=${{env.BUILD_TIME}} -X github.com/statiko-dev/stkcli/buildinfo.CommitHash=${{env.COMMIT_HASH}}" \
-                  -o .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7/stkcli
-              cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7
-              cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7
-              (cd .bin && tar -czvf stkcli-v${{env.BUILD_VERSION}}-linux-armv7.tar.gz stkcli-v${{env.BUILD_VERSION}}-linux-armv7)
+                  -o .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm32v7/stkcli
+              cp LICENSE .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm32v7
+              cp README.md .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm32v7
+              (cd .bin && tar -czvf stkcli-v${{env.BUILD_VERSION}}-linux-arm32v7.tar.gz stkcli-v${{env.BUILD_VERSION}}-linux-arm32v7)
 
               echo -e "\n###\nBuilding darwin/amd64\n"
               mkdir .bin/stkcli-v${{env.BUILD_VERSION}}-macos
