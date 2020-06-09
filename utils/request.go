@@ -79,15 +79,14 @@ func RequestRaw(opts RequestOpts) (response io.ReadCloser, err error) {
 	if opts.Client == nil {
 		if defaultHTTPClient == nil {
 			defaultHTTPClient = &http.Client{
-				// No Timeout, because we might be uploading a large file
-				//Timeout: 30 * time.Second,
+				// This matches the server
+				Timeout: 2 * time.Hour,
 				Transport: &http.Transport{
 					Dial: (&net.Dialer{
 						Timeout:   15 * time.Second,
 						KeepAlive: 30 * time.Second,
 					}).Dial,
-					TLSHandshakeTimeout:   10 * time.Second,
-					ResponseHeaderTimeout: 15 * time.Second,
+					TLSHandshakeTimeout: 10 * time.Second,
 				},
 			}
 		}

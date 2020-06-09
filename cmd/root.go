@@ -69,7 +69,8 @@ func init() {
 
 		// Initialize the HTTP clients
 		httpClient = &http.Client{
-			Timeout: 30 * time.Second,
+			// This matches the server
+			Timeout: 2 * time.Hour,
 		}
 
 		// The "insecure" client doesn't validate TLS certificates
@@ -79,8 +80,9 @@ func init() {
 			},
 		}
 		httpClientInsecure = &http.Client{
+			// This matches the server
+			Timeout:   2 * time.Hour,
 			Transport: tr,
-			Timeout:   30 * time.Second,
 		}
 	})
 }
