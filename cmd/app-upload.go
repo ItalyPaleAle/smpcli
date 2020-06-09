@@ -77,9 +77,10 @@ App names must be unique. You cannot re-upload an app using the same file name.
 				return
 			}
 
-			// App name and bundle name
+			// App name, then bundle name and type
 			app = strings.ToLower(app)
 			bundleName := ""
+			bundleType := ""
 
 			// Check if the path is a folder
 			folder, err := utils.FolderExists(path)
@@ -88,8 +89,9 @@ App names must be unique. You cannot re-upload an app using the same file name.
 				return
 			}
 			if folder {
-				// Bundle is the app's name and ".tar.bz2" extension
-				bundleName = app + ".tar.bz2"
+				// Bundle is the app's name and type is "tar.bz2"
+				bundleName = app
+				bundleType = "tar.bz2"
 			} else {
 				// It's a file, so check the file type
 				pathLc := strings.ToLower(path)
@@ -100,17 +102,21 @@ App names must be unique. You cannot re-upload an app using the same file name.
 					strings.HasSuffix(pathLc, ".tsz"),
 					strings.HasSuffix(pathLc, ".txz"),
 					strings.HasSuffix(pathLc, ".rar"):
-					bundleName = app + pathLc[(len(pathLc)-4):]
+					bundleName = app
+					bundleType = pathLc[(len(pathLc) - 3):]
 				case strings.HasSuffix(pathLc, ".tar.bz2"),
 					strings.HasSuffix(pathLc, ".tar.lz4"):
-					bundleName = app + pathLc[(len(pathLc)-8):]
+					bundleName = app
+					bundleType = pathLc[(len(pathLc) - 7):]
 				case strings.HasSuffix(pathLc, ".tar.gz"),
 					strings.HasSuffix(pathLc, ".tar.sz"),
 					strings.HasSuffix(pathLc, ".tar.xz"):
-					bundleName = app + pathLc[(len(pathLc)-7):]
+					bundleName = app
+					bundleType = pathLc[(len(pathLc) - 6):]
 				case strings.HasSuffix(pathLc, ".tbz2"),
 					strings.HasSuffix(pathLc, ".tlz4"):
-					bundleName = app + pathLc[(len(pathLc)-5):]
+					bundleName = app
+					bundleType = pathLc[(len(pathLc) - 4):]
 				default:
 					utils.ExitWithError(utils.ErrorUser, "Invalid file type", nil)
 					return
@@ -149,6 +155,19 @@ App names must be unique. You cannot re-upload an app using the same file name.
 			pr, pw := io.Pipe()
 			mpw := multipart.NewWriter(pw)
 			go func() {
+				// Write the file name and type
+				err = mpw.WriteField("name", bundleName)
+				if err != nil {
+					utils.ExitWithError(utils.ErrorApp, "Error while preparing request", err)
+					return
+				}
+				mpw.WriteField("type", bundleType)
+				if err != nil {
+					utils.ExitWithError(utils.ErrorApp, "Error while preparing request", err)
+					return
+				}
+
+				// Write the file
 				partw, err := mpw.CreateFormFile("file", bundleName)
 				if err != nil {
 					utils.ExitWithError(utils.ErrorApp, "Error while preparing request", err)
