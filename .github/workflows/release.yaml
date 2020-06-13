@@ -198,14 +198,14 @@ jobs:
         asset_name: stkcli-v${{env.BUILD_VERSION}}-linux-arm64.tar.gz
         asset_content_type: application/gzip
 
-    - name: Upload release asset stkcli-linux-armv7
+    - name: Upload release asset stkcli-linux-arm32v7
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: .bin/stkcli-v${{env.BUILD_VERSION}}-linux-armv7.tar.gz
-        asset_name: stkcli-v${{env.BUILD_VERSION}}-linux-armv7.tar.gz
+        asset_path: .bin/stkcli-v${{env.BUILD_VERSION}}-linux-arm32v7.tar.gz
+        asset_name: stkcli-v${{env.BUILD_VERSION}}-linux-arm32v7.tar.gz
         asset_content_type: application/gzip
 
     - name: Upload release asset stkcli-macos
